@@ -91,6 +91,13 @@ main{ max-width: var(--max); margin: 0 auto; padding: 22px 18px 40px; }
   gap: 18px;
   padding: 24px 0 10px;
   align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-self: start;       
+  max-width: 420px;       
+  width: 100%;
+  margin-left: auto;  
 }
 
 .tag{
