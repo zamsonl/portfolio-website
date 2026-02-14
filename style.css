@@ -217,3 +217,18 @@ h1{
     min-width: 220px;
   }
 }
+
+.profile-card{
+  text-align: center;
+  padding-top: 24px;
+}
+
+.profile-img{
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid rgba(124,247,197,0.5);
+  margin-bottom: 16px;
+  box-shadow: 0 0 30px rgba(124,247,197,0.25);
+}
