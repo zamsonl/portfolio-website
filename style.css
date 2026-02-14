@@ -87,10 +87,12 @@ main{ max-width: var(--max); margin: 0 auto; padding: 22px 18px 40px; }
 
 .hero{
   display:grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.3fr 0.9fr; 
   gap: 18px;
   padding: 24px 0 10px;
+  align-items: start;
 }
+
 .tag{
   display:inline-block;
   color: var(--accent);
@@ -198,7 +200,10 @@ h1{
 }
 
 @media (max-width: 980px){
-  .hero{ grid-template-columns: 1fr; }
+  .hero-card{
+  max-width: 100%;
+  margin-left: 0;
+}
   .grid{ grid-template-columns: 1fr; }
   .links{ display:none; }
   .burger{ display:inline-flex; }
@@ -224,14 +229,14 @@ h1{
 }
 
 .profile-img{
-  width: 100%;
-  max-width: 220px; 
+  width: min(160px, 45vw);  
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 50%;
   border: 3px solid rgba(124,247,197,0.5);
-  margin: 0 auto 16px auto;
+  margin: 0 auto 14px auto;
   display: block;
   box-shadow: 0 0 30px rgba(124,247,197,0.25);
 }
+
 
