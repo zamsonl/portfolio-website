@@ -405,3 +405,39 @@ h1 {
   width:60px;
   height:auto;
 }
+/* PRIMARY RESUME BUTTON */
+.resume-cta{
+  background: linear-gradient(135deg, #7cf7c5, #4dd2a6);
+  color: #0b1020;
+  font-weight: 800;
+  padding: 14px 20px;
+  font-size: 15px;
+  border: none;
+}
+
+.resume-cta:hover{
+  opacity: 0.9;
+}
+
+/* FLOATING RESUME BUTTON */
+.floating-resume{
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #7cf7c5, #4dd2a6);
+  color: #0b1020;
+  font-weight: 800;
+  padding: 14px 18px;
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  z-index: 999;
+}
+
+/* Mobile adjustment */
+@media (max-width: 768px){
+  .floating-resume{
+    bottom: 16px;
+    right: 16px;
+    padding: 12px 16px;
+  }
+}
