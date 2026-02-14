@@ -1,14 +1,14 @@
 :root {
   --bg: #0a0c1c;
   --bg2: #12172f;
-  --card-bg: rgba(20, 30, 50, 0.5);
-  --border: rgba(124, 247, 197, 0.15);
+  --card-bg: rgba(20, 30, 50, 0.6);
+  --border: rgba(124, 247, 197, 0.2);
   --text: #ffffff;
   --muted: rgba(255, 255, 255, 0.7);
   --accent: #7cf7c5;
-  --accent-glow: rgba(124, 247, 197, 0.4);
-  --radius: 24px;
-  --max: 1200px;
+  --accent-glow: rgba(124, 247, 197, 0.3);
+  --radius: 28px;
+  --max: 1300px;
   --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -24,7 +24,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: radial-gradient(circle at 10% 20%, #1b2340, var(--bg) 80%);
+  background: radial-gradient(ellipse at 30% 30%, #1f2940, var(--bg) 70%);
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
@@ -35,25 +35,13 @@ a {
   text-decoration: none;
 }
 
-a.link {
-  color: var(--accent);
-  font-weight: 500;
-  border-bottom: 1px dotted transparent;
-  transition: border-color 0.2s;
-}
-
-a.link:hover {
-  border-bottom-color: var(--accent);
-}
-
 main {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 2rem 2rem 4rem;
 }
 
-/* ---------- NAV ---------- */
-
+/* ---------- NAV (unchanged, but refined) ---------- */
 .nav {
   position: sticky;
   top: 0;
@@ -70,7 +58,6 @@ main {
 .logo {
   font-weight: 800;
   font-size: 1.5rem;
-  letter-spacing: -0.02em;
   background: linear-gradient(135deg, #fff, var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -86,7 +73,7 @@ main {
 .links a {
   color: var(--muted);
   font-weight: 500;
-  transition: color 0.2s, text-shadow 0.2s;
+  transition: color 0.2s;
 }
 
 .links a:hover {
@@ -115,20 +102,117 @@ main {
 .burger {
   display: none;
   font-size: 1.8rem;
-  cursor: pointer;
   color: var(--accent);
+  cursor: pointer;
 }
 
-/* ---------- HERO ---------- */
-
+/* ---------- HERO - NEW ASYMMETRIC GRID ---------- */
 .hero {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 3rem;
+  grid-template-columns: 1.5fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas: 
+    "text profile"
+    "text skills";
+  gap: 2rem;
+  align-items: start;
   padding: 3rem 0;
-  align-items: center;
 }
 
+/* Left column – text */
+.hero > :first-child {
+  grid-area: text;
+}
+
+/* Make hero-card disappear from layout – its children become grid items */
+.hero-card {
+  display: contents;
+}
+
+/* Profile card – placed in top right */
+.profile-card {
+  grid-area: profile;
+}
+
+/* Second card (skills) – placed in bottom right */
+.hero-card .card:not(.profile-card) {
+  grid-area: skills;
+}
+
+/* ---------- CARD STYLING ---------- */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.8rem;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.2s;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 30px 50px -20px var(--accent-glow);
+}
+
+/* Profile card specific – horizontal flex for image + text */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: left;
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 30px var(--accent-glow);
+  flex-shrink: 0;
+}
+
+.profile-card h3 {
+  font-size: 1.6rem;
+  margin-bottom: 0.2rem;
+}
+
+.profile-card p {
+  color: var(--muted);
+}
+
+/* Skills card */
+.hero-card .card:not(.profile-card) h3 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.list {
+  list-style: none;
+  color: var(--muted);
+}
+
+.list li {
+  margin: 0.8rem 0;
+  display: flex;
+  align-items: baseline;
+}
+
+.list li::before {
+  content: "▹";
+  color: var(--accent);
+  margin-right: 0.8rem;
+}
+
+.list .k {
+  color: var(--text);
+  font-weight: 600;
+  margin-right: 0.3rem;
+}
+
+/* ---------- TEXT CONTENT STYLING ---------- */
 .tag {
   display: inline-block;
   background: rgba(124, 247, 197, 0.15);
@@ -138,13 +222,11 @@ main {
   margin-bottom: 1.2rem;
   font-weight: 600;
   font-size: 0.9rem;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(4px);
   border: 1px solid var(--border);
 }
 
 h1 {
-  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   margin: 0 0 1rem;
   line-height: 1.1;
   font-weight: 800;
@@ -157,7 +239,7 @@ h1 {
 
 .sub {
   color: var(--muted);
-  margin-bottom: 1.8rem;
+  margin-bottom: 2rem;
   font-size: 1.2rem;
   max-width: 90%;
 }
@@ -181,10 +263,9 @@ h1 {
 }
 
 .cta .btn:last-child:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255,255,255,0.05);
   border-color: var(--accent);
   color: var(--accent);
-  transform: scale(1.05);
 }
 
 .mini {
@@ -200,109 +281,11 @@ h1 {
   gap: 0.4rem;
 }
 
-.mini i { /* assuming you'll add icons via FontAwesome or similar */
+.mini i {
   color: var(--accent);
 }
 
-/* ---------- RIGHT COLUMN ---------- */
-
-.hero-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 440px;
-  margin-left: auto;
-  width: 100%;
-}
-
-/* ---------- CARDS ---------- */
-
-.card {
-  background: var(--card-bg);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.8rem;
-  transition: transform 0.2s, box-shadow 0.3s, border-color 0.2s;
-  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  border-color: var(--accent);
-  box-shadow: 0 20px 40px -10px var(--accent-glow);
-}
-
-.profile-card {
-  text-align: center;
-}
-
-.profile-img {
-  width: clamp(130px, 16vw, 170px);
-  height: clamp(130px, 16vw, 170px);
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--accent);
-  box-shadow: 0 0 30px var(--accent-glow);
-  margin: 0 auto 1.2rem;
-  display: block;
-  transition: transform 0.3s;
-}
-
-.profile-img:hover {
-  transform: scale(1.02);
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.2rem;
-}
-
-.card-top h3 {
-  font-size: 1.4rem;
-  font-weight: 600;
-}
-
-.pill {
-  font-size: 0.75rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 40px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(4px);
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.list {
-  padding-left: 1.2rem;
-  color: var(--muted);
-  list-style-type: none;
-}
-
-.list li {
-  margin: 0.8rem 0;
-  display: flex;
-  align-items: baseline;
-}
-
-.list li::before {
-  content: "▹";
-  color: var(--accent);
-  margin-right: 0.8rem;
-  font-size: 1rem;
-}
-
-.list .k {
-  color: var(--text);
-  font-weight: 600;
-  margin-right: 0.3rem;
-}
-
-/* ---------- SECTIONS ---------- */
-
+/* ---------- PROJECTS SECTION ---------- */
 .section {
   padding-top: 5rem;
 }
@@ -334,7 +317,6 @@ h1 {
 .project-desc {
   color: var(--muted);
   margin: 1rem 0 1.2rem;
-  line-height: 1.6;
 }
 
 .chips {
@@ -351,12 +333,9 @@ h1 {
   background: rgba(124, 247, 197, 0.05);
   color: var(--accent);
   font-weight: 500;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(2px);
 }
 
 /* ---------- FOOTER ---------- */
-
 .footer {
   padding-top: 5rem;
   text-align: center;
@@ -367,16 +346,24 @@ h1 {
 }
 
 /* ---------- MOBILE ---------- */
-
 @media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-areas: 
+      "text"
+      "profile"
+      "skills";
+    gap: 1.5rem;
   }
 
-  .hero-card {
-    margin-left: 0;
-    max-width: 100%;
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-img {
+    width: 130px;
+    height: 130px;
   }
 
   .grid {
@@ -396,22 +383,10 @@ h1 {
   }
 
   h1 {
-    font-size: clamp(2rem, 8vw, 3rem);
+    font-size: clamp(2rem, 8vw, 2.8rem);
   }
 
   .sub {
     max-width: 100%;
   }
-}
-
-/* ---------- UTILS / ADD-ONS ---------- */
-
-/* Smooth entrance animation (optional) */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.hero, .section {
-  animation: fadeUp 0.6s ease-out;
 }
