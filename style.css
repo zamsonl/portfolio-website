@@ -390,3 +390,18 @@ h1 {
     max-width: 100%;
   }
 }
+.experience-card{
+  padding: 20px;
+}
+
+.exp-header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.exp-logo{
+  width:60px;
+  height:auto;
+}
