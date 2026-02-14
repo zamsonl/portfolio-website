@@ -11,5 +11,5 @@ burger.addEventListener("click", () => {
 
 document.getElementById("resumeBtn").addEventListener("click", (e) => {
   e.preventDefault();
-  alert("Add your resume PDF to the repo and link it here. Example: ./Zamson_Lim_Resume.pdf");
+  alert("/Resume (Zamson).pdf");
 });
