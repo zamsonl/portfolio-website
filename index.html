@@ -18,17 +18,19 @@
       <a href="#contact">Contact</a>
       <a class="btn small" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">Resume</a>
     </nav>
-    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">☰</button>
+    <button class="burger" id="burger">☰</button>
   </header>
 
   <main id="top">
+
+    <!-- HERO SECTION -->
     <section class="hero">
+
       <div class="hero-text">
         <p class="tag">Cybersecurity • SOC • DFIR • Networking</p>
         <h1>
-          Hi, I’m <span class="accent">Zamson Lim</span>.
-          <br />
-          Year 2 Cybersecurity student at Asia Pacific University. 
+          Hi, I’m <span class="accent">Zamson Lim</span>.<br />
+          Year 2 Cybersecurity Student at APU.
         </h1>
         <p class="sub">
           Interested in SOC operations, incident response,
@@ -41,21 +43,20 @@
         </div>
 
         <div class="mini">
-          <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/zamsonl" target="_blank">GitHub</a>
           <span class="dot">•</span>
-          <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank">LinkedIn</a>
           <span class="dot">•</span>
           <a href="mailto:zamsonlim@gmail.com">Email</a>
         </div>
       </div>
 
       <div class="hero-card">
-  <div class="card glow profile-card">
-    <img src="Zamson.jpeg" alt="Zamson Lim profile photo" class="profile-img" />
-    <h3>Zamson Lim</h3>
-    <p class="muted">Cybersecurity Student | SOC & DFIR</p>
-  </div>
-</div>
+        <div class="card glow profile-card">
+          <img src="Zamson.jpeg" alt="Zamson Lim profile photo" class="profile-img" />
+          <h3>Zamson Lim</h3>
+          <p class="muted">Cybersecurity Student | SOC & DFIR</p>
+        </div>
 
         <div class="card glow">
           <div class="card-top">
@@ -70,94 +71,77 @@
           </ul>
         </div>
       </div>
+
     </section>
 
+    <!-- PROJECTS -->
     <section class="section" id="projects">
       <div class="section-head">
         <h2>Featured Projects</h2>
-        <p>Projects with clear problem statements, tech stack, and real outcomes.</p>
       </div>
 
       <div class="grid">
-        <!-- Project 1 -->
+
         <article class="card project">
-          <div class="project-head">
-            <h3>Community Library Management System (CLI)</h3>
-            <div class="chips">
-              <span class="chip">Python</span>
-              <span class="chip">File Handling</span>
-              <span class="chip">RBAC</span>
-            </div>
+          <h3>Community Library Management System (CLI)</h3>
+          <div class="chips">
+            <span class="chip">Python</span>
+            <span class="chip">File Handling</span>
+            <span class="chip">RBAC</span>
           </div>
           <p class="project-desc">
-            Role-based command-line library system with member, librarian, and admin functions,
-            authentication flow, and text-file storage.
+            Role-based command-line library system with authentication, structured permissions,
+            and file-based storage.
           </p>
           <ul class="bullets">
-            <li>Login attempt limits + input validation</li>
-            <li>Separate permissions per role (RBAC)</li>
-            <li>Practical system design + structured menus</li>
+            <li>Login attempt limitation</li>
+            <li>Role-Based Access Control (RBAC)</li>
+            <li>Structured CLI system design</li>
           </ul>
           <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">Repo</a>
-            <a class="link" href="#" target="_blank" rel="noreferrer">Write-up</a>
+            <a class="link" href="https://github.com/zamsonl/Library-Management-System" target="_blank">View Repo</a>
           </div>
         </article>
 
-        <!-- Project 2 (placeholder) -->
         <article class="card project">
-          <div class="project-head">
-            <h3>Packet Tracer Networking Labs</h3>
-            <div class="chips">
-              <span class="chip">Cisco</span>
-              <span class="chip">Networking</span>
-              <span class="chip">Routing</span>
-            </div>
+          <h3>Packet Tracer Networking Labs</h3>
+          <div class="chips">
+            <span class="chip">Cisco</span>
+            <span class="chip">Networking</span>
+            <span class="chip">Routing</span>
           </div>
           <p class="project-desc">
-            Network topology labs demonstrating IP planning, routing/switching basics, and troubleshooting.
+            Network topology labs demonstrating IP addressing, routing configuration,
+            and troubleshooting.
           </p>
-          <ul class="bullets">
-            <li>Clear topology diagram + configs</li>
-            <li>Objectives + testing steps</li>
-            <li>What I learned section (employer-friendly)</li>
-          </ul>
           <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">Repo</a>
-            <a class="link" href="#" target="_blank" rel="noreferrer">Write-up</a>
+            <span class="pill">Coming Soon</span>
           </div>
         </article>
 
-        <!-- Project 3 (placeholder) -->
         <article class="card project">
-          <div class="project-head">
-            <h3>DFIR Memory / Artifact Analysis (Volatility)</h3>
-            <div class="chips">
-              <span class="chip">DFIR</span>
-              <span class="chip">Volatility</span>
-              <span class="chip">Windows</span>
-            </div>
+          <h3>DFIR Memory Analysis (Volatility)</h3>
+          <div class="chips">
+            <span class="chip">DFIR</span>
+            <span class="chip">Volatility</span>
+            <span class="chip">Windows</span>
           </div>
           <p class="project-desc">
-            Investigation-style write-up: identify suspicious processes, persistence clues, and timeline indicators.
+            Investigation-style write-up identifying suspicious processes,
+            persistence mechanisms, and forensic artifacts.
           </p>
-          <ul class="bullets">
-            <li>Commands + outputs documented</li>
-            <li>Findings summarized like an analyst report</li>
-            <li>Evidence-first explanation</li>
-          </ul>
           <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">Repo</a>
-            <a class="link" href="#" target="_blank" rel="noreferrer">Report</a>
+            <span class="pill">Coming Soon</span>
           </div>
         </article>
+
       </div>
     </section>
 
+    <!-- SKILLS -->
     <section class="section" id="skills">
       <div class="section-head">
         <h2>Skills</h2>
-        <p>Short, scannable, and relevant to SOC / cyber internships.</p>
       </div>
 
       <div class="grid skills">
@@ -165,8 +149,8 @@
           <h3>Security</h3>
           <ul class="list">
             <li>SOC workflow & alert triage</li>
-            <li>Incident response basics</li>
-            <li>Threat intel awareness</li>
+            <li>Incident response fundamentals</li>
+            <li>Threat intelligence basics</li>
             <li>Vulnerability assessment (labs)</li>
           </ul>
         </div>
@@ -175,46 +159,46 @@
           <h3>DFIR</h3>
           <ul class="list">
             <li>Autopsy</li>
-            <li>Windows artifacts basics</li>
             <li>Memory forensics (Volatility)</li>
+            <li>Windows artifact analysis</li>
             <li>Evidence documentation</li>
           </ul>
         </div>
 
         <div class="card">
-          <h3>Tech</h3>
+          <h3>Technical</h3>
           <ul class="list">
             <li>Python, Java, C++, JavaScript</li>
-            <li>Linux: Ubuntu, Kali</li>
-            <li>Networking: Packet Tracer</li>
+            <li>Linux (Ubuntu, Kali)</li>
+            <li>Cisco Packet Tracer</li>
             <li>Git & GitHub</li>
           </ul>
         </div>
       </div>
     </section>
 
+    <!-- ABOUT -->
     <section class="section" id="about">
       <div class="section-head">
         <h2>About</h2>
-        <p>A short story that sounds like a real person (not “AI vibes”).</p>
       </div>
 
       <div class="card about">
         <p>
-          I’m a Year 2 Cybersecurity student at Asia Pacific University (APU). I enjoy practical security work —
-          understanding how incidents happen, how SOC teams respond, and how evidence is collected and explained clearly.
-          I like building small systems and write-ups that show how I think, not just what tools I know.
+          I am a Year 2 Cybersecurity student at Asia Pacific University (APU).
+          I enjoy practical security work — understanding how incidents occur,
+          how SOC teams respond, and how evidence is analyzed clearly and systematically.
         </p>
         <p class="muted">
-          Currently building: more DFIR write-ups + small Python security automations.
+          Currently building more DFIR write-ups and security automation projects.
         </p>
       </div>
     </section>
 
+    <!-- CONTACT -->
     <section class="section" id="contact">
       <div class="section-head">
         <h2>Contact</h2>
-        <p>Best way to reach me.</p>
       </div>
 
       <div class="grid contact">
@@ -224,18 +208,19 @@
         </div>
         <div class="card">
           <h3>LinkedIn</h3>
-          <p><a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">linkedin.com/in/zamson-lim-b16617374</a></p>
+          <p><a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank">linkedin.com/in/zamson-lim-b16617374</a></p>
         </div>
         <div class="card">
           <h3>GitHub</h3>
-          <p><a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">github.com/zamsonl</a></p>
+          <p><a class="link" href="https://github.com/zamsonl" target="_blank">github.com/zamsonl</a></p>
         </div>
       </div>
     </section>
 
     <footer class="footer">
-      <p>© <span id="year"></span> Zamson Lim • Built with HTML/CSS/JS • Hosted on GitHub Pages</p>
+      <p>© <span id="year"></span> Zamson Lim • Hosted on GitHub Pages</p>
     </footer>
+
   </main>
 
   <script src="script.js"></script>
