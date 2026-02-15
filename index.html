@@ -11,21 +11,23 @@
 <body>
   <header class="nav">
     <a class="logo" href="#top">ZL<span class="accent">.</span></a>
+
     <nav class="links" id="navLinks">
       <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
       <a href="#skills">Skills</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
       <a class="btn small" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">Resume</a>
     </nav>
-    <button class="burger" id="burger">☰</button>
+
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">☰</button>
   </header>
 
   <main id="top">
 
     <!-- HERO SECTION -->
     <section class="hero">
-
       <div class="hero-text">
         <p class="tag">Cybersecurity • SOC • DFIR • Networking</p>
         <h1>
@@ -33,28 +35,21 @@
           Year 2 Cybersecurity Student at APU.
         </h1>
         <p class="sub">
-          Interested in SOC operations, incident response,
-          threat intelligence, vulnerability assessment, and digital forensics.
+          Interested in SOC operations, incident response, threat intelligence,
+          vulnerability assessment, and digital forensics.
         </p>
 
-<div class="cta">
-  <a class="btn resume-cta" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">
-    View Resume
-  </a>
-  <a class="btn ghost" href="#projects">View Projects</a>
-</div>
-<a href="./Resume (Zamson).pdf" 
-   target="_blank" 
-   rel="noreferrer"
-   class="floating-resume">
-  View Resume
-</a>
-
+        <div class="cta">
+          <a class="btn resume-cta" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">
+            View Resume
+          </a>
+          <a class="btn ghost" href="#projects">View Projects</a>
+        </div>
 
         <div class="mini">
-          <a href="https://github.com/zamsonl" target="_blank">GitHub</a>
+          <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">GitHub</a>
           <span class="dot">•</span>
-          <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank">LinkedIn</a>
+          <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">LinkedIn</a>
           <span class="dot">•</span>
           <a href="mailto:zamsonlim@gmail.com">Email</a>
         </div>
@@ -80,7 +75,6 @@
           </ul>
         </div>
       </div>
-
     </section>
 
     <!-- PROJECTS -->
@@ -90,7 +84,6 @@
       </div>
 
       <div class="grid">
-
         <article class="card project">
           <h3>Community Library Management System (CLI)</h3>
           <div class="chips">
@@ -108,7 +101,7 @@
             <li>Structured CLI system design</li>
           </ul>
           <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl/Library-Management-System" target="_blank">View Repo</a>
+            <a class="link" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">View Repo</a>
           </div>
         </article>
 
@@ -143,28 +136,32 @@
             <span class="pill">Coming Soon</span>
           </div>
         </article>
-
       </div>
     </section>
-<!-- EXPERIENCE -->
-<section class="section" id="experience">
-<div class="card experience-card">
-  <div class="exp-header">
-    <img src="CyberNexus_White.png" alt="CYNX CTF Logo" class="exp-logo">
-    <div>
-      <h3>CYNX CTF Participant</h3>
-      <p class="muted">Capture The Flag Competition</p>
-    </div>
-  </div>
 
-  <ul class="list">
-    <li>Solved cybersecurity challenges in web exploitation, forensics, and OSINT</li>
-    <li>Analyzed vulnerabilities and extracted hidden flags under time constraints</li>
-    <li>Applied problem-solving and teamwork skills in competitive environment</li>
-    <li>Strengthened knowledge in practical attack and defense techniques</li>
-  </ul>
-</div>
-</section>
+    <!-- EXPERIENCE -->
+    <section class="section" id="experience">
+      <div class="section-head">
+        <h2>Experience</h2>
+      </div>
+
+      <div class="card experience-card">
+        <div class="exp-header">
+          <img src="CyberNexus_White.png" alt="CYNX CTF Logo" class="exp-logo">
+          <div>
+            <h3>CYNX CTF Participant</h3>
+            <p class="muted">Capture The Flag Competition</p>
+          </div>
+        </div>
+
+        <ul class="list">
+          <li>Solved cybersecurity challenges in web exploitation, forensics, and OSINT</li>
+          <li>Analyzed vulnerabilities and extracted hidden flags under time constraints</li>
+          <li>Applied problem-solving and teamwork skills in a competitive environment</li>
+          <li>Strengthened knowledge in practical attack and defense techniques</li>
+        </ul>
+      </div>
+    </section>
 
     <!-- SKILLS -->
     <section class="section" id="skills">
@@ -236,11 +233,11 @@
         </div>
         <div class="card">
           <h3>LinkedIn</h3>
-          <p><a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank">linkedin.com/in/zamson-lim-b16617374</a></p>
+          <p><a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">linkedin.com/in/zamson-lim-b16617374</a></p>
         </div>
         <div class="card">
           <h3>GitHub</h3>
-          <p><a class="link" href="https://github.com/zamsonl" target="_blank">github.com/zamsonl</a></p>
+          <p><a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">github.com/zamsonl</a></p>
         </div>
       </div>
     </section>
@@ -248,8 +245,12 @@
     <footer class="footer">
       <p>© <span id="year"></span> Zamson Lim • Hosted on GitHub Pages</p>
     </footer>
-
   </main>
+
+  <!-- Floating Resume Button (ALWAYS VISIBLE) -->
+  <a href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer" class="floating-resume">
+    View Resume
+  </a>
 
   <script src="script.js"></script>
 </body>
