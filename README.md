@@ -2,7 +2,7 @@
 
 **Live site: https://zamsonl.github.io/portfolio-website/**
 
-Personal portfolio of mine, a Cybersecurity student at Asia Pacific University (APU), Malaysia.
+Personal portfolio, a Cybersecurity student at Asia Pacific University (APU), Malaysia.
 It covers most of my work - the projects I have built, the tools I use, and how to reach me.
 
 ## Sections
