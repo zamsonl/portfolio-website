@@ -2,8 +2,8 @@
 
 **Live site: https://zamsonl.github.io/portfolio-website/**
 
-Personal portfolio of Zamson Lim, a Year 2 Cybersecurity student at Asia Pacific University (APU), Malaysia.
-It covers my SOC, DFIR, and networking work - the projects I have built, the tools I use, and how to reach me.
+Personal portfolio mine, a Cybersecurity student at Asia Pacific University (APU), Malaysia.
+It covers most of my work - the projects I have built, the tools I use, and how to reach me.
 
 ## Sections
 
