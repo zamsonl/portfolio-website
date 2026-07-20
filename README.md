@@ -22,18 +22,6 @@ It covers most of my work - the projects I have built, the tools I use, and how 
 | Packet Tracer Networking Labs | Cisco, routing, switching | [Repo](https://github.com/zamsonl/Switching-And-Routing-Essentials) |
 | DFIR Memory Analysis | Volatility, Windows forensics | Coming soon |
 
-## Built with
-
-Plain HTML, CSS, and JavaScript - no framework and no build step.
-The site deploys automatically to GitHub Pages on every push to the main branch.
-
-## Running locally
-
-Clone the repository and open index.html in your browser:
-
-    git clone https://github.com/zamsonl/portfolio-website.git
-    cd portfolio-website
-    start index.html
 
 ## Contact
 
