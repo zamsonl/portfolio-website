@@ -1,280 +1,598 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zamson Lim | Cybersecurity Portfolio</title>
-  <meta name="description" content="Cybersecurity student portfolio - SOC, DFIR, Networking, Python." />
+  <title>Zamson Lim | Cybersecurity Portfolio — SOC, DFIR & Networking</title>
+  <meta name="description" content="Portfolio of Zamson Lim, Year 2 Cybersecurity student at APU. SOC operations, incident response, digital forensics, and networking projects." />
+  <meta name="author" content="Zamson Lim" />
+  <meta name="theme-color" content="#070b14" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Zamson Lim | Cybersecurity Portfolio" />
+  <meta property="og:description" content="SOC operations, incident response, digital forensics, and networking. Year 2 Cybersecurity student at Asia Pacific University." />
+  <meta property="og:image" content="Zamson.jpeg" />
+  <meta name="twitter:card" content="summary" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
+  <script>
+    // Apply the saved theme before first paint to avoid a flash of the wrong theme.
+    (function () {
+      try {
+        var saved = localStorage.getItem('theme');
+        if (!saved) {
+          saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.setAttribute('data-theme', saved);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body>
-  <header class="nav">
-    <a class="logo" href="#top">ZL<span class="accent">.</span></a>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
-    <nav class="links" id="navLinks">
-      <a href="#projects">Projects</a>
-      <a href="#experience">Experience</a>
-      <a href="#skills">Skills</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-      <a class="btn small" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">Resume</a>
-    </nav>
+  <!-- ============ HEADER ============ -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a class="logo" href="#top" aria-label="Zamson Lim, back to top">
+        <span class="logo-mark">ZL</span>
+        <span class="logo-text">Zamson<span class="accent">.</span></span>
+      </a>
 
-    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">☰</button>
+      <nav class="nav" id="navLinks" aria-label="Main">
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#experience">Experience</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch to light theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+
+        <a class="btn btn-primary btn-sm" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Resume</a>
+
+        <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <main id="top">
+  <main id="main">
+    <span id="top"></span>
 
-    <!-- HERO SECTION -->
+    <!-- ============ HERO ============ -->
     <section class="hero">
-      <div class="hero-text">
-        <p class="tag">Cybersecurity • SOC • DFIR • Networking</p>
-        <h1>
-          Hi, I’m <span class="accent">Zamson Lim</span>.<br />
-          Year 2 Cybersecurity Student at APU.
-        </h1>
-        <p class="sub">
-          Interested in SOC operations, incident response, threat intelligence,
-          vulnerability assessment, and digital forensics.
-        </p>
-
-        <div class="cta">
-          <a class="btn resume-cta" href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer">
-            View Resume
-          </a>
-          <a class="btn ghost" href="#projects">View Projects</a>
-        </div>
-
-        <div class="mini">
-          <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">GitHub</a>
-          <span class="dot">•</span>
-          <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">LinkedIn</a>
-          <span class="dot">•</span>
-          <a href="mailto:zamsonlim@gmail.com">Email</a>
-        </div>
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-grid"></div>
+        <div class="hero-glow"></div>
       </div>
 
-      <div class="hero-card">
-        <div class="card glow profile-card">
-          <img src="Zamson.jpeg" alt="Zamson Lim profile photo" class="profile-img" />
-          <h3>Zamson Lim</h3>
-          <p class="muted">Cybersecurity Student | SOC & DFIR</p>
-        </div>
+      <div class="shell hero-inner">
+        <div class="hero-copy reveal">
+          <p class="status">
+            <span class="status-dot" aria-hidden="true"></span>
+            Open to internship opportunities
+          </p>
 
-        <div class="card glow">
-          <div class="card-top">
-            <p class="card-title">Quick Snapshot</p>
-            <p class="pill">Open for Internship (May)</p>
+          <h1>
+            Zamson Lim
+            <span class="h1-sub">Cybersecurity student building<br class="br-lg" /> <span class="accent">real-world defence</span>.</span>
+          </h1>
+
+          <p class="lead">
+            Year 2 Cybersecurity undergraduate at Asia Pacific University. I work across
+            SOC operations, incident response, threat intelligence, vulnerability assessment,
+            and digital forensics &mdash; and I build the tooling that makes that work faster.
+          </p>
+
+          <div class="cta-row">
+            <a class="btn btn-primary" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+              </svg>
+              View Resume
+            </a>
+            <a class="btn btn-ghost" href="#projects">Explore Projects</a>
           </div>
-          <ul class="list">
-            <li><span class="k">Focus:</span> SOC, DFIR, Vulnerability Assessment</li>
-            <li><span class="k">Tools:</span> Wazuh, OpenSearch, Autopsy, Kali, Wireshark</li>
-            <li><span class="k">Code:</span> Python, Java, C++, JavaScript</li>
-            <li><span class="k">Languages:</span> English, Mandarin, Malay, Cantonese</li>
+
+          <ul class="social-row">
+            <li>
+              <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.97.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+                GitHub
+              </a>
+            </li>
+            <li>
+              <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+                LinkedIn
+              </a>
+            </li>
+            <li>
+              <a href="mailto:zamsonlim@gmail.com">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+                Email
+              </a>
+            </li>
           </ul>
         </div>
+
+        <aside class="hero-panel reveal" aria-label="Profile summary">
+          <div class="panel profile">
+            <div class="profile-media">
+              <img src="Zamson.jpeg" alt="Portrait of Zamson Lim" class="profile-img" width="96" height="96" loading="eager" />
+              <span class="profile-ring" aria-hidden="true"></span>
+            </div>
+            <div>
+              <h2 class="profile-name">Zamson Lim</h2>
+              <p class="profile-role">Cybersecurity &middot; SOC &amp; DFIR</p>
+              <p class="profile-loc">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Kuala Lumpur, Malaysia
+              </p>
+            </div>
+          </div>
+
+          <div class="panel snapshot">
+            <div class="panel-head">
+              <h2 class="panel-title">Quick Snapshot</h2>
+            </div>
+            <dl class="spec">
+              <div class="spec-row">
+                <dt>Focus</dt>
+                <dd>SOC &middot; DFIR &middot; Vulnerability Assessment</dd>
+              </div>
+              <div class="spec-row">
+                <dt>Tooling</dt>
+                <dd>Wazuh, OpenSearch, Autopsy, Kali, Wireshark</dd>
+              </div>
+              <div class="spec-row">
+                <dt>Code</dt>
+                <dd>Python, Java, C++, JavaScript</dd>
+              </div>
+              <div class="spec-row">
+                <dt>Languages</dt>
+                <dd>English, Mandarin, Malay, Cantonese</dd>
+              </div>
+            </dl>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <!-- PROJECTS -->
-    <section class="section" id="projects">
-      <div class="section-head">
-        <h2>Featured Projects</h2>
-      </div>
+    <!-- ============ HIGHLIGHTS ============ -->
+    <section class="shell" aria-label="At a glance">
+      <ul class="stats reveal">
+        <li>
+          <span class="stat-value">Year 2</span>
+          <span class="stat-label">BSc Cybersecurity, APU</span>
+        </li>
+        <li>
+          <span class="stat-value">4</span>
+          <span class="stat-label">Portfolio projects</span>
+        </li>
+        <li>
+          <span class="stat-value">1</span>
+          <span class="stat-label">Production SOC deployment</span>
+        </li>
+        <li>
+          <span class="stat-value">CTF</span>
+          <span class="stat-label">CYNX competitor</span>
+        </li>
+      </ul>
+    </section>
 
-      <div class="grid">
-        <article class="card project">
-          <h3>Real-Time SOC Visualization Suite (Wazuh)</h3>
+    <!-- ============ PROJECTS ============ -->
+    <section class="section shell" id="projects">
+      <header class="section-head reveal">
+        <p class="eyebrow">01 &mdash; Work</p>
+        <h2>Featured Projects</h2>
+        <p class="section-lead">
+          Security tooling and lab work, from a live SOC visualisation suite to
+          forensics and network engineering exercises.
+        </p>
+      </header>
+
+      <!-- Spotlight -->
+      <article class="spotlight reveal">
+        <div class="spotlight-body">
+          <div class="spotlight-tagline">
+            <span class="badge badge-live">
+              <span class="status-dot" aria-hidden="true"></span>
+              Deployed in production
+            </span>
+            <span class="badge">Flagship</span>
+          </div>
+
+          <h3>Real-Time SOC Visualization Suite</h3>
+
+          <p class="spotlight-desc">
+            A suite of live security dashboards built on Wazuh and OpenSearch, running on an
+            on-premise Security Operations Centre. It turns raw firewall and endpoint telemetry
+            into displays an analyst can actually act on: a wall-mounted global attack map, a
+            drill-down analyst console, a live endpoint floor map, and an alert triage console.
+          </p>
+
+          <ul class="feature-list">
+            <li>
+              <strong>Live telemetry pipeline</strong>
+              Queries Wazuh alert and monitoring indices in real time through an OpenSearch proxy.
+            </li>
+            <li>
+              <strong>Canvas-rendered attack map</strong>
+              Plots GeoIP-enriched firewall traffic on a custom world map with zoom, pan, and country drill-down.
+            </li>
+            <li>
+              <strong>Analyst triage workflow</strong>
+              Severity and category filters, application-level drill-downs, CSV export, and audible critical alerting.
+            </li>
+            <li>
+              <strong>Built for a wall display</strong>
+              Survives GPU context loss, auto-fits any screen, and runs unattended for days at a time.
+            </li>
+          </ul>
+
           <div class="chips">
             <span class="chip">Wazuh</span>
             <span class="chip">OpenSearch</span>
             <span class="chip">JavaScript</span>
+            <span class="chip">Canvas</span>
+            <span class="chip">GeoIP</span>
+            <span class="chip">SIEM</span>
           </div>
-          <p class="project-desc">
-            Suite of live security dashboards built on Wazuh/OpenSearch and firewall
-            telemetry, deployed to an on-prem SOC: a wall display with a global
-            attack-traffic map, an analyst console with category/application drill-downs,
-            a live endpoint floor map, and an alert triage console.
+
+          <p class="note">
+            Source is private &mdash; deployed inside a client SOC. Happy to walk through the
+            architecture and design decisions in an interview.
           </p>
-          <ul class="bullets">
-            <li>Real-time queries against Wazuh alert &amp; monitoring indices</li>
-            <li>Canvas-rendered world map of GeoIP-enriched firewall traffic</li>
-            <li>Alert feed with severity filters, CSV export, and audio alerting</li>
-          </ul>
-          <div class="project-links">
-            <span class="pill">Production Deployment</span>
-          </div>
-        </article>
-
-        <article class="card project">
-          <h3>Community Library Management System (CLI)</h3>
-          <div class="chips">
-            <span class="chip">Python</span>
-            <span class="chip">File Handling</span>
-            <span class="chip">RBAC</span>
-          </div>
-          <p class="project-desc">
-            Role-based command-line library system with authentication, structured permissions,
-            and file-based storage.
-          </p>
-          <ul class="bullets">
-            <li>Login attempt limitation</li>
-            <li>Role-Based Access Control (RBAC)</li>
-            <li>Structured CLI system design</li>
-          </ul>
-          <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">View Repo</a>
-          </div>
-        </article>
-
-        <article class="card project">
-          <h3>Packet Tracer Networking Labs</h3>
-          <div class="chips">
-            <span class="chip">Cisco</span>
-            <span class="chip">Networking</span>
-            <span class="chip">Routing</span>
-          </div>
-          <p class="project-desc">
-            Network topology labs demonstrating IP addressing, routing configuration,
-            and troubleshooting.
-          </p>
-          <div class="project-links">
-            <a class="link" href="https://github.com/zamsonl/Switching-And-Routing-Essentials" target="_blank" rel="noreferrer">View Repo</a>
-          </div>
-        </article>
-
-        <article class="card project">
-          <h3>DFIR Memory Analysis (Volatility)</h3>
-          <div class="chips">
-            <span class="chip">DFIR</span>
-            <span class="chip">Volatility</span>
-            <span class="chip">Windows</span>
-          </div>
-          <p class="project-desc">
-            Investigation-style write-up identifying suspicious processes,
-            persistence mechanisms, and forensic artifacts.
-          </p>
-          <div class="project-links">
-            <span class="pill">Coming Soon</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- EXPERIENCE -->
-    <section class="section" id="experience">
-      <div class="section-head">
-        <h2>Experience</h2>
-      </div>
-
-      <div class="card experience-card">
-        <div class="exp-header">
-          <img src="CyberNexus_White.png" alt="CYNX CTF Logo" class="exp-logo">
-          <div>
-            <h3>CYNX CTF Participant</h3>
-            <p class="muted">Capture The Flag Competition</p>
-          </div>
         </div>
 
-        <ul class="list">
-          <li>Solved cybersecurity challenges in web exploitation, forensics, and OSINT</li>
-          <li>Analyzed vulnerabilities and extracted hidden flags under time constraints</li>
-          <li>Applied problem-solving and teamwork skills in a competitive environment</li>
-          <li>Strengthened knowledge in practical attack and defense techniques</li>
-        </ul>
+        <div class="spotlight-visual" aria-hidden="true">
+          <div class="mock-window">
+            <div class="mock-bar">
+              <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+              <span class="mock-title">soc-dashboard &mdash; live</span>
+            </div>
+            <div class="mock-body">
+              <div class="mock-map">
+                <span class="ping ping-1"></span>
+                <span class="ping ping-2"></span>
+                <span class="ping ping-3"></span>
+                <span class="ping ping-4"></span>
+              </div>
+              <div class="mock-rows">
+                <div class="mock-row"><span class="sev sev-crit"></span><span class="bar" style="width:82%"></span></div>
+                <div class="mock-row"><span class="sev sev-high"></span><span class="bar" style="width:64%"></span></div>
+                <div class="mock-row"><span class="sev sev-med"></span><span class="bar" style="width:47%"></span></div>
+                <div class="mock-row"><span class="sev sev-low"></span><span class="bar" style="width:31%"></span></div>
+                <div class="mock-row"><span class="sev sev-med"></span><span class="bar" style="width:55%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Grid -->
+      <div class="project-grid">
+        <article class="card project reveal">
+          <div class="project-top">
+            <span class="project-index">02</span>
+            <span class="badge">Software</span>
+          </div>
+          <h3>Community Library Management System</h3>
+          <p class="project-desc">
+            A role-based command-line library system with authentication, structured
+            permissions, and file-backed persistence.
+          </p>
+          <ul class="bullets">
+            <li>Login attempt limiting to resist brute force</li>
+            <li>Role-Based Access Control across user tiers</li>
+            <li>Structured CLI architecture and data validation</li>
+          </ul>
+          <div class="chips">
+            <span class="chip">Python</span>
+            <span class="chip">RBAC</span>
+            <span class="chip">File Handling</span>
+          </div>
+          <a class="card-link" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">
+            View repository
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </a>
+        </article>
+
+        <article class="card project reveal">
+          <div class="project-top">
+            <span class="project-index">03</span>
+            <span class="badge">Networking</span>
+          </div>
+          <h3>Switching &amp; Routing Labs</h3>
+          <p class="project-desc">
+            Cisco Packet Tracer topologies covering addressing, routing, and
+            systematic fault isolation.
+          </p>
+          <ul class="bullets">
+            <li>VLAN segmentation and inter-VLAN routing</li>
+            <li>Static and dynamic routing configuration</li>
+            <li>Structured troubleshooting methodology</li>
+          </ul>
+          <div class="chips">
+            <span class="chip">Cisco</span>
+            <span class="chip">Routing</span>
+            <span class="chip">Switching</span>
+          </div>
+          <a class="card-link" href="https://github.com/zamsonl/Switching-And-Routing-Essentials" target="_blank" rel="noreferrer">
+            View repository
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </a>
+        </article>
+
+        <article class="card project is-upcoming reveal">
+          <div class="project-top">
+            <span class="project-index">04</span>
+            <span class="badge badge-soon">In progress</span>
+          </div>
+          <h3>DFIR Memory Analysis</h3>
+          <p class="project-desc">
+            An investigation-style write-up walking a memory image end to end, in the
+            format of a real incident report.
+          </p>
+          <ul class="bullets">
+            <li>Suspicious process and injection identification</li>
+            <li>Persistence mechanism analysis</li>
+            <li>Evidence documentation and timeline reconstruction</li>
+          </ul>
+          <div class="chips">
+            <span class="chip">Volatility</span>
+            <span class="chip">DFIR</span>
+            <span class="chip">Windows</span>
+          </div>
+          <span class="card-link is-disabled">Write-up in progress</span>
+        </article>
       </div>
     </section>
 
-    <!-- SKILLS -->
-    <section class="section" id="skills">
-      <div class="section-head">
-        <h2>Skills</h2>
-      </div>
+    <!-- ============ SKILLS ============ -->
+    <section class="section shell" id="skills">
+      <header class="section-head reveal">
+        <p class="eyebrow">02 &mdash; Capability</p>
+        <h2>Skills &amp; Tooling</h2>
+        <p class="section-lead">
+          What I work with day to day, grouped by how I actually use it.
+        </p>
+      </header>
 
-      <div class="grid skills">
-        <div class="card">
-          <h3>Security</h3>
-          <ul class="list">
-            <li>SOC workflow & alert triage</li>
+      <div class="skills-grid">
+        <div class="card skill-card reveal">
+          <div class="skill-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Security Operations</h3>
+          <p class="skill-desc">Detecting, triaging, and responding to activity that matters.</p>
+          <ul class="tag-list">
+            <li>SOC workflow &amp; alert triage</li>
             <li>SIEM dashboards (Wazuh, OpenSearch)</li>
             <li>Incident response fundamentals</li>
             <li>Threat intelligence basics</li>
-            <li>Vulnerability assessment (labs)</li>
+            <li>Vulnerability assessment</li>
           </ul>
         </div>
 
-        <div class="card">
-          <h3>DFIR</h3>
-          <ul class="list">
-            <li>Autopsy</li>
+        <div class="card skill-card reveal">
+          <div class="skill-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </div>
+          <h3>Digital Forensics</h3>
+          <p class="skill-desc">Recovering the story an incident left behind, and documenting it defensibly.</p>
+          <ul class="tag-list">
+            <li>Autopsy disk analysis</li>
             <li>Memory forensics (Volatility)</li>
             <li>Windows artifact analysis</li>
             <li>Evidence documentation</li>
+            <li>Timeline reconstruction</li>
           </ul>
         </div>
 
-        <div class="card">
-          <h3>Technical</h3>
-          <ul class="list">
+        <div class="card skill-card reveal">
+          <div class="skill-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
+          </div>
+          <h3>Engineering</h3>
+          <p class="skill-desc">Building the scripts, tools, and networks the security work runs on.</p>
+          <ul class="tag-list">
             <li>Python, Java, C++, JavaScript</li>
             <li>Linux (Ubuntu, Kali)</li>
             <li>Cisco Packet Tracer</li>
-            <li>Git & GitHub</li>
+            <li>Git &amp; GitHub</li>
+            <li>Wireshark</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- ABOUT -->
-    <section class="section" id="about">
-      <div class="section-head">
-        <h2>About</h2>
-      </div>
+    <!-- ============ EXPERIENCE ============ -->
+    <section class="section shell" id="experience">
+      <header class="section-head reveal">
+        <p class="eyebrow">03 &mdash; Track record</p>
+        <h2>Experience</h2>
+        <p class="section-lead">
+          Competitive and hands-on security practice outside the classroom.
+        </p>
+      </header>
 
-      <div class="card about">
-        <p>
-          I am a Year 2 Cybersecurity student at Asia Pacific University (APU).
-          I enjoy practical security work — understanding how incidents occur,
-          how SOC teams respond, and how evidence is analyzed clearly and systematically.
-        </p>
-        <p class="muted">
-          Currently building real-time SOC dashboards on Wazuh/OpenSearch,
-          along with more DFIR write-ups and security automation projects.
-        </p>
+      <ol class="timeline">
+        <li class="timeline-item reveal">
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <div class="card timeline-card">
+            <div class="timeline-head">
+              <div class="org-logo">
+                <img src="CyberNexus_White.png" alt="CyberNexus CTF logo" loading="lazy" />
+              </div>
+              <div>
+                <h3>CYNX CTF Competitor</h3>
+                <p class="muted">CyberNexus &middot; Capture The Flag competition</p>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Solved challenges spanning web exploitation, forensics, and OSINT</li>
+              <li>Analysed vulnerabilities and extracted hidden flags under time pressure</li>
+              <li>Coordinated with teammates to split workload across challenge categories</li>
+              <li>Applied offensive techniques to sharpen defensive intuition</li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="timeline-item reveal">
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <div class="card timeline-card">
+            <div class="timeline-head">
+              <div class="org-logo org-logo-text" aria-hidden="true">APU</div>
+              <div>
+                <h3>BSc (Hons) Cybersecurity &mdash; Year 2</h3>
+                <p class="muted">Asia Pacific University &middot; Kuala Lumpur, Malaysia</p>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Coursework across network security, forensics, and secure development</li>
+              <li>Hands-on lab work in Kali, Ubuntu, Wireshark, and Cisco Packet Tracer</li>
+              <li>Currently building DFIR write-ups and security automation projects</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ ABOUT ============ -->
+    <section class="section shell" id="about">
+      <header class="section-head reveal">
+        <p class="eyebrow">04 &mdash; Background</p>
+        <h2>About</h2>
+      </header>
+
+      <div class="about-grid">
+        <div class="card about-card reveal">
+          <p class="about-lead">
+            I am a Year 2 Cybersecurity student at Asia Pacific University, and I learn
+            best by building things that have to survive contact with real traffic.
+          </p>
+          <p>
+            What draws me to this field is the investigative side of it &mdash; understanding
+            how an incident actually unfolded, how a SOC team decides what to chase first,
+            and how evidence gets analysed clearly enough to stand up to scrutiny. Most of
+            my time outside coursework goes into that: building dashboards that make noisy
+            telemetry legible, working through forensic images, and turning what I find into
+            documentation someone else could follow.
+          </p>
+          <p>
+            Right now I am extending my SOC visualisation work, writing up DFIR case studies,
+            and looking for an internship where I can learn from an experienced blue team.
+          </p>
+        </div>
+
+        <div class="card facts-card reveal">
+          <h3 class="panel-title">Details</h3>
+          <dl class="spec">
+            <div class="spec-row">
+              <dt>Education</dt>
+              <dd>BSc (Hons) Cybersecurity, APU &mdash; Year 2</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Location</dt>
+              <dd>Kuala Lumpur, Malaysia</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Languages</dt>
+              <dd>English, Mandarin, Malay, Cantonese</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Interests</dt>
+              <dd>Blue team operations, forensics, detection engineering</dd>
+            </div>
+            <div class="spec-row">
+              <dt>Status</dt>
+              <dd><span class="inline-live"><span class="status-dot" aria-hidden="true"></span>Open to internships</span></dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </section>
 
-    <!-- CONTACT -->
-    <section class="section" id="contact">
-      <div class="section-head">
-        <h2>Contact</h2>
+    <!-- ============ CONTACT ============ -->
+    <section class="section shell" id="contact">
+      <header class="section-head reveal">
+        <p class="eyebrow">05 &mdash; Contact</p>
+        <h2>Get in touch</h2>
+      </header>
+
+      <div class="contact-band card reveal">
+        <div>
+          <h3>Looking for a cybersecurity intern?</h3>
+          <p class="muted">
+            I would be glad to talk through my projects, my approach, and where I could
+            contribute to your team.
+          </p>
+        </div>
+        <div class="contact-actions">
+          <a class="btn btn-primary" href="mailto:zamsonlim@gmail.com">Email me</a>
+          <a class="btn btn-ghost" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Download resume</a>
+        </div>
       </div>
 
-      <div class="grid contact">
-        <div class="card">
-          <h3>Email</h3>
-          <p><a class="link" href="mailto:zamsonlim@gmail.com">zamsonlim@gmail.com</a></p>
-        </div>
-        <div class="card">
-          <h3>LinkedIn</h3>
-          <p><a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">linkedin.com/in/zamson-lim-b16617374</a></p>
-        </div>
-        <div class="card">
-          <h3>GitHub</h3>
-          <p><a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">github.com/zamsonl</a></p>
-        </div>
+      <div class="contact-grid">
+        <a class="card contact-card reveal" href="mailto:zamsonlim@gmail.com">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          </span>
+          <span class="contact-label">Email</span>
+          <span class="contact-value">zamsonlim@gmail.com</span>
+        </a>
+
+        <a class="card contact-card reveal" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
+          </span>
+          <span class="contact-label">LinkedIn</span>
+          <span class="contact-value">zamson-lim</span>
+        </a>
+
+        <a class="card contact-card reveal" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.97.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
+          </span>
+          <span class="contact-label">GitHub</span>
+          <span class="contact-value">github.com/zamsonl</span>
+        </a>
       </div>
     </section>
 
     <footer class="footer">
-      <p>© <span id="year"></span> Zamson Lim • Hosted on GitHub Pages</p>
+      <div class="shell footer-inner">
+        <p>&copy; <span id="year"></span> Zamson Lim</p>
+        <p class="muted">Built from scratch with HTML, CSS &amp; JavaScript &middot; Hosted on GitHub Pages</p>
+      </div>
     </footer>
   </main>
 
-  <!-- Floating Resume Button (ALWAYS VISIBLE) -->
-  <a href="./Resume (Zamson).pdf" target="_blank" rel="noreferrer" class="floating-resume">
-    View Resume
+  <a href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer" class="floating-resume" id="floatingResume">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
+    </svg>
+    Resume
   </a>
 
   <script src="script.js"></script>
