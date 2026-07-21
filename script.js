@@ -431,3 +431,66 @@
     grid.parentNode.insertBefore(note, grid);
   }
 })();
+
+
+/* ---------------------------------------------------------------
+   Flagship spotlight flip — turns the SOC build-out card over to
+   reveal the real production dashboard.
+   ---------------------------------------------------------------- */
+(function () {
+  'use strict';
+
+  var spot = document.querySelector('.spotlight');
+  if (!spot || spot.classList.contains('flip')) return;
+
+  var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3H15"/><path d="M18.7 6V3"/><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3H9"/><path d="M5.3 18v3"/></svg>';
+
+  var inner = document.createElement('div');
+  inner.className = 'flip-inner';
+
+  var front = document.createElement('div');
+  front.className = 'spotlight-front';
+  while (spot.firstChild) front.appendChild(spot.firstChild);
+
+  var body = front.querySelector('.spotlight-body') || front;
+  var hintFront = document.createElement('span');
+  hintFront.className = 'flip-hint';
+  hintFront.innerHTML = ICON + '<span>Click to see the real dashboard</span>';
+  body.appendChild(hintFront);
+
+  var back = document.createElement('div');
+  back.className = 'spotlight-back';
+  back.innerHTML =
+    '<div class="spotlight-shot">' +
+      '<img src="soc-dashboard.png" alt="Live traffic overview dashboard from the production SOC, showing session event counts, a severity timeline, a global activity map, top countries, top firewall signatures, targeted services and top applications." loading="lazy" width="1280" height="717" />' +
+    '</div>' +
+    '<h4>Traffic Overview — running in production</h4>' +
+    '<p class="flip-cap">22,246 events in a 30-minute window across 45 countries, rendered live from Wazuh and OpenSearch. Source addresses are external inbound traffic; one signature row naming an internal host has been masked.</p>' +
+    '<span class="flip-hint">' + ICON + '<span>Click to go back</span></span>';
+
+  inner.appendChild(front);
+  inner.appendChild(back);
+  spot.appendChild(inner);
+
+  spot.classList.add('flip');
+  spot.setAttribute('tabindex', '0');
+  spot.setAttribute('role', 'button');
+  spot.setAttribute('aria-pressed', 'false');
+  spot.setAttribute('aria-label', 'Enterprise SOC Build-out — press to show the production dashboard');
+
+  function toggle() {
+    var on = spot.classList.toggle('is-flipped');
+    spot.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  spot.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('a')) return;
+    toggle();
+  });
+  spot.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.target.closest && e.target.closest('a')) return;
+    e.preventDefault();
+    toggle();
+  });
+})();
