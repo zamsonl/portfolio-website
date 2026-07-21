@@ -1174,3 +1174,69 @@ h1, h2, h3 {
   .flip-note, .flip-back { display: none !important; }
   .project.flip .flip-inner { transform: none !important; }
 }
+
+/* ---- Flagship spotlight flip ---- */
+.spotlight.flip {
+  display: block;
+  perspective: 1600px;
+  cursor: pointer;
+}
+.spotlight.flip .flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s var(--ease);
+}
+.spotlight.flip.is-flipped .flip-inner { transform: rotateY(180deg); }
+
+.spotlight-front {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.spotlight-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  justify-content: center;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.spotlight-shot {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-elevated);
+}
+.spotlight-shot img { width: 100%; height: auto; display: block; }
+.spotlight-back .flip-cap { text-align: left; }
+.spotlight.flip:hover .flip-hint,
+.spotlight.flip:focus-visible .flip-hint { color: var(--accent); }
+.spotlight .flip-hint { margin-top: 1.2rem; padding-top: 0; }
+.spotlight-back .flip-hint { margin-top: 0.2rem; }
+
+@media (max-width: 1000px) {
+  .spotlight-front { grid-template-columns: 1fr; }
+  .spotlight-front .spotlight-visual { order: -1; max-width: 520px; }
+  .spotlight-back { position: relative; inset: auto; }
+  .spotlight.flip .flip-inner { transform-style: flat; }
+  .spotlight.flip.is-flipped .flip-inner { transform: none; }
+  .spotlight.flip.is-flipped .spotlight-front { display: none; }
+  .spotlight.flip:not(.is-flipped) .spotlight-back { display: none; }
+  .spotlight-back { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight.flip .flip-inner { transition: none; }
+}
+
+@media print {
+  .spotlight-back { display: none !important; }
+  .spotlight.flip .flip-inner { transform: none !important; }
+}
