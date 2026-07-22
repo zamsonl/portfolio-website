@@ -1302,3 +1302,7 @@ h1, h2, h3 {
 /* Tile sized so the mark SVG maps 1:1 to CSS pixels and stays crisp. */
 .ctf-logo { width: 104px; height: 52px; padding: 6px 8px; }
 .ctf-logo svg { width: 100%; height: 100%; }
+
+/* Larger tiles: the mark SVG maps 1:1 to CSS pixels at this size. */
+.ctf-logo { width: 132px; height: 64px; padding: 8px 10px; }
+@media (max-width: 560px) { .ctf-logo { width: 118px; height: 58px; } }
