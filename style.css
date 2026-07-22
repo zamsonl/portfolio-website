@@ -1240,3 +1240,13 @@ h1, h2, h3 {
   .spotlight-back { display: none !important; }
   .spotlight.flip .flip-inner { transform: none !important; }
 }
+
+/* ---- Layout corrections ---- */
+@media (min-width: 1000px) {
+  /* Four skill cards read better as a 2x2 block than 3 + 1 orphan. */
+  .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Coursework heading sits inside the projects section, so it needs
+   air above it without the full section rhythm. */
+.course-head { margin-top: clamp(3rem, 6vw, 4.5rem); }
