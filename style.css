@@ -1324,3 +1324,16 @@ h1, h2, h3 {
 @media (max-width: 620px) {
   .ctf-logo { flex: 1 1 40%; height: 54px; }
 }
+
+/* A square logo mark stranded in a landscape tile reads as a tiny
+   sticker. Square the tile up and let the mark fill it. */
+.org-logo.is-mark {
+  width: 56px;
+  height: 56px;
+  padding: 6px;
+}
+.org-logo.is-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
