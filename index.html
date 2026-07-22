@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Zamson Lim | Cybersecurity Portfolio — SOC Engineering, Detection & DFIR</title>
-  <meta name="description" content="Portfolio of Zamson Lim, Year 3 Cybersecurity student at APU and Network &amp; Security Administrator at Palmgold Management Sdn Bhd. Built an enterprise SOC from the ground up: Wazuh SIEM, Zeek monitoring, detection engineering, and Active Directory security." />
+  <meta name="description" content="Portfolio of Zamson Lim, Year 3 Cybersecurity student at APU and Network &amp; Security Administrator at Palmgold Management Sdn Bhd. Built an enterprise SOC after a ransomware incident: Wazuh SIEM, Zeek monitoring, detection engineering, and Active Directory security." />
   <meta name="author" content="Zamson Lim" />
   <meta name="theme-color" content="#070b14" />
 
@@ -92,15 +92,15 @@
 
           <h1>
             Zamson Lim
-            <span class="h1-sub">I built a Security Operations Centre<br class="br-lg" /> <span class="accent">from the ground up</span>.</span>
+            <span class="h1-sub">Cybersecurity student, and the person who<br class="br-lg" /> <span class="accent">built my company&rsquo;s SOC</span>.</span>
           </h1>
 
           <p class="lead">
             Year 3 Cybersecurity undergraduate at Asia Pacific University, and Network &amp;
             Security Administrator at Palmgold Management Sdn Bhd, a licensed gaming operator
-            in Malaysia. After a ransomware incident in August 2025, I designed and deployed
-            the organisation&rsquo;s SOC end to end &mdash; SIEM, network sensor, endpoint
-            agents, detection content, and the tooling that makes it all legible on a wall display.
+            in Malaysia. After a ransomware incident in August 2025 I built the company&rsquo;s
+            Security Operations Centre &mdash; the SIEM, the network sensor, the endpoint
+            agents, and the detection rules behind them.
           </p>
 
           <div class="cta-row">
@@ -166,7 +166,7 @@
               </div>
               <div class="spec-row">
                 <dt>Network</dt>
-                <dd>Zeek, Suricata, FortiGate, Aruba, Wireshark</dd>
+                <dd>Zeek, FortiGate, Aruba, Wireshark</dd>
               </div>
               <div class="spec-row">
                 <dt>Code</dt>
@@ -187,19 +187,19 @@
       <ul class="stats reveal">
         <li>
           <span class="stat-value">80+</span>
-          <span class="stat-label">Endpoints under monitoring</span>
+          <span class="stat-label">Endpoints monitored</span>
         </li>
         <li>
           <span class="stat-value">6</span>
           <span class="stat-label">Log sources integrated</span>
         </li>
         <li>
-          <span class="stat-value">1</span>
-          <span class="stat-label">SOC built from scratch</span>
-        </li>
-        <li>
           <span class="stat-value">Year 3</span>
           <span class="stat-label">BSc Cybersecurity, APU</span>
+        </li>
+        <li>
+          <span class="stat-value">CTF</span>
+          <span class="stat-label">CYNX competitor</span>
         </li>
       </ul>
     </section>
@@ -210,9 +210,8 @@
         <p class="eyebrow">01 &mdash; Work</p>
         <h2>Featured Projects</h2>
         <p class="section-lead">
-          One flagship programme and the components that make it up &mdash; detection
-          engineering, network monitoring, endpoint rollout, and the visualisation layer
-          that puts it all on a wall.
+          The SOC build broken into its parts: getting the logs in, writing the detections,
+          testing the network, and the tools I wrote along the way.
         </p>
       </header>
 
@@ -230,37 +229,37 @@
           <h3>Enterprise SOC Build-out</h3>
 
           <p class="spotlight-desc">
-            In August 2025 my employer was hit by ransomware. There was no SOC, no central
-            logging, and no way to reconstruct what had happened. I was brought in to make
-            sure it could not happen the same way twice &mdash; and over the following months
-            designed and deployed a full Security Operations Centre from nothing.
+            In August 2025 my employer was hit by ransomware. There was no central logging,
+            so nobody could reconstruct what had happened or when. I was brought in to fix
+            that, and spent the following months building the Security Operations Centre that
+            now runs the company&rsquo;s monitoring.
           </p>
 
           <ul class="feature-list">
             <li>
-              <strong>SIEM at the centre</strong>
-              A Wazuh all-in-one deployment (manager, indexer, dashboard) on Ubuntu, tuned at the
+              <strong>Wazuh SIEM on Ubuntu</strong>
+              An all-in-one deployment &mdash; manager, indexer, and dashboard &mdash; tuned at the
               systemd level to stay stable under sustained ingest.
             </li>
             <li>
               <strong>Six log sources, one pipeline</strong>
               Firewall, core switching, wireless access points, Windows endpoints, Active Directory,
-              and a Zeek network sensor &mdash; normalised through custom ingest pipelines that
-              resolve field-mapping conflicts between sources.
+              and a Zeek network sensor, normalised through custom ingest pipelines that resolve
+              field-mapping conflicts between sources.
             </li>
             <li>
-              <strong>Detection content written, not downloaded</strong>
-              Custom multi-level decoders and correlation rules built for the estate&rsquo;s own
-              hardware, rather than relying on generic rulesets that never fire.
+              <strong>Detection content written for this network</strong>
+              Custom multi-level decoders and correlation rules matched to the hardware actually
+              in use, instead of generic rulesets that never fire.
             </li>
             <li>
-              <strong>Alerting that reaches a human</strong>
-              A real-time bot pushes critical alerts to chat, so triage does not depend on somebody
-              happening to be looking at the dashboard.
+              <strong>Alerts that reach someone</strong>
+              A bot pushes critical alerts to chat, so triage does not depend on somebody having
+              the dashboard open at the time.
             </li>
             <li>
               <strong>Hardened access path</strong>
-              The dashboard gateway was migrated from an ad-hoc Python proxy to Nginx with TLS,
+              The dashboard gateway moved from an ad-hoc Python proxy to Nginx with TLS,
               subnet-level allow-listing, and host firewall hardening.
             </li>
           </ul>
@@ -277,8 +276,7 @@
 
           <p class="note">
             Configuration and detection content stay private &mdash; this is a live environment.
-            Happy to walk through the architecture, the trade-offs, and what I would do
-            differently in an interview.
+            I am happy to walk through the architecture and the trade-offs in an interview.
           </p>
         </div>
 
@@ -311,13 +309,13 @@
       <div class="project-grid">
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">02</span>
-            <span class="badge">Network Monitoring</span>
+            <span class="project-index">01</span>
+            <span class="badge">Collection</span>
           </div>
           <h3>Zeek Network Security Monitoring Pipeline</h3>
           <p class="project-desc">
             A Zeek sensor fed by a core-switch traffic mirror, giving the SOC visibility into
-            east-west traffic the firewall never sees.
+            internal traffic the firewall never sees.
           </p>
           <ul class="bullets">
             <li>Custom Python stage strips encapsulation headers from mirrored traffic and injects it into a virtual capture interface</li>
@@ -334,13 +332,13 @@
 
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">03</span>
-            <span class="badge">Endpoint</span>
+            <span class="project-index">02</span>
+            <span class="badge">Collection</span>
           </div>
           <h3>Agent Rollout to 80+ Endpoints via GPO</h3>
           <p class="project-desc">
-            Automated SIEM agent deployment across the Windows estate using Active Directory
-            Group Policy, with no desk-to-desk visits.
+            SIEM agents deployed across the Windows estate through Active Directory Group
+            Policy, without visiting each desk.
           </p>
           <ul class="bullets">
             <li>Idempotent installer with three-state logic: running, stopped, or absent</li>
@@ -357,7 +355,7 @@
 
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">04</span>
+            <span class="project-index">03</span>
             <span class="badge">Detection</span>
           </div>
           <h3>Active Directory Security Monitoring</h3>
@@ -368,7 +366,7 @@
           <ul class="bullets">
             <li>Security, Group Policy, and Directory Service channels ingested</li>
             <li>Saved searches for account creation and deletion, lockouts, logons, privilege use, and group membership changes</li>
-            <li>&ldquo;Top Failed Logons&rdquo; and &ldquo;Top AD Events&rdquo; visualisations for daily triage</li>
+            <li>&ldquo;Top Failed Logons&rdquo; and &ldquo;Top AD Events&rdquo; views for daily triage</li>
           </ul>
           <div class="chips">
             <span class="chip">Active Directory</span>
@@ -379,13 +377,13 @@
 
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">05</span>
+            <span class="project-index">04</span>
             <span class="badge">Detection</span>
           </div>
           <h3>Wireless &amp; Access Point Monitoring</h3>
           <p class="project-desc">
-            Detection content for enterprise access points, plus enrichment that turns
-            anonymous client identifiers into names a human recognises.
+            Detection content for the wireless estate, plus enrichment that turns anonymous
+            client identifiers into names a human recognises.
           </p>
           <ul class="bullets">
             <li>Multi-level decoders for auth failures, WPA2 handshake anomalies, and connect/disconnect tracking</li>
@@ -401,7 +399,7 @@
 
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">06</span>
+            <span class="project-index">05</span>
             <span class="badge">Offensive</span>
           </div>
           <h3>Authorized Internal Vulnerability Assessment</h3>
@@ -412,7 +410,7 @@
           <ul class="bullets">
             <li>Found unauthenticated device admin interfaces with default credentials, exposed print services, and unpatched CVEs</li>
             <li>Identified a reverse-proxy bypass and denial-of-service exposure on multiple devices</li>
-            <li>Delivered technical, management, and plain-language reports so every stakeholder could act</li>
+            <li>Delivered technical, management, and plain-language reports so every stakeholder could act on it</li>
           </ul>
           <div class="chips">
             <span class="chip">Vulnerability Assessment</span>
@@ -423,41 +421,18 @@
 
         <article class="card project reveal">
           <div class="project-top">
-            <span class="project-index">07</span>
+            <span class="project-index">06</span>
             <span class="badge">Visualisation</span>
           </div>
-          <h3>Packet-Highway &mdash; 3D Traffic Visualizer</h3>
+          <h3>SOC Dashboard Suite</h3>
           <p class="project-desc">
-            Live network traffic rendered as a night highway. Vehicles are packets, sized and
-            coloured by protocol, with an emergency lane reserved for critical and blocked events.
+            The interface layer of the SOC: a global traffic overview, drill-down views by
+            application and country, and an alert queue an analyst can work through.
           </p>
           <ul class="bullets">
-            <li>Three.js scene driven by real-time SIEM data</li>
-            <li>Instanced meshes and object pooling to keep draw calls flat</li>
-            <li>Allocation-free animation loop so it runs unattended without GC stutter</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Three.js</span>
-            <span class="chip">JavaScript</span>
-            <span class="chip">WebGL</span>
-            <span class="chip">Data Viz</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">08</span>
-            <span class="badge">Visualisation</span>
-          </div>
-          <h3>Real-Time SOC Dashboard Suite</h3>
-          <p class="project-desc">
-            The wall-display layer of the SOC: a global attack map, an analyst drill-down
-            console, and an alert triage view.
-          </p>
-          <ul class="bullets">
-            <li>Canvas-rendered attack map plotting GeoIP-enriched firewall traffic with zoom, pan, and country drill-down</li>
-            <li>Fleet health derived from a terms aggregation with per-agent top hits, so counts stay correct at any fleet size</li>
-            <li>Severity filters, CSV export, audible critical alerting, and recovery from GPU context loss for multi-day uptime</li>
+            <li>Canvas-rendered activity map plotting GeoIP-enriched firewall traffic, with zoom, pan, and country drill-down</li>
+            <li>Agent counts derived from a terms aggregation with per-agent top hits, so the numbers stay correct as the fleet grows</li>
+            <li>Severity and category filters, CSV export, and audible alerting on critical events</li>
           </ul>
           <div class="chips">
             <span class="chip">JavaScript</span>
@@ -467,19 +442,42 @@
           </div>
         </article>
 
+        <article class="card project reveal">
+          <div class="project-top">
+            <span class="project-index">07</span>
+            <span class="badge">Visualisation</span>
+          </div>
+          <h3>Packet-Highway &mdash; 3D Traffic Visualizer</h3>
+          <p class="project-desc">
+            Network traffic rendered as a night highway. Vehicles are packets, sized and
+            coloured by protocol, with an emergency lane for critical and blocked events.
+          </p>
+          <ul class="bullets">
+            <li>Three.js scene driven by live SIEM data</li>
+            <li>Instanced meshes and object pooling to keep draw calls flat</li>
+            <li>Allocation-free animation loop, so it runs for long stretches without garbage-collection stutter</li>
+          </ul>
+          <div class="chips">
+            <span class="chip">Three.js</span>
+            <span class="chip">JavaScript</span>
+            <span class="chip">WebGL</span>
+            <span class="chip">Data Viz</span>
+          </div>
+        </article>
+
         <article class="card project is-upcoming reveal">
           <div class="project-top">
-            <span class="project-index">09</span>
+            <span class="project-index">08</span>
             <span class="badge badge-soon">In progress</span>
           </div>
           <h3>Physical Floor-Plan Agent Map</h3>
           <p class="project-desc">
-            Binds live SIEM agents to physical port codes on a digitised floor plan, so a
-            compromised host has a location, not just a hostname.
+            Binds SIEM agents to physical port codes on a digitised floor plan, so an alerting
+            host resolves to a desk rather than just a hostname.
           </p>
           <ul class="bullets">
-            <li>Multi-DPI, tiled, multi-mode OCR pipeline extracted a verified 300+ port-code dataset from the plan</li>
-            <li>Live map joining agent status to physical location</li>
+            <li>Multi-DPI, tiled, multi-mode OCR pipeline extracted a verified 310-port-code dataset from the plan</li>
+            <li>Map view joining agent status to physical location</li>
             <li>Binder UI for mapping agents to port codes</li>
           </ul>
           <div class="chips">
@@ -491,35 +489,13 @@
 
         <article class="card project is-upcoming reveal">
           <div class="project-top">
-            <span class="project-index">10</span>
-            <span class="badge badge-soon">Roadmap</span>
-          </div>
-          <h3>Detection &rarr; Active Response</h3>
-          <p class="project-desc">
-            Extending the SOC from passive detection into automated containment &mdash; the
-            work I am on now.
-          </p>
-          <ul class="bullets">
-            <li>Automated IP blocking and host isolation via firewall and switch APIs</li>
-            <li>Ransomware behaviour detection: canary files, mass-rename and mass-encrypt patterns</li>
-            <li>Inline IPS with Suricata</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Suricata</span>
-            <span class="chip">SOAR</span>
-            <span class="chip">FortiGate API</span>
-          </div>
-        </article>
-
-        <article class="card project is-upcoming reveal">
-          <div class="project-top">
-            <span class="project-index">11</span>
+            <span class="project-index">09</span>
             <span class="badge badge-soon">In progress</span>
           </div>
           <h3>DFIR Memory Analysis</h3>
           <p class="project-desc">
-            An investigation-style write-up walking a memory image end to end, in the
-            format of a real incident report.
+            An investigation write-up walking a memory image end to end, in the format of a
+            real incident report.
           </p>
           <ul class="bullets">
             <li>Suspicious process and injection identification</li>
@@ -535,12 +511,12 @@
         </article>
       </div>
 
-      <!-- Academic foundations -->
-      <header class="section-head reveal">
-        <p class="eyebrow">Also &mdash; Academic foundations</p>
-        <h2>Coursework Projects</h2>
+      <!-- Coursework -->
+      <header class="section-head reveal course-head">
+        <p class="eyebrow">Coursework</p>
+        <h2>University Projects</h2>
         <p class="section-lead">
-          Earlier university work, kept public because the fundamentals still show.
+          Earlier work from my degree, kept public because the fundamentals still show.
         </p>
       </header>
 
@@ -641,7 +617,7 @@
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3>SIEM &amp; Detection Engineering</h3>
-          <p class="skill-desc">Getting the right events in, and making them fire when they matter.</p>
+          <p class="skill-desc">Getting the right events in, and writing the rules that catch them.</p>
           <ul class="tag-list">
             <li>Wazuh deployment &amp; agent management</li>
             <li>Custom decoders &amp; correlation rules</li>
@@ -657,10 +633,9 @@
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="10" cy="18" r="1.6"/></svg>
           </div>
           <h3>Network &amp; Infrastructure</h3>
-          <p class="skill-desc">The layer everything else depends on.</p>
+          <p class="skill-desc">The systems the monitoring runs on.</p>
           <ul class="tag-list">
             <li>Zeek network security monitoring</li>
-            <li>Suricata inline IPS</li>
             <li>FortiGate firewall policy &amp; syslog integration</li>
             <li>Aruba switching &amp; wireless monitoring</li>
             <li>Traffic mirroring &amp; decapsulation pipelines</li>
@@ -674,7 +649,7 @@
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
           </div>
           <h3>Automation &amp; Engineering</h3>
-          <p class="skill-desc">Building the tools that make security work repeatable.</p>
+          <p class="skill-desc">Scripts and tools that make the work repeatable.</p>
           <ul class="tag-list">
             <li>Python (automation, enrichment, data pipelines)</li>
             <li>Bash &amp; Windows batch scripting</li>
@@ -690,12 +665,12 @@
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           </div>
           <h3>Offensive &amp; Forensics</h3>
-          <p class="skill-desc">Attacking it to defend it, and reconstructing what happened after.</p>
+          <p class="skill-desc">Testing the network, and reconstructing what happened after an incident.</p>
           <ul class="tag-list">
             <li>Authorized vulnerability assessment</li>
             <li>Internal network penetration testing</li>
             <li>OSINT &amp; reconnaissance</li>
-            <li>Formal report writing for mixed audiences</li>
+            <li>Report writing for technical and non-technical readers</li>
             <li>Memory forensics (Volatility), Autopsy disk analysis</li>
             <li>Windows artifact analysis &amp; timeline reconstruction</li>
           </ul>
@@ -725,13 +700,12 @@
               </div>
             </div>
             <ul class="bullets">
-              <li>Joined following a ransomware incident and built the organisation&rsquo;s Security Operations Centre from the ground up</li>
+              <li>Joined after a ransomware incident and built the company&rsquo;s Security Operations Centre</li>
               <li>Deployed a Wazuh SIEM integrating firewall, switching, wireless, Windows endpoint, Active Directory, and Zeek sensor telemetry</li>
               <li>Rolled out monitoring agents to 80+ Windows machines via Active Directory Group Policy</li>
-              <li>Authored custom decoders, correlation rules, and dashboards tuned to the estate&rsquo;s own hardware</li>
+              <li>Wrote custom decoders, correlation rules, and dashboards for the hardware in use</li>
               <li>Ran an authorized internal vulnerability assessment and delivered three audience-tailored reports</li>
               <li>Provide day-to-day IT support at head office and on-site support across branch locations, including gaming terminal troubleshooting</li>
-              <li>Currently extending the SOC from passive detection into automated containment</li>
             </ul>
           </div>
         </li>
@@ -751,8 +725,7 @@
             <ul class="bullets">
               <li>Solved challenges spanning web exploitation, forensics, and OSINT</li>
               <li>Analysed vulnerabilities and extracted hidden flags under time pressure</li>
-              <li>Coordinated with teammates to split workload across challenge categories</li>
-              <li>Applied offensive techniques to sharpen defensive intuition</li>
+              <li>Split challenge categories across the team to cover more ground</li>
             </ul>
           </div>
         </li>
@@ -770,7 +743,7 @@
             <ul class="bullets">
               <li>Two semesters from graduation</li>
               <li>Coursework across network security, forensics, and secure development</li>
-              <li>Hands-on lab work in Kali, Ubuntu, Wireshark, and Cisco Packet Tracer</li>
+              <li>Lab work in Kali, Ubuntu, Wireshark, and Cisco Packet Tracer</li>
             </ul>
           </div>
         </li>
@@ -787,28 +760,27 @@
       <div class="about-grid">
         <div class="card about-card reveal">
           <p class="about-lead">
-            I am a Year 3 Cybersecurity student at Asia Pacific University who also runs
-            security operations for a licensed gaming operator &mdash; and I learn best by
-            building things that have to survive contact with real traffic.
+            I am a Year 3 Cybersecurity student at Asia Pacific University, and I run security
+            operations for Palmgold Management, a licensed gaming operator in Malaysia.
           </p>
           <p>
-            The turning point was a ransomware incident in August 2025. There was no central
-            logging, so nobody could answer the first question anyone asks after an incident:
-            what actually happened, and when. Everything I have built since comes back to
-            that &mdash; getting the telemetry in, making it queryable, and turning it into
-            something an analyst can act on before the next incident, not after.
+            The ransomware incident in August 2025 is what shaped the work. Afterwards, nobody
+            could answer the first question anyone asks: what happened, and when. There were no
+            central logs to check. Everything I have built since comes back to that &mdash;
+            getting the telemetry in, making it queryable, and putting it somewhere an analyst
+            will actually look.
           </p>
           <p>
-            A lot of that work is unglamorous debugging: tracing why a dashboard tile reads
-            &ldquo;&mdash;&rdquo; back through the proxy, the index pattern, and the query
-            window until the pipeline is actually correct rather than merely quiet. That habit
-            of chasing a silent failure to its root is the part I would bring to a blue team.
+            Most of it is less glamorous than the dashboards suggest. A fair amount of my time
+            goes into tracing why a panel shows no data &mdash; back through the proxy, the
+            index pattern, and the query window &mdash; until the pipeline is correct rather
+            than just quiet.
           </p>
           <p>
-            I work both sides. The vulnerability assessment I ran on our own network taught me
-            more about what to detect than any ruleset would have. Right now I am extending the
-            SOC from detection into automated containment, and looking for a team where I can
-            learn from people who have done this at a larger scale.
+            Next I want to take the SOC from detection into response: automated blocking and
+            host isolation through the firewall and switch APIs, and detection for ransomware
+            behaviour such as canary files and mass renames. I am also looking for a team where
+            I can learn from people who have run this at a larger scale.
           </p>
         </div>
 
@@ -853,10 +825,10 @@
 
       <div class="contact-band card reveal">
         <div>
-          <h3>Building out a blue team?</h3>
+          <h3>Hiring a security intern or junior analyst?</h3>
           <p class="muted">
-            I would be glad to talk through the SOC build, the decisions behind it, and
-            where I could contribute to your team.
+            I am happy to talk through the SOC build, the decisions behind it, and where I
+            could contribute to your team.
           </p>
         </div>
         <div class="contact-actions">
