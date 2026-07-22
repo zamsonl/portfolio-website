@@ -1282,3 +1282,19 @@ h1, h2, h3 {
 
 /* Logo tiles fall back to a text mark when the image is missing. */
 .org-logo.is-fallback::before { content: attr(data-mark); }
+
+/* Grid items default to min-width:auto, which stops a large logo
+   shrinking inside its tile. Pin both axes to zero and clip. */
+.org-logo, .ctf-logo { overflow: hidden; }
+.org-logo img,
+.ctf-logo img,
+.ctf-logo svg {
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.ctf-logo svg { width: 100%; }
