@@ -1337,3 +1337,11 @@ h1, h2, h3 {
   height: 100%;
   object-fit: contain;
 }
+
+/* Sections carried 112px of padding top and bottom, so two adjacent
+   sections stacked 224px of dead space between them. Halve it. */
+.section { padding-block: clamp(2.5rem, 5vw, 3.75rem); }
+.section-head { margin-bottom: clamp(1.4rem, 2.8vw, 2.1rem); }
+.timeline { gap: 1.1rem; }
+.skills-grid { gap: 1.25rem; }
+.course-head { margin-top: clamp(2rem, 4vw, 3rem); }
