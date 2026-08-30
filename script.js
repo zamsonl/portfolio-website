@@ -1,628 +1,250 @@
-/* Zamson Lim — portfolio interactions */
+/* =========================================================================
+   Zamson Lim — portfolio behaviour
+   Small, dependency-free, and defensive: every block checks its own nodes
+   exist before binding, so a missing section can never break the rest.
+   ========================================================================= */
 (function () {
   'use strict';
 
-  var root = document.documentElement;
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Footer year ---------- */
-  var year = document.getElementById('year');
-  if (year) year.textContent = new Date().getFullYear();
+  /* ---- 1. Footer year -------------------------------------------------- */
+  var yr = $('#yr');
+  if (yr) yr.textContent = new Date().getFullYear();
 
-  /* ---------- Theme toggle ---------- */
-  var themeToggle = document.getElementById('themeToggle');
+  /* ---- 2. Theme -------------------------------------------------------- */
+  (function theme() {
+    var btn = $('#theme');
+    if (!btn) return;
+    var meta = $('meta[name="theme-color"]');
+    var COLOR = { dark: '#08090d', light: '#fbfbfa' };
 
-  function applyTheme(theme) {
-    root.setAttribute('data-theme', theme);
-    if (themeToggle) {
-      themeToggle.setAttribute(
-        'aria-label',
-        theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
-      );
+    function apply(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      if (meta) meta.setAttribute('content', COLOR[t] || COLOR.dark);
+      btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+      try { localStorage.setItem('zl.theme', t); } catch (e) {}
     }
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#070b14' : '#f6f8fc');
-  }
+    apply(document.documentElement.getAttribute('data-theme') || 'dark');
 
-  if (themeToggle) {
-    themeToggle.addEventListener('click', function () {
-      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      try { localStorage.setItem('theme', next); } catch (e) {}
+    btn.addEventListener('click', function () {
+      apply(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
     });
-    applyTheme(root.getAttribute('data-theme') || 'dark');
-  }
-
-  /* ---------- Mobile navigation ---------- */
-  var burger = document.getElementById('burger');
-  var nav = document.getElementById('navLinks');
-
-  function closeNav() {
-    if (!nav || !burger) return;
-    nav.classList.remove('is-open');
-    burger.setAttribute('aria-expanded', 'false');
-  }
-
-  if (burger && nav) {
-    burger.addEventListener('click', function () {
-      var open = nav.classList.toggle('is-open');
-      burger.setAttribute('aria-expanded', String(open));
-    });
-
-    nav.addEventListener('click', function (e) {
-      if (e.target.closest('a')) closeNav();
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeNav();
-    });
-
-    window.addEventListener('resize', function () {
-      if (window.innerWidth > 860) closeNav();
-    });
-  }
-
-  /* ---------- Scroll progress, sticky header, floating CTA ---------- */
-  var progress = document.getElementById('scrollProgress');
-  var header = document.getElementById('siteHeader');
-  var floating = document.getElementById('floatingResume');
-  var ticking = false;
-
-  function onScroll() {
-    var top = window.scrollY || document.documentElement.scrollTop;
-    var height = document.documentElement.scrollHeight - window.innerHeight;
-
-    if (progress) {
-      progress.style.width = (height > 0 ? (top / height) * 100 : 0) + '%';
-    }
-    if (header) {
-      header.classList.toggle('is-stuck', top > 8);
-    }
-    if (floating) {
-      floating.classList.toggle('is-visible', top > window.innerHeight * 0.6);
-    }
-    ticking = false;
-  }
-
-  window.addEventListener('scroll', function () {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(onScroll);
-  }, { passive: true });
-
-  onScroll();
-
-  /* ---------- Reveal on scroll ---------- */
-  var revealables = document.querySelectorAll('.reveal');
-
-  if (reduceMotion || !('IntersectionObserver' in window)) {
-    revealables.forEach(function (el) { el.classList.add('is-visible'); });
-  } else {
-    var revealObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        revealObserver.unobserve(entry.target);
-      });
-    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
-
-    revealables.forEach(function (el, i) {
-      el.style.transitionDelay = Math.min(i % 4, 3) * 70 + 'ms';
-      revealObserver.observe(el);
-    });
-  }
-
-  /* ---------- Active section in nav ---------- */
-  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.nav a[href^="#"]'));
-  var sections = navLinks
-    .map(function (link) { return document.querySelector(link.getAttribute('href')); })
-    .filter(Boolean);
-
-  if (sections.length && 'IntersectionObserver' in window) {
-    var sectionObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        navLinks.forEach(function (link) {
-          link.classList.toggle(
-            'is-active',
-            link.getAttribute('href') === '#' + entry.target.id
-          );
-        });
-      });
-    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
-
-    sections.forEach(function (section) { sectionObserver.observe(section); });
-  }
-})();
-
-
-/* ---------------------------------------------------------------
-   Project card flip — builds a diagram on the back of each project
-   card and toggles it on click or Enter/Space. The diagrams are
-   schematics of how each system works, not screenshots.
-   ---------------------------------------------------------------- */
-(function () {
-  'use strict';
-
-  var cards = document.querySelectorAll('.card.project');
-  if (!cards.length) return;
-
-  var A = 'var(--accent)', A2 = 'var(--accent-2)', BS = 'var(--border-strong)',
-      BD = 'var(--border)', MU = 'var(--muted)', FT = 'var(--faint)',
-      CR = 'var(--crit)', HI = 'var(--high)', ME = 'var(--med)', LO = 'var(--low)';
-
-  function win(title, inner) {
-    return '<svg viewBox="0 0 320 176" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
-      '<rect width="320" height="176" fill="var(--bg-elevated)"/>' +
-      '<rect width="320" height="20" fill="var(--surface-solid)"/>' +
-      '<circle cx="11" cy="10" r="2.6" fill="' + BS + '"/>' +
-      '<circle cx="20" cy="10" r="2.6" fill="' + BS + '"/>' +
-      '<circle cx="29" cy="10" r="2.6" fill="' + BS + '"/>' +
-      '<text x="40" y="13.5" font-family="monospace" font-size="7.5" fill="' + FT + '">' + title + '</text>' +
-      '<line x1="0" y1="20" x2="320" y2="20" stroke="' + BD + '"/>' + inner + '</svg>';
-  }
-  function box(x, y, w, h, stroke, fill) {
-    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="4" fill="' + (fill || 'none') + '" stroke="' + stroke + '"/>';
-  }
-  function label(x, y, t, c, s) {
-    return '<text x="' + x + '" y="' + y + '" font-family="monospace" font-size="' + (s || 7) + '" fill="' + (c || MU) + '">' + t + '</text>';
-  }
-  function arrow(x1, x2, y) {
-    return '<line x1="' + x1 + '" y1="' + y + '" x2="' + (x2 - 5) + '" y2="' + y + '" stroke="' + A + '" stroke-width="1.2"/>' +
-      '<path d="M' + (x2 - 5) + ' ' + (y - 3) + ' L' + x2 + ' ' + y + ' L' + (x2 - 5) + ' ' + (y + 3) + 'Z" fill="' + A + '"/>';
-  }
-
-  var ART = {};
-
-  ART.zeek = win('zeek-cluster', (function () {
-    var s = box(14, 36, 62, 26, BS) + label(22, 52, 'SPAN port', MU) +
-      arrow(78, 100, 49) + box(100, 36, 62, 26, A, 'var(--accent-soft)') + label(107, 52, 'decap.py', A) +
-      arrow(164, 186, 49);
-    var names = ['logger', 'manager', 'proxy', 'worker'];
-    for (var i = 0; i < 4; i++) {
-      s += box(188, 30 + i * 26, 118, 20, BD) + label(196, 44 + i * 26, names[i], i === 3 ? A : MU);
-    }
-    s += label(14, 88, 'conn.log  dns.log  ssl.log  files.log', FT, 7);
-    for (var j = 0; j < 5; j++) {
-      s += '<rect x="14" y="' + (98 + j * 13) + '" width="' + (70 + j * 34) + '" height="6" rx="3" fill="' + (j % 2 ? A2 : A) + '" opacity="' + (0.55 - j * 0.07) + '"/>';
-    }
-    return s;
-  })());
-
-  ART.gpo = win('group-policy-rollout', (function () {
-    var s = '', i, x, y;
-    for (i = 0; i < 32; i++) {
-      x = 16 + (i % 8) * 37; y = 34 + Math.floor(i / 8) * 26;
-      s += '<rect x="' + x + '" y="' + y + '" width="28" height="19" rx="3" fill="var(--accent-soft)" stroke="' + A + '"/>';
-      s += '<path d="M' + (x + 10) + ' ' + (y + 10) + ' l3 3 l6 -7" stroke="' + A + '" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
-    }
-    s += label(16, 158, 'one policy object, applied estate-wide', FT, 7.5);
-    return s;
-  })());
-
-  ART.ad = win('ad-security-events', (function () {
-    var v = [46, 72, 30, 88, 54, 24, 66, 38];
-    var lb = ['4624', '4625', '4720', '4740', '4728', '4726', '4672', '5136'];
-    var s = '';
-    for (var i = 0; i < 8; i++) {
-      var h = v[i], x = 20 + i * 37, y = 140 - h;
-      s += '<rect x="' + x + '" y="' + y + '" width="22" height="' + h + '" rx="3" fill="' + (i === 3 ? CR : i === 1 ? HI : A) + '" opacity="0.8"/>';
-      s += label(x - 1, 152, lb[i], FT, 6.5);
-    }
-    s += '<line x1="14" y1="140" x2="306" y2="140" stroke="' + BD + '"/>' + label(14, 32, 'event IDs tracked for daily triage', MU, 7.5);
-    return s;
-  })());
-
-  ART.wifi = win('ap-monitoring', (function () {
-    var s = '<circle cx="160" cy="96" r="7" fill="' + A + '"/>';
-    for (var r = 20; r <= 62; r += 21) {
-      s += '<circle cx="160" cy="96" r="' + r + '" fill="none" stroke="' + A + '" opacity="' + (0.5 - r / 200) + '"/>';
-    }
-    var pts = [[92, 62], [232, 68], [104, 132], [222, 128], [160, 36]];
-    for (var i = 0; i < pts.length; i++) {
-      s += '<line x1="160" y1="96" x2="' + pts[i][0] + '" y2="' + pts[i][1] + '" stroke="' + (i === 4 ? CR : BD) + '" stroke-dasharray="2 3"/>';
-      s += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="4" fill="' + (i === 4 ? CR : A2) + '"/>';
-    }
-    s += label(14, 34, 'client associations per access point', MU, 7.5) + label(14, 166, 'SSID hopping across APs raises an alert', CR, 7);
-    return s;
-  })());
-
-  ART.vuln = win('assessment-findings', (function () {
-    var rows = [['Critical', CR, 62], ['High', HI, 118], ['Medium', ME, 190], ['Low', LO, 148]];
-    var s = '';
-    for (var i = 0; i < 4; i++) {
-      var y = 40 + i * 27;
-      s += label(16, y + 8, rows[i][0], MU, 7.5);
-      s += '<rect x="66" y="' + y + '" width="' + rows[i][2] + '" height="11" rx="5" fill="' + rows[i][1] + '" opacity="0.85"/>';
-    }
-    s += label(16, 162, 'findings grouped by severity, reported three ways', FT, 7);
-    return s;
-  })());
-
-  ART.highway = win('packet-highway', (function () {
-    var s = '<rect y="20" width="320" height="156" fill="#050810"/>';
-    s += '<path d="M110 176 L146 44 L174 44 L210 176 Z" fill="#0b1220" stroke="' + BD + '"/>';
-    for (var i = 0; i < 6; i++) {
-      var t = i / 6, y = 176 - t * 132, w = 46 - t * 34;
-      s += '<rect x="' + (160 - w / 2) + '" y="' + y + '" width="' + w + '" height="' + (5 - t * 3) + '" fill="' + FT + '" opacity="0.35"/>';
-    }
-    var cars = [[132, 150, 14, 8, A], [176, 120, 11, 7, A2], [148, 92, 9, 5, A], [186, 70, 7, 4, ME], [124, 168, 16, 9, CR]];
-    for (var j = 0; j < cars.length; j++) {
-      s += '<rect x="' + cars[j][0] + '" y="' + cars[j][1] + '" width="' + cars[j][2] + '" height="' + cars[j][3] + '" rx="2" fill="' + cars[j][4] + '"/>';
-    }
-    s += '<rect x="212" y="44" width="12" height="132" fill="' + CR + '" opacity="0.1"/>' + label(226, 60, 'emergency', CR, 6.5) + label(226, 70, 'lane', CR, 6.5);
-    s += label(14, 34, 'each vehicle is a packet', MU, 7.5);
-    return s;
-  })());
-
-  ART.dashboard = win('soc-dashboard', (function () {
-    var s = '<rect x="10" y="28" width="196" height="92" rx="4" fill="none" stroke="' + BD + '"/>';
-    for (var i = 0; i < 9; i++) {
-      var x = 22 + (i * 47) % 176, y = 40 + (i * 31) % 68;
-      s += '<circle cx="' + x + '" cy="' + y + '" r="' + (2 + i % 3) + '" fill="' + (i % 4 === 0 ? CR : A) + '" opacity="0.85"/>';
-    }
-    s += label(14, 40, 'activity map', FT, 6.5);
-    s += box(212, 28, 96, 92, BD) + label(218, 40, 'alert queue', FT, 6.5);
-    var sev = [CR, HI, ME, LO, ME, A];
-    for (var j = 0; j < 6; j++) {
-      s += '<rect x="218" y="' + (48 + j * 12) + '" width="3" height="8" fill="' + sev[j] + '"/>';
-      s += '<rect x="225" y="' + (50 + j * 12) + '" width="' + (76 - j * 9) + '" height="4" rx="2" fill="' + BS + '"/>';
-    }
-    s += label(14, 140, 'filters', FT, 7) + label(14, 156, 'severity \u00b7 category \u00b7 country', MU, 7);
-    s += label(212, 140, 'export', FT, 7) + label(212, 156, 'CSV', A, 7);
-    return s;
-  })());
-
-  ART.floor = win('floor-plan-binder', (function () {
-    var s = box(14, 30, 292, 108, BD);
-    for (var i = 1; i < 6; i++) s += '<line x1="' + (14 + i * 48) + '" y1="30" x2="' + (14 + i * 48) + '" y2="138" stroke="' + BD + '" opacity="0.6"/>';
-    for (var j = 1; j < 3; j++) s += '<line x1="14" y1="' + (30 + j * 36) + '" x2="306" y2="' + (30 + j * 36) + '" stroke="' + BD + '" opacity="0.6"/>';
-    var pins = [[38, 48], [110, 48], [182, 84], [254, 48], [62, 120], [206, 120], [134, 84]];
-    for (var k = 0; k < pins.length; k++) {
-      s += '<path d="M' + pins[k][0] + ' ' + (pins[k][1] + 8) + ' c-6 -8 -6 -14 0 -14 c6 0 6 6 0 14 Z" fill="' + A + '"/>';
-      s += label(pins[k][0] - 8, pins[k][1] + 18, 'port', FT, 5.5);
-    }
-    s += label(14, 158, '310 port codes extracted from the plan by OCR', FT, 7);
-    return s;
-  })());
-
-  ART.dfir = win('volatility3 -f mem.raw', (function () {
-    var rows = [['System', 0], ['  services.exe', 1], ['    svch0st.exe', 2], ['      cmd.exe', 3], ['  explorer.exe', 1]];
-    var s = '';
-    for (var i = 0; i < rows.length; i++) {
-      var y = 40 + i * 20, sus = i === 2 || i === 3;
-      if (sus) s += '<rect x="12" y="' + (y - 9) + '" width="296" height="13" fill="' + CR + '" opacity="0.09"/>';
-      s += label(16 + rows[i][1] * 4, y, rows[i][0], sus ? CR : MU, 8);
-    }
-    s += label(16, 150, 'what the write-up looks for: injection, no parent match', CR, 7);
-    return s;
-  })());
-
-  ART.cli = win('library-system.py', (function () {
-    var lines = [['> login admin', A], ['  auth ok \u2014 role: LIBRARIAN', MU], ['> borrow 10432', A], ['  due 2026-08-04', MU], ['> login guest', A], ['  attempt 3/3 \u2014 locked', CR]];
-    var s = '';
-    for (var i = 0; i < lines.length; i++) s += label(16, 40 + i * 19, lines[i][0], lines[i][1], 8);
-    return s;
-  })());
-
-  ART.net = win('LAN_Lords.pkt', (function () {
-    var s = box(126, 30, 68, 22, A, 'var(--accent-soft)') + label(140, 45, 'Router', A);
-    s += '<line x1="160" y1="52" x2="90" y2="82" stroke="' + BD + '"/><line x1="160" y1="52" x2="230" y2="82" stroke="' + BD + '"/>';
-    s += box(56, 82, 68, 22, BS) + label(68, 97, 'SW-A', MU) + box(196, 82, 68, 22, BS) + label(208, 97, 'SW-B', MU);
-    var v = [['V10', 30], ['V20', 100], ['V30', 170], ['V40', 240]];
-    for (var i = 0; i < 4; i++) {
-      s += '<line x1="' + (i < 2 ? 90 : 230) + '" y1="104" x2="' + (v[i][1] + 22) + '" y2="126" stroke="' + BD + '"/>';
-      s += box(v[i][1], 126, 44, 20, BD) + label(v[i][1] + 12, 140, v[i][0], A2, 7);
-    }
-    s += label(14, 166, 'trunked switches, inter-VLAN routing verified', FT, 7);
-    return s;
-  })());
-
-  ART.java = win('JavaSystemImplementation', (function () {
-    var s = box(112, 30, 96, 30, A, 'var(--accent-soft)') + label(126, 49, 'abstract User', A, 7.5);
-    s += '<line x1="160" y1="60" x2="160" y2="74" stroke="' + BD + '"/><line x1="62" y1="74" x2="258" y2="74" stroke="' + BD + '"/>';
-    var kids = ['Member', 'Staff', 'Admin'];
-    for (var i = 0; i < 3; i++) {
-      var x = 30 + i * 98;
-      s += '<line x1="' + (x + 32) + '" y1="74" x2="' + (x + 32) + '" y2="88" stroke="' + BD + '"/>';
-      s += box(x, 88, 64, 42, BS) + label(x + 10, 103, kids[i], MU, 7.5);
-      s += '<line x1="' + x + '" y1="110" x2="' + (x + 64) + '" y2="110" stroke="' + BD + '"/>';
-      s += label(x + 6, 122, '+ act()', FT, 6.5);
-    }
-    s += label(14, 158, 'inheritance \u00b7 encapsulation \u00b7 polymorphism', FT, 7);
-    return s;
-  })());
-
-  ART.purple = win('purple-team-exercise', (function () {
-    var s = box(12, 30, 84, 34, CR) + label(20, 44, 'red side', CR, 7) + label(20, 56, 'C2 listener', FT, 6.5);
-    s += arrow(98, 118, 47);
-    s += box(118, 30, 84, 34, MU) + label(126, 44, 'tunnel', MU, 7) + label(126, 56, 'shared edge IP', FT, 6.5);
-    s += arrow(204, 224, 47);
-    s += box(224, 30, 84, 34, A) + label(232, 44, 'victims', A, 7) + label(232, 56, 'beacon 10s', FT, 6.5);
-    s += '<line x1="266" y1="66" x2="266" y2="86" stroke="' + BD + '" stroke-dasharray="2 2"/>';
-    s += box(12, 86, 296, 30, BD) + label(20, 99, 'sensor', FT, 6.5);
-    var ticks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-    for (var i = 0; i < ticks.length; i++) {
-      s += '<rect x="' + (74 + i * 20) + '" y="94" width="3" height="14" rx="1.5" fill="' + A + '" opacity="0.8"/>';
-    }
-    s += label(20, 112, 'dns', FT, 6);
-    s += box(12, 124, 296, 26, CR, 'var(--accent-soft)');
-    s += label(20, 141, 'the DNS rules were the only thing that named the internal victims', CR, 7);
-    s += label(12, 166, 'the finding beat the catch: one segment was never mirrored at all', FT, 7);
-    return s;
-  })());
-
-  ART.malware = win('detection-validation-lab', (function () {
-    var names = ['ransomware.rs', 'stealer.py', 'c2client.cpp', 'macro.docm'];
-    var s = '';
-    for (var i = 0; i < 4; i++) {
-      var y = 30 + i * 26;
-      s += box(12, y, 108, 20, BD) + label(19, y + 14, names[i], i === 0 ? CR : MU, 7);
-      s += arrow(122, 146, y + 10);
-    }
-    s += box(146, 30, 74, 98, A, 'var(--accent-soft)');
-    s += label(154, 50, 'isolated', A, 7) + label(154, 62, 'lab VM', A, 7);
-    s += label(154, 84, 'observe', FT, 6.5) + label(154, 96, 'artefacts', FT, 6.5);
-    s += arrow(222, 244, 79);
-    var out = ['wazuh rules', 'zeek scripts', 'os queries'];
-    for (var j = 0; j < 3; j++) {
-      s += box(244, 46 + j * 26, 64, 20, BD) + label(250, 60 + j * 26, out[j], A2, 6.5);
-    }
-    s += label(12, 148, 'benign by construction · hard-guarded to a canary folder', FT, 7);
-    s += label(12, 164, 'never a live sample, never outside the lab', FT, 7);
-    return s;
-  })());
-
-  ART.ai = win('build · verify · keep', (function () {
-    var s = box(12, 32, 90, 30, BD) + label(20, 51, 'draft it fast', MU, 7);
-    s += arrow(104, 126, 47);
-    s += box(126, 32, 90, 30, A, 'var(--accent-soft)') + label(134, 51, 'run the thing', A, 7);
-    s += arrow(218, 240, 47);
-    s += box(240, 32, 68, 30, BD) + label(247, 51, 'keep / bin', MU, 7);
-    s += '<path d="M274 64 L274 82 L57 82 L57 66" stroke="' + BD + '" stroke-width="1.1" fill="none" stroke-dasharray="3 3"/>';
-    s += '<path d="M54 71 L57 64 L60 71Z" fill="' + BD + '"/>';
-    s += label(120, 78, 'and again', FT, 6.5);
-    s += box(12, 94, 296, 26, CR, 'var(--accent-soft)');
-    s += label(20, 111, 'a "done" message is not evidence — check the artefact', CR, 7);
-    var rows = ['hash the deploy, do not trust the deploy tool',
-                'read the count out of the binary, not the README',
-                'a rule that loads is not a rule that works'];
-    for (var i = 0; i < 3; i++) {
-      s += '<circle cx="17" cy="' + (134 + i * 12) + '" r="1.8" fill="' + A + '"/>';
-      s += label(24, 137 + i * 12, rows[i], FT, 6.5);
-    }
-    return s;
-  })());
-
-  ART.console = win('soc-alert-console', (function () {
-    var tiles = [['CRIT', CR], ['HIGH', HI], ['MED', ME], ['LOW', LO]];
-    var s = '';
-    for (var i = 0; i < 4; i++) {
-      s += box(12 + i * 50, 28, 44, 28, BD) + label(18 + i * 50, 40, tiles[i][0], tiles[i][1], 6.5);
-      s += label(18 + i * 50, 52, ['31', '28', '19', '10'][i], MU, 8);
-    }
-    s += box(214, 28, 94, 28, A) + label(221, 46, 'triage · one path', A, 6.5);
-    s += box(12, 62, 296, 60, BD) + label(19, 74, 'live alert feed', FT, 6.5);
-    var sev = [CR, HI, ME, CR, LO];
-    for (var j = 0; j < 5; j++) {
-      s += '<rect x="19" y="' + (80 + j * 9) + '" width="3" height="6" fill="' + sev[j] + '"/>';
-      s += '<rect x="27" y="' + (81 + j * 9) + '" width="' + (150 - j * 14) + '" height="4" rx="2" fill="' + BS + '"/>';
-      s += '<rect x="' + (196 + j * 6) + '" y="' + (81 + j * 9) + '" width="' + (44 - j * 4) + '" height="4" rx="2" fill="' + BD + '"/>';
-    }
-    s += label(12, 138, 'filters, counters and the feed all read one dispatcher,', FT, 7);
-    s += label(12, 152, 'so they cannot drift apart · 7 themes × 6 severity palettes', FT, 7);
-    return s;
-  })());
-
-  ART.tmap = win('soc-traffic-map', (function () {
-    var s = box(12, 28, 214, 96, BD);
-    var pts = [[42, 52], [70, 44], [96, 60], [128, 48], [150, 70], [176, 56], [200, 78],
-               [58, 88], [110, 96], [164, 100], [86, 74], [190, 40]];
-    for (var i = 0; i < pts.length; i++) {
-      s += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="' + (1.8 + (i % 3)) + '" fill="' +
-           (i % 5 === 0 ? CR : A) + '" opacity="0.85"/>';
-    }
-    s += '<path d="M42 52 Q110 20 176 56" stroke="' + A + '" stroke-width="1.2" fill="none" opacity="0.8"/>';
-    s += '<path d="M200 78 Q150 112 58 88" stroke="' + A2 + '" stroke-width="1.2" fill="none" opacity="0.8"/>';
-    s += '<circle cx="176" cy="56" r="4.5" fill="none" stroke="' + A + '"/>';
-    s += label(18, 40, 'global activity', FT, 6.5);
-    s += box(232, 28, 76, 44, BD) + label(238, 40, 'posture', FT, 6.5);
-    s += '<rect x="238" y="46" width="42" height="5" rx="2.5" fill="' + ME + '"/>';
-    s += '<rect x="238" y="46" width="64" height="5" rx="2.5" fill="' + BD + '" opacity="0.35"/>';
-    s += label(238, 64, 'decays, not ratchets', A, 6);
-    s += box(232, 78, 76, 46, BD) + label(238, 90, 'events/min', FT, 6.5);
-    for (var j = 0; j < 11; j++) {
-      s += '<rect x="' + (238 + j * 6) + '" y="' + (118 - (4 + (j * 5) % 22)) + '" width="4" height="' +
-           (4 + (j * 5) % 22) + '" rx="1" fill="' + (j === 10 ? CR : A) + '" opacity="0.8"/>';
-    }
-    s += label(12, 142, 'rate buckets use the EVENT timestamp, not arrival time,', FT, 7);
-    s += label(12, 156, 'so one batched poll cannot invent a spike', FT, 7);
-    return s;
-  })());
-
-  var MAP = [
-    [/purple team/i, 'purple', 'Red side ran a tunnelled C2 with implants beaconing on a fixed interval; blue side watched the same activity land in the SIEM and wrote the rules for it.'],
-    [/malicious code/i, 'malware', 'Samples built and detonated in an isolated lab purely to see what they leave behind, then turned into rules, scripts and queries.'],
-    [/ai tooling/i, 'ai', 'Draft fast, then verify against the artefact rather than the message about the artefact. The verification habit is the transferable part.'],
-    [/traffic map/i, 'tmap', 'A world map with live arcs and a threat-posture score that decays with no new events, so an idle network stops reading SEVERE.'],
-    [/alert console/i, 'console', 'Severity counters, ranked lists and the feed all read one filter dispatcher, so they cannot disagree with each other.'],
-    [/visualization suite/i, 'dashboard', 'Activity map on one side, alert queue on the other, with filters and CSV export for working through the day.'],
-    [/zeek/i, 'zeek', 'Mirrored traffic is decapsulated in Python, replayed onto a virtual interface, then processed by a four-node Zeek cluster.'],
-    [/gpo|endpoint/i, 'gpo', 'One Group Policy object and one idempotent installer, so the whole Windows estate reports in without a desk visit.'],
-    [/active directory/i, 'ad', 'Domain controller event channels ranked by volume, so an unusual lockout spike is visible before anyone reports it.'],
-    [/wireless|access point/i, 'wifi', 'Association tracking per access point, with auth-failure bursts and cross-AP SSID hopping raised as alerts.'],
-    [/vulnerability assessment/i, 'vuln', 'Findings grouped by severity and written up three ways, so the person fixing it and the person funding it both got a readable version.'],
-    [/packet-highway/i, 'highway', 'Every vehicle is a packet. Size tracks bytes, colour tracks protocol, and blocked traffic moves into the emergency lane.'],
-    [/floor-plan/i, 'floor', 'OCR lifted every port code off the building plan, so an alerting agent resolves to a desk instead of a hostname.'],
-    [/memory analysis/i, 'dfir', 'A process tree from a memory image, with injected and unparented processes flagged for the write-up.'],
-    [/library/i, 'cli', 'Role-based command line with attempt limiting, so a guest account locks out before brute force gets anywhere.'],
-    [/switching|routing/i, 'net', 'VLANs segmented across two switches, trunked and routed, then verified end to end with ping and the routing table.'],
-    [/java/i, 'java', 'An abstract base with three concrete roles, keeping behaviour where it belongs instead of in one long switch statement.']
-  ];
-
-  var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3H15"/><path d="M18.7 6V3"/><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3H9"/><path d="M5.3 18v3"/></svg>';
-
-  Array.prototype.forEach.call(cards, function (card) {
-    var h = card.querySelector('h3');
-    var title = h ? h.textContent : '';
-    var hit = null;
-    for (var i = 0; i < MAP.length; i++) {
-      if (MAP[i][0].test(title)) { hit = MAP[i]; break; }
-    }
-    if (!hit || !ART[hit[1]]) return;
-
-    var inner = document.createElement('div');
-    inner.className = 'flip-inner';
-
-    var front = document.createElement('div');
-    front.className = 'flip-face flip-front';
-    while (card.firstChild) front.appendChild(card.firstChild);
-
-    var hintFront = document.createElement('span');
-    hintFront.className = 'flip-hint';
-    hintFront.innerHTML = ICON + '<span>Click to flip</span>';
-    front.appendChild(hintFront);
-
-    var back = document.createElement('div');
-    back.className = 'flip-face flip-back';
-    back.innerHTML =
-      '<div class="flip-group">' +
-        '<div class="flip-art">' + ART[hit[1]] + '</div>' +
-        '<h4>' + title + '</h4>' +
-        '<p class="flip-cap">' + hit[2] + '</p>' +
-      '</div>' +
-      '<span class="flip-hint">' + ICON + '<span>Click to go back</span></span>';
-
-    inner.appendChild(front);
-    inner.appendChild(back);
-    card.appendChild(inner);
-
-    card.classList.add('flip');
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-pressed', 'false');
-    card.setAttribute('aria-label', title + ' \u2014 press to show a diagram of how it works');
-
-    function toggle() {
-      var on = card.classList.toggle('is-flipped');
-      card.setAttribute('aria-pressed', on ? 'true' : 'false');
-    }
-
-    card.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('a')) return;
-      toggle();
-    });
-    card.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      if (e.target.closest && e.target.closest('a')) return;
-      e.preventDefault();
-      toggle();
-    });
-  });
-
-  var grid = document.querySelector('#projects .project-grid');
-  if (grid && !document.querySelector('.flip-note')) {
-    var note = document.createElement('p');
-    note.className = 'flip-note';
-    note.innerHTML = ICON + '<span>Click any card to flip it over</span>';
-    grid.parentNode.insertBefore(note, grid);
-  }
-})();
-
-
-/* ---------------------------------------------------------------
-   Flagship spotlight flip — turns the SOC build-out card over to
-   reveal the production dashboard.
-   ---------------------------------------------------------------- */
-(function () {
-  'use strict';
-
-  var spot = document.querySelector('.spotlight');
-  if (!spot || spot.classList.contains('flip')) return;
-
-  var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3H15"/><path d="M18.7 6V3"/><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3H9"/><path d="M5.3 18v3"/></svg>';
-
-  var inner = document.createElement('div');
-  inner.className = 'flip-inner';
-
-  var front = document.createElement('div');
-  front.className = 'spotlight-front';
-  while (spot.firstChild) front.appendChild(spot.firstChild);
-
-  var body = front.querySelector('.spotlight-body') || front;
-  var hintFront = document.createElement('span');
-  hintFront.className = 'flip-hint';
-  hintFront.innerHTML = ICON + '<span>Click to see the real dashboard</span>';
-  body.appendChild(hintFront);
-
-  var back = document.createElement('div');
-  back.className = 'spotlight-back';
-  back.innerHTML =
-    '<div class="spotlight-shot is-live">' +
-      '<iframe title="SOC traffic map running on synthetic demo data" ' +
-        'data-src="./soc-traffic-map.html" loading="lazy" scrolling="no" ' +
-        'referrerpolicy="no-referrer" ' +
-        'style="background:var(--bg-elevated)"></iframe>' +
-    '</div>' +
-    '<h4>The same console, running right here</h4>' +
-    '<p class="flip-cap">This is the real traffic map, de-identified and published as a template, running live on a synthetic feed. Nothing on it describes a real network. Open it full size, or read the source \u2014 it is one HTML file with no build step and no external requests.</p>' +
-    '<span class="flip-hint">' + ICON + '<span>Click to go back</span></span>';
-
-  inner.appendChild(front);
-  inner.appendChild(back);
-  spot.appendChild(inner);
-
-  spot.classList.add('flip');
-  spot.setAttribute('tabindex', '0');
-  spot.setAttribute('role', 'button');
-  spot.setAttribute('aria-pressed', 'false');
-  spot.setAttribute('aria-label', 'Enterprise SOC Build-out \u2014 press to show the live console demo');
-
-  var shot = back.querySelector('.spotlight-shot');
-
-  // The frame is laid out at a desktop width (1600px) and scaled down, so the
-  // miniature keeps real desktop proportions instead of collapsing to a phone
-  // layout. Its logical HEIGHT is derived from the container's own aspect ratio
-  // so the render fills the panel exactly -- a fixed 16:9 frame left a large
-  // empty band under the dashboard, since the back face is as tall as the
-  // (much longer) front face.
-  var BASE_W = 1600;
-  function fitShot() {
-    if (!shot) return;
-    var w = shot.clientWidth, h = shot.clientHeight;
-    if (w <= 0 || h <= 0) return;
-    var scale = w / BASE_W;
-    shot.style.setProperty('--shot-scale', scale.toFixed(4));
-    var frame = shot.querySelector('iframe');
-    if (frame) frame.style.height = Math.round(h / scale) + 'px';
-  }
-
-  function toggle() {
-    var on = spot.classList.toggle('is-flipped');
-    spot.setAttribute('aria-pressed', on ? 'true' : 'false');
-    if (on) {
-      var frame = back.querySelector('iframe[data-src]');
-      if (frame) {
-        frame.src = frame.getAttribute('data-src');
-        frame.removeAttribute('data-src');
+  })();
+
+  /* ---- 3. Header state, scroll progress, active section ---------------- */
+  (function chrome() {
+    var hdr = $('#hdr');
+    var bar = $('#progress');
+    var links = $$('#nav a[href^="#"]');
+    var targets = links
+      .map(function (a) { return { a: a, el: document.getElementById(a.getAttribute('href').slice(1)) }; })
+      .filter(function (t) { return t.el; });
+
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      var y = window.scrollY || document.documentElement.scrollTop;
+
+      if (hdr) hdr.classList.toggle('stuck', y > 8);
+
+      if (bar) {
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (max > 0 ? Math.min(100, (y / max) * 100) : 0) + '%';
       }
-      fitShot();
-      var f = back.querySelector('iframe');
-      if (f) f.addEventListener('load', fitShot, { once: true });
+
+      // Active link = the last section whose top has passed the header line.
+      var line = y + (window.innerHeight * 0.32);
+      var current = null;
+      for (var i = 0; i < targets.length; i++) {
+        if (targets[i].el.offsetTop <= line) current = targets[i];
+      }
+      links.forEach(function (a) { a.classList.remove('on'); });
+      if (current) current.a.classList.add('on');
     }
-  }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    frame();
+  })();
 
-  window.addEventListener('resize', fitShot);
-  fitShot();
+  /* ---- 4. Mobile menu -------------------------------------------------- */
+  (function menu() {
+    var burger = $('#burger');
+    var nav = $('#nav');
+    if (!burger || !nav) return;
 
-  spot.addEventListener('click', function (e) {
-    if (e.target.closest && e.target.closest('a')) return;
-    toggle();
-  });
-  spot.addEventListener('keydown', function (e) {
-    if (e.key !== 'Enter' && e.key !== ' ') return;
-    if (e.target.closest && e.target.closest('a')) return;
-    e.preventDefault();
-    toggle();
-  });
+    function set(open) {
+      nav.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+    burger.addEventListener('click', function () {
+      set(burger.getAttribute('aria-expanded') !== 'true');
+    });
+    nav.addEventListener('click', function (e) {
+      if (e.target.closest('a')) set(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') set(false);
+    });
+    // A resize past the breakpoint must not leave the panel stuck open.
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 860) set(false);
+    });
+  })();
+
+  /* ---- 5. Reveal on scroll --------------------------------------------- */
+  (function reveal() {
+    var items = $$('.rv');
+    if (!items.length) return;
+    if (reduced || !('IntersectionObserver' in window)) {
+      items.forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    items.forEach(function (el) { io.observe(el); });
+  })();
+
+  /* ---- 6. Project filter ----------------------------------------------- */
+  (function filter() {
+    var bar = $('#filters');
+    var grid = $('#pgrid');
+    var count = $('#fcount');
+    if (!bar || !grid) return;
+
+    var items = $$('.item', grid);
+
+    // Label counts are derived from the DOM, so they cannot drift from it.
+    $$('.filter', bar).forEach(function (b) {
+      var f = b.dataset.f;
+      var n = f === 'all'
+        ? items.length
+        : items.filter(function (i) { return i.dataset.cat === f; }).length;
+      var i = b.querySelector('i');
+      if (i) i.textContent = n;
+      if (!n && f !== 'all') b.hidden = true;
+    });
+
+    function run(f) {
+      var shown = 0;
+      items.forEach(function (el) {
+        var hit = f === 'all' || el.dataset.cat === f;
+        el.hidden = !hit;
+        if (hit) shown++;
+      });
+      $$('.filter', bar).forEach(function (b) {
+        b.setAttribute('aria-pressed', b.dataset.f === f ? 'true' : 'false');
+      });
+      if (count) {
+        count.textContent = f === 'all'
+          ? 'Showing all ' + shown
+          : 'Showing ' + shown + ' of ' + items.length;
+      }
+    }
+
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('.filter');
+      if (b) run(b.dataset.f);
+    });
+    run('all');
+  })();
+
+  /* ---- 7. Lightbox ----------------------------------------------------- */
+  (function lightbox() {
+    var lb = $('#lb'), img = $('#lbimg'), cap = $('#lbcap'), x = $('#lbx');
+    if (!lb || !img) return;
+    var last = null;
+
+    function open(src, caption, alt) {
+      img.src = src;
+      img.alt = alt || '';
+      if (cap) cap.textContent = caption || '';
+      lb.hidden = false;
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (x) x.focus();
+    }
+    function close() {
+      lb.classList.remove('open');
+      lb.hidden = true;
+      document.body.style.overflow = '';
+      img.src = '';
+      if (last) { last.focus(); last = null; }
+    }
+
+    $$('[data-lightbox]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        last = b;
+        var pic = b.parentNode.querySelector('img');
+        open(b.dataset.lightbox, b.dataset.caption, pic ? pic.alt : '');
+      });
+    });
+    if (x) x.addEventListener('click', close);
+    lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lb.classList.contains('open')) close();
+    });
+  })();
+
+  /* ---- 8. Live console embed ------------------------------------------- */
+  (function embed() {
+    var box = $('#embed');
+    if (!box) return;
+    var frame = box.querySelector('iframe');
+    if (!frame) return;
+
+    // The frame is laid out at a desktop width and scaled down, so the preview
+    // keeps real desktop proportions instead of collapsing to a phone layout.
+    // The container is 16:9 and the frame is 1600x900, so scaling on width
+    // fills it exactly -- no empty band underneath.
+    var BASE_W = 1600;
+    function fit() {
+      var w = box.clientWidth;
+      if (w > 0) box.style.setProperty('--embed-scale', (w / BASE_W).toFixed(4));
+    }
+
+    var loaded = false;
+    function load() {
+      if (loaded) return;
+      loaded = true;
+      frame.addEventListener('load', function () {
+        box.classList.add('ready');
+        fit();
+      }, { once: true });
+      frame.src = frame.getAttribute('data-src');
+      frame.removeAttribute('data-src');
+      fit();
+    }
+
+    fit();
+    window.addEventListener('resize', fit);
+
+    // Only fetch the 600KB console once it is actually about to be seen.
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          io.disconnect();
+          load();
+        });
+      }, { rootMargin: '200px' });
+      io.observe(box);
+    } else {
+      load();
+    }
+  })();
+
 })();

@@ -1,1083 +1,874 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zamson Lim | Cybersecurity Portfolio — SOC Engineering, Detection &amp; Purple Team</title>
-  <meta name="description" content="Portfolio of Zamson Lim, final-year Cybersecurity student at APU and Network &amp; Security Administrator at Palmgold Management Sdn Bhd. Sole owner of security: built an enterprise SOC after a ransomware incident — Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and two open-source SOC console templates." />
-  <meta name="author" content="Zamson Lim" />
-  <meta name="theme-color" content="#070b14" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2034%2034%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%235eead4%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2338bdf8%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2734%27%20height%3D%2734%27%20rx%3D%2710%27%20fill%3D%27url%28%23g%29%27%2F%3E%3Ctext%20x%3D%2717%27%20y%3D%2722.5%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CSegoe%20UI%2CHelvetica%2CArial%2Csans-serif%27%20font-size%3D%2713%27%20font-weight%3D%27800%27%20letter-spacing%3D%27.3%27%20fill%3D%27%2304121a%27%3EZL%3C%2Ftext%3E%3C%2Fsvg%3E" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Zamson Lim — SOC Engineering, Detection &amp; Purple Team</title>
+<meta name="description" content="Final-year Cybersecurity student at APU and Network &amp; Security Administrator at Palmgold Management. After a ransomware incident I proposed a Security Operations Centre, got approval, and built it as the only person on security: Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and two open-source SOC consoles." />
+<meta name="author" content="Zamson Lim" />
+<meta name="theme-color" content="#08090d" />
+<meta property="og:type" content="profile" />
+<meta property="og:title" content="Zamson Lim — SOC Engineering, Detection &amp; Purple Team" />
+<meta property="og:description" content="Built and ran a company's Security Operations Centre as the only person on security, after a ransomware incident left no way to reconstruct what happened." />
+<meta property="og:image" content="Zamson.jpeg" />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2034%2034%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23ffb020%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23ffd166%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2734%27%20height%3D%2734%27%20rx%3D%279%27%20fill%3D%27url%28%23g%29%27/%3E%3Ctext%20x%3D%2717%27%20y%3D%2722.5%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CSegoe%20UI%2CHelvetica%2CArial%2Csans-serif%27%20font-size%3D%2713%27%20font-weight%3D%27800%27%20fill%3D%27%231a1200%27%3EZL%3C/text%3E%3C/svg%3E" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Zamson Lim | Cybersecurity Portfolio" />
-  <meta property="og:description" content="SOC engineering, detection engineering, purple teaming and DFIR. Built and ran a company's Security Operations Centre as the only person on security." />
-  <meta property="og:image" content="Zamson.jpeg" />
-  <meta name="twitter:card" content="summary" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
-
-  <script>
-    // Apply the saved theme before first paint to avoid a flash of the wrong theme.
-    (function () {
-      try {
-        var saved = localStorage.getItem('theme');
-        if (!saved) {
-          saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        }
-        document.documentElement.setAttribute('data-theme', saved);
-      } catch (e) {}
-    })();
-  </script>
+<script>
+  /* Set the theme before first paint so there is no flash of the wrong one. */
+  (function () {
+    try {
+      var t = localStorage.getItem('zl.theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
 
-  <!-- ============ HEADER ============ -->
-  <header class="site-header" id="siteHeader">
-    <div class="header-inner">
-      <a class="logo" href="#top" aria-label="Zamson Lim, back to top">
-        <span class="logo-mark">ZL</span>
-        <span class="logo-text">Zamson<span class="accent">.</span></span>
-      </a>
+<!-- ============================ HEADER ============================ -->
+<header class="hdr" id="hdr">
+  <div class="shell hdr-in">
+    <a class="brand" href="#top" aria-label="Zamson Lim — back to top">
+      <span class="brand-mark" aria-hidden="true">ZL</span>
+      <span class="brand-txt">Zamson Lim<i>.</i></span>
+    </a>
 
-      <nav class="nav" id="navLinks" aria-label="Main">
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#experience">Experience</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-      </nav>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#work">Work</a>
+      <a href="#open-source">Open source</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
 
-      <div class="header-actions">
-        <button class="icon-btn" id="themeToggle" type="button" aria-label="Switch to light theme" title="Toggle theme">
-          <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-          <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-          </svg>
-        </button>
-
-        <a class="btn btn-primary btn-sm" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Resume</a>
-
-        <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
+    <div class="hdr-act">
+      <button class="iconbtn" id="theme" type="button" aria-label="Toggle colour theme" title="Toggle theme">
+        <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+      </button>
+      <a class="btn btn-line btn-sm" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
+      <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
     </div>
+  </div>
+</header>
+
+<main id="main">
+<span id="top"></span>
+
+<!-- ============================= HERO ============================= -->
+<section class="hero">
+  <div class="shell hero-in">
+    <div class="hero-lede rv">
+      <p class="avail"><span class="dot" aria-hidden="true"></span> Wrapping up my internship — open to graduate &amp; junior analyst roles</p>
+      <h1 class="hero-h">
+        Zamson Lim
+        <span class="l2">I built a company&rsquo;s <em>SOC</em>.</span>
+      </h1>
+      <p class="hero-p">
+        Final-year Cybersecurity undergraduate at Asia Pacific University, and Network &amp;
+        Security Administrator at Palmgold Management Sdn Bhd. In August 2025 the company was hit
+        by ransomware. There was no monitoring in place, so there was no way to reconstruct how it
+        got in or how far it reached. I proposed a Security Operations Centre, got approval, and
+        built it as the only person on security.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-fill" href="#work">See the work</a>
+        <a class="btn btn-line" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          Résumé
+        </a>
+      </div>
+      <ul class="hero-social">
+        <li><a href="https://github.com/zamsonl" target="_blank" rel="noreferrer"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12a11.5 11.5 0 0 0 7.9 10.9c.5.1.8-.2.8-.5v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.2-1.3-5.2-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.1v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z"/></svg> GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 20.5H17v-5.6c0-1.3 0-3-1.9-3s-2.1 1.5-2.1 2.9v5.7H9.4V9h3.4v1.6h.1a3.7 3.7 0 0 1 3.3-1.9c3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4a2.1 2.1 0 1 1 0-4.1 2.1 2.1 0 0 1 0 4.1zm1.8 13.1H3.6V9h3.5v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7c0-.9-.8-1.7-1.8-1.7z"/></svg> LinkedIn</a></li>
+        <li><a href="mailto:zamsonlim@gmail.com"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg> Email</a></li>
+      </ul>
+    </div>
+
+    <aside class="hero-aside rv" aria-label="Profile summary">
+      <div class="card who">
+        <img src="Zamson.jpeg" alt="Portrait of Zamson Lim" width="72" height="72" decoding="async" />
+        <div>
+          <h3>Zamson Lim</h3>
+          <p>Kuala Lumpur, Malaysia</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>At a glance</h3>
+        <dl class="spec">
+          <div><dt>Focus</dt><dd>SOC engineering · Detection · Purple team</dd></div>
+          <div><dt>SIEM</dt><dd>Wazuh, OpenSearch, custom decoders &amp; rules</dd></div>
+          <div><dt>Network</dt><dd>Zeek, Suricata, FortiGate, Aruba</dd></div>
+          <div><dt>Code</dt><dd>Python, JavaScript, Bash, Rust, C++, Java</dd></div>
+          <div><dt>Study</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
+        </dl>
+      </div>
+    </aside>
+
+    <ul class="stats rv">
+      <li><span class="stat-v amber">Solo</span><span class="stat-l">Only person on security</span></li>
+      <li><span class="stat-v">80+</span><span class="stat-l">Endpoints monitored</span></li>
+      <li><span class="stat-v">6</span><span class="stat-l">Log sources integrated</span></li>
+      <li><span class="stat-v">12&nbsp;mo</span><span class="stat-l">Aug 2025 &ndash; Aug 2026</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ ORIGIN ============================ -->
+<section class="origin">
+  <div class="shell origin-grid">
+    <blockquote class="rv">
+      There was no monitoring, so there was no way to reconstruct how it got in
+      &mdash; <em>or how far it reached</em>.
+    </blockquote>
+    <div class="origin-body rv">
+      <p>
+        That is the whole reason any of this exists. After the August 2025 ransomware incident,
+        nobody could answer the first question anyone asks. There were no central logs to check.
+      </p>
+      <p>
+        What it turned into: Wazuh for endpoint detection and file integrity monitoring, Zeek for
+        network visibility, the firewall integrated into Wazuh, wireless syslog with
+        address-to-hostname enrichment, and mirrored feeds from the core and access switches so
+        the sensor sees the network instead of a slice of it &mdash; all on a Proxmox host I set
+        up myself in the office.
+      </p>
+      <ul class="chain">
+        <li>Endpoint</li>
+        <li>Network</li>
+        <li>Firewall</li>
+        <li>Wireless</li>
+        <li>Active Directory</li>
+        <li>Detection</li>
+        <li>Response</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= WORK ============================= -->
+<section class="sec shell" id="work">
+  <header class="sec-head rv">
+    <p class="tag">01 — Featured work</p>
+    <h2>Three things worth reading in full</h2>
+    <p>
+      The rest is indexed further down. These are the ones where the reasoning matters more than
+      the tool list.
+    </p>
   </header>
 
-  <main id="main">
-    <span id="top"></span>
+  <div class="cases">
 
-    <!-- ============ HERO ============ -->
-    <section class="hero">
-      <div class="hero-bg" aria-hidden="true">
-        <div class="hero-grid"></div>
-        <div class="hero-glow"></div>
-      </div>
-
-      <div class="shell hero-inner">
-        <div class="hero-copy reveal">
-          <p class="status">
-            <span class="status-dot" aria-hidden="true"></span>
-            Wrapping up my internship &mdash; open to graduate &amp; junior analyst roles
-          </p>
-
-          <h1>
-            Zamson Lim
-            <span class="h1-sub">Cybersecurity student, and who<br class="br-lg" /> <span class="accent">built a company&rsquo;s SOC</span>.</span>
-          </h1>
-
-          <p class="lead">
-            Final-year Cybersecurity undergraduate at Asia Pacific University, and Network &amp;
-            Security Administrator at Palmgold Management Sdn Bhd. In August 2025 the company was
-            hit by ransomware. There was no monitoring in place, so there was no way to reconstruct
-            how it got in or how far it reached. I proposed a Security Operations Centre, got
-            approval, and built it as the only person on security.
-          </p>
-
-          <div class="cta-row">
-            <a class="btn btn-primary" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
-              </svg>
-              View Resume
-            </a>
-            <a class="btn btn-ghost" href="#projects">Explore Projects</a>
-          </div>
-
-          <ul class="social-row">
-            <li>
-              <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.97.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
-                LinkedIn
-              </a>
-            </li>
-            <li>
-              <a href="mailto:zamsonlim@gmail.com">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-                Email
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <aside class="hero-panel reveal" aria-label="Profile summary">
-          <div class="panel profile">
-            <div class="profile-media">
-              <img src="Zamson.jpeg" alt="Portrait of Zamson Lim" class="profile-img" width="96" height="96" loading="eager" />
-              <span class="profile-ring" aria-hidden="true"></span>
-            </div>
-            <div>
-              <h2 class="profile-name">Zamson Lim</h2>
-              <p class="profile-role">SOC Engineering &middot; Detection &middot; Purple Team</p>
-              <p class="profile-loc">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Kuala Lumpur, Malaysia
-              </p>
-            </div>
-          </div>
-
-          <div class="panel snapshot">
-            <div class="panel-head">
-              <h2 class="panel-title">Quick Snapshot</h2>
-            </div>
-            <dl class="spec">
-              <div class="spec-row">
-                <dt>Focus</dt>
-                <dd>SOC engineering &middot; Detection &middot; Purple team</dd>
-              </div>
-              <div class="spec-row">
-                <dt>SIEM</dt>
-                <dd>Wazuh, OpenSearch, custom decoders &amp; rules</dd>
-              </div>
-              <div class="spec-row">
-                <dt>Network</dt>
-                <dd>Zeek, Suricata, FortiGate, Aruba, Wireshark</dd>
-              </div>
-              <div class="spec-row">
-                <dt>Code</dt>
-                <dd>Python, JavaScript, Bash, Rust, C++, Java</dd>
-              </div>
-              <div class="spec-row">
-                <dt>Languages</dt>
-                <dd>English, Mandarin, Malay, Cantonese</dd>
-              </div>
-            </dl>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- ============ HIGHLIGHTS ============ -->
-    <section class="shell" aria-label="At a glance">
-      <ul class="stats reveal">
-        <li>
-          <span class="stat-value">80+</span>
-          <span class="stat-label">Endpoints monitored</span>
-        </li>
-        <li>
-          <span class="stat-value">Solo</span>
-          <span class="stat-label">Only person on security</span>
-        </li>
-        <li>
-          <span class="stat-value">6</span>
-          <span class="stat-label">Log sources integrated</span>
-        </li>
-        <li>
-          <span class="stat-value">Final year</span>
-          <span class="stat-label">BSc Cybersecurity, APU</span>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ============ PROJECTS ============ -->
-    <section class="section shell" id="projects">
-      <header class="section-head reveal">
-        <p class="eyebrow">01 &mdash; Work</p>
-        <h2>Featured Projects</h2>
-        <p class="section-lead">
-          One year as the only person on security at a company with no monitoring. Everything
-          below exists because of that.
-        </p>
-      </header>
-
-      <!-- Spotlight -->
-      <article class="spotlight reveal">
-        <div class="spotlight-body">
-          <div class="spotlight-tagline">
-            <span class="badge badge-live">
-              <span class="status-dot" aria-hidden="true"></span>
-              Running in production
-            </span>
-            <span class="badge">Flagship</span>
-          </div>
-
-          <h3>Enterprise SOC Build-out</h3>
-
-          <p class="spotlight-desc">
-            In August 2025 my employer was hit by ransomware. There was no central logging, so
-            nobody could reconstruct what had happened or when. I proposed a Security Operations
-            Centre, got approval from the Head of IT, and built it &mdash; from a proof of concept
-            on a spare desktop to the production stack that now runs the company&rsquo;s monitoring.
-            I am the only person on security, so the architecture, the detection content, the
-            incident response and the reporting are all mine.
-          </p>
-
-          <ul class="feature-list">
-            <li>
-              <strong>Wazuh SIEM with co-located OpenSearch</strong>
-              An all-in-one deployment on a Proxmox host I set up myself in the office, tuned at
-              the systemd level to stay stable under sustained ingest.
-            </li>
-            <li>
-              <strong>Six log sources, one pipeline</strong>
-              Firewall, core switching, wireless access points, Windows endpoints, Active Directory
-              and a Zeek network sensor, normalised through custom ingest pipelines that resolve
-              field-mapping conflicts between sources.
-            </li>
-            <li>
-              <strong>A sensor that sees the network, not a slice of it</strong>
-              Port mirroring from the core and access switches feeds a multi-node Zeek cluster
-              through a Python decapsulation stage, so internal traffic the firewall never sees is
-              still on the wire for detection.
-            </li>
-            <li>
-              <strong>Detection content written for this network</strong>
-              Custom decoders and correlation rules matched to the hardware actually in use,
-              deliberately built without an endpoint-agent dependency I have no authority to deploy.
-            </li>
-            <li>
-              <strong>Alerts that reach someone</strong>
-              A de-duplicated bot pushes critical alerts to chat, so triage does not depend on
-              somebody having the dashboard open at the time.
-            </li>
-            <li>
-              <strong>The unglamorous half</strong>
-              Retention policies and a purge job after archive logging filled the disk and silently
-              flipped every index read-only; SQLite recovery across dozens of corrupt agent
-              databases; NIC-level fixes for link flapping and transmit-engine hangs on the host.
-            </li>
-          </ul>
-
-          <div class="chips">
-            <span class="chip">Wazuh</span>
-            <span class="chip">OpenSearch</span>
-            <span class="chip">Zeek</span>
-            <span class="chip">Suricata</span>
-            <span class="chip">Proxmox</span>
-            <span class="chip">Nginx</span>
-            <span class="chip">Detection Engineering</span>
-            <span class="chip">Incident Response</span>
-          </div>
-
-          <p class="note">
-            Configuration, addresses and detection internals stay private &mdash; this is a live
-            environment. The two consoles below are published as de-identified templates, and I am
-            happy to walk through the architecture and the trade-offs in an interview.
-          </p>
-        </div>
-
-        <div class="spotlight-visual" aria-hidden="true">
-          <div class="mock-window">
-            <div class="mock-bar">
-              <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
-              <span class="mock-title">soc-dashboard &mdash; live</span>
-            </div>
-            <div class="mock-body">
-              <div class="mock-map">
-                <span class="ping ping-1"></span>
-                <span class="ping ping-2"></span>
-                <span class="ping ping-3"></span>
-                <span class="ping ping-4"></span>
-              </div>
-              <div class="mock-rows">
-                <div class="mock-row"><span class="sev sev-crit"></span><span class="bar" style="width:82%"></span></div>
-                <div class="mock-row"><span class="sev sev-high"></span><span class="bar" style="width:64%"></span></div>
-                <div class="mock-row"><span class="sev sev-med"></span><span class="bar" style="width:47%"></span></div>
-                <div class="mock-row"><span class="sev sev-low"></span><span class="bar" style="width:31%"></span></div>
-                <div class="mock-row"><span class="sev sev-med"></span><span class="bar" style="width:55%"></span></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <!-- Grid -->
-      <div class="project-grid">
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">01</span>
-            <span class="badge">Purple team</span>
-          </div>
-          <h3>Purple Team &mdash; Both Chairs</h3>
-          <p class="project-desc">
-            I ran the red side and the blue side of the same exercise: a command-and-control
-            listener reached through a tunnelling service, with implants beaconing on a fixed
-            interval, then caught from the SIEM alone.
-          </p>
-          <ul class="bullets">
-            <li>Red: a C2 listener on Kali Purple, exposed through a tunnel, with implants polling on a fixed interval</li>
-            <li>Blue: watched the same activity land in Wazuh, then wrote the detection rules for that signature</li>
-            <li>Proved the architecture from data &mdash; the tunnel launders the destination, so only DNS-resolution rules identified the actual internal victims</li>
-            <li>The findings mattered more than the catch: an unmonitored egress path, a beacon rule false-positiving on a vendor cloud, and remote-access tooling running with no authorization on record</li>
-            <li>Then tested it honestly: a plain implant to a clean host on 443 was <em>missed</em>, because the tunnel was itself the signature and a bare beacon has none</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Kali Purple</span>
-            <span class="chip">C2 &amp; Beaconing</span>
-            <span class="chip">Detection Engineering</span>
-            <span class="chip">MITRE ATT&amp;CK</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">02</span>
-            <span class="badge">Detection</span>
-          </div>
-          <h3>Malicious Code Analysis for Detection Validation</h3>
-          <p class="project-desc">
-            In isolated lab VMs I built and analysed samples purely to test signatures. Being the
-            attacker taught me more about detection than any rule template did.
-          </p>
-          <ul class="bullets">
-            <li>Ransomware behaviour in Rust, a browser credential stealer in Python, and a C2 client in C++</li>
-            <li>Microsoft Word macro abuse and DLL injection, analysed for the artefacts they leave behind</li>
-            <li>A phishing kit sample analysed for its indicators and exfiltration pattern</li>
-            <li>Encryption testing stayed hard-guarded to a canary folder &mdash; benign by construction, never a live sample</li>
-            <li>Every one of them became Wazuh rules, Zeek scripts and OpenSearch queries</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Rust</span>
-            <span class="chip">Python</span>
-            <span class="chip">C++</span>
-            <span class="chip">Malware Analysis</span>
-            <span class="chip">FIM</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">03</span>
-            <span class="badge">Collection</span>
-          </div>
-          <h3>Zeek Network Security Monitoring Pipeline</h3>
-          <p class="project-desc">
-            A Zeek sensor fed by a core-switch traffic mirror, giving the SOC visibility into
-            internal traffic the firewall never sees.
-          </p>
-          <ul class="bullets">
-            <li>Custom Python stage strips encapsulation headers from mirrored traffic and injects it into a virtual capture interface</li>
-            <li>Multi-node ZeekControl cluster: logger, manager, proxy, and workers</li>
-            <li>Decoders classify each log stream by fields unique to that stream instead of guessing from field presence, with enrichment for direction and disposition</li>
-            <li>Detections for domain-generation bursts, DNS tunnelling, exfiltration and inbound scans</li>
-            <li>Correctly re-characterised an alarming reported capture loss as an MTU artefact of the mirror tunnel, not real packet loss &mdash; which decides exactly which detections you are allowed to trust</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Zeek</span>
-            <span class="chip">Python</span>
-            <span class="chip">Traffic Mirroring</span>
-            <span class="chip">NSM</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">04</span>
-            <span class="badge">Collection</span>
-          </div>
-          <h3>Agent Rollout to 80+ Endpoints via GPO</h3>
-          <p class="project-desc">
-            SIEM agents deployed across the Windows estate through Active Directory Group
-            Policy, without visiting each desk.
-          </p>
-          <ul class="bullets">
-            <li>Idempotent installer with three-state logic: running, stopped, or absent &mdash; safe to re-run</li>
-            <li>MSI distribution over a network share with per-machine install logging</li>
-            <li>Guards so hand-tuned servers keep their custom log channel configuration</li>
-            <li>Recovered every agent&rsquo;s group membership from backup after a minor version upgrade silently reset them</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Active Directory</span>
-            <span class="chip">GPO</span>
-            <span class="chip">Batch</span>
-            <span class="chip">Windows Server</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">05</span>
-            <span class="badge">Detection</span>
-          </div>
-          <h3>Active Directory Security Monitoring</h3>
-          <p class="project-desc">
-            I had to learn Active Directory properly &mdash; domain structure, Group Policy, and
-            event log semantics &mdash; before I could monitor it. Then I built the monitoring on
-            native Windows event logs.
-          </p>
-          <ul class="bullets">
-            <li>Domain controller event channels forwarded and ranked by volume, so an unusual lockout spike is visible before anyone reports it</li>
-            <li>Detection written against process-creation events rather than an endpoint agent I have no authority to deploy fleet-wide</li>
-            <li>Saved searches and dashboards for authentication failures, log clearing and account enumeration</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Active Directory</span>
-            <span class="chip">Windows Event Log</span>
-            <span class="chip">OpenSearch</span>
-            <span class="chip">Detection Engineering</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">06</span>
-            <span class="badge">Collection</span>
-          </div>
-          <h3>Wireless &amp; Access Point Monitoring</h3>
-          <p class="project-desc">
-            Wireless syslog brought into the SIEM with custom decoders, plus an enrichment step
-            that turns a hardware address into a name a human recognises.
-          </p>
-          <ul class="bullets">
-            <li>Custom decoders and rules for access point association, authentication and roaming events</li>
-            <li>A scheduled enrichment pipeline resolving hardware addresses to hostnames</li>
-            <li>Auth-failure bursts and cross-AP hopping raised as alerts rather than buried in syslog</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Wireless</span>
-            <span class="chip">Syslog</span>
-            <span class="chip">Custom Decoders</span>
-            <span class="chip">Python</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">07</span>
-            <span class="badge">Offensive</span>
-          </div>
-          <h3>Authorized Internal Vulnerability Assessment</h3>
-          <p class="project-desc">
-            With written authorization from my senior, an internal assessment of the network run
-            from Kali Purple &mdash; and written up three times over for three different readers.
-          </p>
-          <ul class="bullets">
-            <li>OpenVAS for the full scan, plus Nmap, Nikto and a lot of command-line work to verify by hand what the scanner claimed</li>
-            <li>Findings included unauthenticated printer administration, exposed print services, and a reverse-proxy bypass on an office device</li>
-            <li>Delivered as three reports: technical, non-technical, and plain language</li>
-            <li>Re-scanned and honestly downgraded one finding to &ldquo;unconfirmed&rdquo; when it could not be reproduced</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">OpenVAS</span>
-            <span class="chip">Nmap</span>
-            <span class="chip">Nikto</span>
-            <span class="chip">Kali</span>
-            <span class="chip">Reporting</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">08</span>
-            <span class="badge badge-live"><span class="status-dot" aria-hidden="true"></span>Live demo</span>
-          </div>
-          <h3>SOC Visualization Suite</h3>
-          <p class="project-desc">
-            I built the tool I use every day. Two single-file consoles served from the SOC host:
-            a global traffic map and an endpoint alert console. Writing them changed how I think
-            about what an operator actually needs on screen.
-          </p>
-          <ul class="bullets">
-            <li>Traffic map: a world attack map with a threat-posture score that <em>decays</em> over time rather than ratcheting up, so a wall display that had one bad morning does not still read SEVERE at midnight</li>
-            <li>Alert console: incremental polling, severity bucketing, and a triage layer where every filter routes through one dispatcher, so the counters, the ranked lists and the feed cannot drift apart</li>
-            <li>Seven surface themes crossed with six severity palettes on two independent axes, every combination checked for contrast</li>
-            <li>Both are one HTML file with no build step and no external requests, and both are now published as de-identified templates</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">JavaScript</span>
-            <span class="chip">D3.js</span>
-            <span class="chip">Canvas</span>
-            <span class="chip">OpenSearch DSL</span>
-          </div>
-          <a class="card-link" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
-            Open the live demo
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">09</span>
-            <span class="badge">Tooling</span>
-          </div>
-          <h3>Packet-Highway &mdash; 3D Traffic Visualizer</h3>
-          <p class="project-desc">
-            Firewall traffic rendered as vehicles on a night highway. Built to make network
-            activity legible to people who do not read log lines.
-          </p>
-          <ul class="bullets">
-            <li>Three.js scene with instanced meshes and object pooling to keep a live feed at frame rate</li>
-            <li>Vehicle size tracks bytes, colour tracks protocol, and blocked traffic moves into the emergency lane</li>
-            <li>Self-contained: no CDN, no external assets</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Three.js</span>
-            <span class="chip">WebGL</span>
-            <span class="chip">Data Visualization</span>
-          </div>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">10</span>
-            <span class="badge">Practice</span>
-          </div>
-          <h3>Building with AI Tooling</h3>
-          <p class="project-desc">
-            Getting hands on with this now, while it is all still moving, has been one of the most
-            valuable parts of the internship.
-          </p>
-          <ul class="bullets">
-            <li>Built and debugged a lot of the tooling above with Claude Code, and used Claude Cowork for longer multi-step work</li>
-            <li>Put an AI assistant in the analyst seat during a purple-team exercise, watching the same activity in the SIEM alongside me</li>
-            <li>Ran local models through Ollama to understand what does and does not need a hosted model</li>
-            <li>The judgement is the point: what to delegate, what to verify, and never trusting a &ldquo;done&rdquo; message over the artefact itself</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Claude Code</span>
-            <span class="chip">Ollama</span>
-            <span class="chip">Automation</span>
-          </div>
-        </article>
-
-        <article class="card project is-upcoming reveal">
-          <div class="project-top">
-            <span class="project-index">11</span>
-            <span class="badge">In progress</span>
-          </div>
-          <h3>Physical Floor-Plan Agent Map</h3>
-          <p class="project-desc">
-            A live map that resolves an alerting machine to a desk on the office plan, instead of
-            to a hostname nobody can place.
-          </p>
-          <ul class="bullets">
-            <li>An OCR pipeline lifts every network port code off the building floor plan</li>
-            <li>A binder ties each monitored machine to its port code</li>
-            <li>The map joins agent status, bindings and positions so an alert lands on a location</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Python</span>
-            <span class="chip">OCR</span>
-            <span class="chip">Asset Mapping</span>
-          </div>
-          <span class="card-link is-disabled">Write-up in progress</span>
-        </article>
-
-        <article class="card project is-upcoming reveal">
-          <div class="project-top">
-            <span class="project-index">12</span>
-            <span class="badge">In progress</span>
-          </div>
-          <h3>DFIR Memory Analysis</h3>
-          <p class="project-desc">
-            Reconstructing what ran on a machine from a memory image &mdash; the skill the August
-            2025 incident showed we did not have.
-          </p>
-          <ul class="bullets">
-            <li>Volatility process trees, with injected and unparented processes flagged</li>
-            <li>Windows artefact analysis and timeline reconstruction</li>
-            <li>Practising against samples I build myself, so I know the ground truth</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Volatility</span>
-            <span class="chip">Windows Forensics</span>
-            <span class="chip">Timeline Analysis</span>
-          </div>
-          <span class="card-link is-disabled">Write-up in progress</span>
-        </article>
-      </div>
-
-      <!-- Open-source templates -->
-      <header class="section-head reveal" style="margin-top:clamp(3rem,6vw,5rem)">
-        <p class="eyebrow">Open source</p>
-        <h2>SOC Console Templates</h2>
-        <p class="section-lead">
-          The two consoles I run in production, de-identified and published so anyone with a Wazuh
-          or OpenSearch backend can use them. Every organisation name, hostname, address and
-          coordinate has been replaced with a placeholder &mdash; nothing in them describes a real
-          network. Each is one HTML file with no build step and no external requests, and each
-          opens in demo mode with a synthetic feed so the links below just work.
-        </p>
-      </header>
-
-      <div class="project-grid">
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">&mdash;</span>
-            <span class="badge badge-live"><span class="status-dot" aria-hidden="true"></span>Live demo</span>
-          </div>
-          <h3>SOC Traffic Map</h3>
-          <p class="project-desc">
-            A global traffic operations map over a firewall-fed alert index: a D3 world map with
-            live arcs, a rolling threat-posture score, a per-minute activity timeline, an
-            applications explorer and a filterable event feed.
-          </p>
-          <ul class="bullets">
-            <li>Posture scores off a rolling window and decays with no new events, instead of accumulating forever</li>
-            <li>Rate buckets use the event timestamp, not arrival time, so one batched poll cannot invent a spike</li>
-            <li>D3, TopoJSON and the world atlas are all inlined &mdash; it works with no network at all</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">D3.js</span>
-            <span class="chip">TopoJSON</span>
-            <span class="chip">Canvas</span>
-            <span class="chip">Single file</span>
-          </div>
-          <a class="card-link" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
-            Open the demo
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">&mdash;</span>
-            <span class="badge badge-live"><span class="status-dot" aria-hidden="true"></span>Live demo</span>
-          </div>
-          <h3>SOC Alert Console</h3>
-          <p class="project-desc">
-            An endpoint alert console over a Wazuh alert index: incremental polling, severity
-            bucketing, a unified filter and triage layer, a vulnerability backlog and an ATT&amp;CK
-            coverage matrix.
-          </p>
-          <ul class="bullets">
-            <li>Every filter routes through one dispatcher, so counters, ranked lists and the feed cannot disagree</li>
-            <li>The coverage matrix renders all fourteen tactics even when empty &mdash; coverage, not silence</li>
-            <li>Seven surface themes crossed with six severity palettes on two independent axes</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">JavaScript</span>
-            <span class="chip">OpenSearch DSL</span>
-            <span class="chip">MITRE ATT&amp;CK</span>
-            <span class="chip">Single file</span>
-          </div>
-          <a class="card-link" href="./soc-alert-console.html" target="_blank" rel="noreferrer">
-            Open the demo
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-      </div>
-
-      <!-- Coursework -->
-      <header class="section-head reveal" style="margin-top:clamp(3rem,6vw,5rem)">
-        <p class="eyebrow">Coursework</p>
-        <h2>University Projects</h2>
-        <p class="section-lead">
-          Smaller pieces from the degree, kept here because they show the fundamentals.
-        </p>
-      </header>
-
-      <div class="project-grid">
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">&mdash;</span>
-            <span class="badge">Python</span>
-          </div>
-          <h3>Community Library Management System</h3>
-          <p class="project-desc">
-            A command-line library system with role-based access, built for a first-year
-            programming module.
-          </p>
-          <ul class="bullets">
-            <li>Separate member, librarian and administrator roles</li>
-            <li>Attempt limiting so a guest account locks out before brute force gets anywhere</li>
-            <li>File-backed persistence with input validation throughout</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Python</span>
-            <span class="chip">RBAC</span>
-            <span class="chip">File Handling</span>
-          </div>
-          <a class="card-link" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">
-            View repository
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">&mdash;</span>
-            <span class="badge">Networking</span>
-          </div>
-          <h3>Switching &amp; Routing Labs</h3>
-          <p class="project-desc">
-            Cisco Packet Tracer labs covering the switching and routing groundwork the SOC work
-            later depended on.
-          </p>
-          <ul class="bullets">
-            <li>VLANs segmented across two switches, trunked and routed</li>
-            <li>Static and dynamic routing, verified end to end with ping and the routing table</li>
-            <li>Port security and basic device hardening</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Cisco</span>
-            <span class="chip">VLANs</span>
-            <span class="chip">Routing</span>
-          </div>
-          <a class="card-link" href="https://github.com/zamsonl/Switching-And-Routing-Essentials" target="_blank" rel="noreferrer">
-            View repository
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-
-        <article class="card project reveal">
-          <div class="project-top">
-            <span class="project-index">&mdash;</span>
-            <span class="badge">Java</span>
-          </div>
-          <h3>Object-Oriented Java System</h3>
-          <p class="project-desc">
-            A team project built around inheritance and interfaces rather than one long branch
-            statement.
-          </p>
-          <ul class="bullets">
-            <li>An abstract base with three concrete roles</li>
-            <li>Encapsulation and polymorphism applied where they earn their keep</li>
-            <li>Delivered as a team, with shared version control</li>
-          </ul>
-          <div class="chips">
-            <span class="chip">Java</span>
-            <span class="chip">OOP</span>
-            <span class="chip">Team Project</span>
-          </div>
-          <a class="card-link" href="https://github.com/zamsonl/Java-assignment" target="_blank" rel="noreferrer">
-            View repository
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-          </a>
-        </article>
-      </div>
-    </section>
-
-    <!-- ============ SKILLS ============ -->
-    <section class="section shell" id="skills">
-      <header class="section-head reveal">
-        <p class="eyebrow">02 &mdash; Capability</p>
-        <h2>Skills &amp; Tooling</h2>
-        <p class="section-lead">
-          What I work with day to day, grouped by how I actually use it.
-        </p>
-      </header>
-
-      <div class="skills-grid">
-        <div class="card skill-card reveal">
-          <div class="skill-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <h3>SIEM &amp; Detection Engineering</h3>
-          <p class="skill-desc">Getting the right events in, and writing the rules that catch them.</p>
-          <ul class="tag-list">
-            <li>Wazuh deployment &amp; agent management</li>
-            <li>Custom decoders &amp; correlation rules</li>
-            <li>OpenSearch / Elasticsearch, query DSL &amp; aggregations</li>
-            <li>Log &amp; ingest pipeline design</li>
-            <li>File integrity monitoring &amp; canary detection</li>
-            <li>Alert triage &amp; incident response</li>
-          </ul>
-        </div>
-
-        <div class="card skill-card reveal">
-          <div class="skill-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="10" cy="18" r="1.6"/></svg>
-          </div>
-          <h3>Network &amp; Infrastructure</h3>
-          <p class="skill-desc">The systems the monitoring runs on.</p>
-          <ul class="tag-list">
-            <li>Zeek &amp; Suricata network security monitoring</li>
-            <li>FortiGate firewall policy &amp; syslog integration</li>
-            <li>Aruba switching &amp; wireless monitoring</li>
-            <li>Traffic mirroring &amp; decapsulation pipelines</li>
-            <li>Proxmox virtualization, Ubuntu / Linux, systemd tuning</li>
-            <li>Nginx reverse proxy &amp; TLS</li>
-          </ul>
-        </div>
-
-        <div class="card skill-card reveal">
-          <div class="skill-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
-          </div>
-          <h3>Automation &amp; Engineering</h3>
-          <p class="skill-desc">Scripts and tools that make the work repeatable.</p>
-          <ul class="tag-list">
-            <li>Python (automation, enrichment, data pipelines)</li>
-            <li>Bash &amp; Windows batch scripting</li>
-            <li>JavaScript, D3.js, Three.js</li>
-            <li>Rust, C++, Java</li>
-            <li>Active Directory &amp; Group Policy at scale</li>
-            <li>AI-assisted development, OCR pipelines, Git</li>
-          </ul>
-        </div>
-
-        <div class="card skill-card reveal">
-          <div class="skill-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          </div>
-          <h3>Offensive &amp; Forensics</h3>
-          <p class="skill-desc">Testing the network, and reconstructing what happened after an incident.</p>
-          <ul class="tag-list">
-            <li>Authorized vulnerability assessment (OpenVAS, Nmap, Nikto)</li>
-            <li>Purple-team exercise design &amp; execution</li>
-            <li>Malicious code analysis in isolated labs</li>
-            <li>Report writing for technical and non-technical readers</li>
-            <li>Memory forensics (Volatility), Autopsy disk analysis</li>
-            <li>Windows artifact analysis &amp; timeline reconstruction</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ EXPERIENCE ============ -->
-    <section class="section shell" id="experience">
-      <header class="section-head reveal">
-        <p class="eyebrow">03 &mdash; Track record</p>
-        <h2>Experience</h2>
-        <p class="section-lead">
-          Where the work above actually happened.
-        </p>
-      </header>
-
-      <ol class="timeline">
-        <li class="timeline-item reveal">
-          <span class="timeline-dot" aria-hidden="true"></span>
-          <div class="card timeline-card">
-            <div class="timeline-head">
-              <div class="org-logo is-mark" aria-hidden="true">
-                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAYFBMVEXp3Jv76+b+/On+/OH38tG8rGHFsVX//7X//3+7u7v/v7///wB/f39/f/+/v///f3/Mv4PFpy8AAAD9+9P+/vrOumr//8/Dq0j+/uq8p0j+/uW9ozTUw3jw57XZyYf+/uaZZ/6XAAAAIHRSTlP7Fkyp5vr+AwIDBAECAgQC/P4A+gr8Bf5t/fj8/v78jIFpJdgAAAVUSURBVHja7ZuLmqMoEEZBaUy29yYXQYL4/m85VSSb6SR4x3a+nVRHYycajwXKT1EQcbCRN8Ab4A3wBvh1AaqqOhBAKTy7avKYAlsCcN2bUpr1Uk+zAdRfQhR96Zwr+/Kn9XMtcUhRWPjd+UXQOyk7r3UgeazrpGNUJMuBvPq/KCXRpm3r+nK51HG90Qz3gck+6YRnACVKJ72JZ85nl7bVxJVFoiKQ5+unrtNtnff86MXWBOmKVx+QFwdI3eY+/ZWBB1aqCQAlqAv5r/9qhhNHX1zwCNBEB9Q7WatlOQ7wxyc6wNS7EZDXWvAIIArJL/V+AMHZUQAhGPnYE8DLl1rwBIBVcE+AzqkJAL+jA+qL7qY8IA8HgCKAuyB9I+AXcfmyYe673j8esSkAJVinl5vX3n/5l/O2HWhLdMeoGgH4s1JMSnh1rGOMdfD2xVjSnr6GDUmgKTdJAi3HnwPQWKmyVKVVG4yCEgE1kSyMSQCh8sgv67qQIDC6K0eLILbHqlFbBSiKik4nAabugjweQFUhA18BoERht5sSlUBdwxcDVKoAObrVHMNeRS89X1EELny0W01LK6AqpMpg3pNwq3EioRquBcjQFhgvoU91LIA6GqCPAOboIjBHF8Hv7IE3wG8MgEdDPxwAim8GMDcBBO86tgWly/wkhF/mfJZIJq4X2QEM1yF08/QAhiGwn+8zAhgdMNA1TxDFIKMqpc5XB6BYHevpTMH4T9WgJCO8zgRwgU6ttHjYHFEMy6c42zKlilcCYGzHis9mvmIumCTe1NkAvGRwYfBssZZO9ousLaFTQDSvswHwEI9Sds4dgKuOeN7W+QA06aFsqXMk+Dmm+WAnfSWAtPHBQrQxKLtNyn6q8rEQwSoAAwAqRlDN5gDeOg94Ik5UlERvPr9ZC6COBhC/CED9BjgG4PIGuN+Gv6sHas+oOhRAy6hyBwCgGTIc/p6MPxt+qP9lbiJQOdIapgFALmsfAiHhZveNZ8MvOklP46HapQAglwlG5q5K5BamSxrsAUsvKpETAHtBoJf7noqCFviCJT2mboXtU0PoGwGIZEVMM5iXbaEqkRUA5KpbEmCeMXy/EIC4osGgZDHDXNGjt1RGAKgBTFQn1bM5EWboWXaONXkBZA/XX7jHW+9RIt+Gla4bYXLEZBkAhkKUYiiXZ1l71berAcxgTNbs/CgeBhgKBmUdOR0DYIsAtnogUQnLgbB4doBmFOAbPECPBmiSdeDbAHpBBwBiJfSzu0yrPaCSAHzpbbi2dwynoYn8nkt7A/D7FwFtMMPp4y7uoubD9DD4Mbp7EUCjq5Q6W9aRKP1ihh6uJcOglZV6b4DgClGdRQ/CLgo+XKMOLGlMupDz9fpKADysaqAUniRGHOynruM7A6DyK2OiWUrh9QuqwGoA0L4lak/1zBCzL+c7YHWwuo3qGxMDHuPimHu6KHKzOlzfGhwscIx97XlcY6KLsh9XA1wwKRS7YA8JQ1pjxlD9HQBxOOoxSnrdXDjCdHQuGQKogwHYiu55PjN6Vb/gfwQA7fckQNgVIExk1ULTRtp9Acazas+gLviOacX4GFATecVuv8RqdEA/Hh9QFXR1c6f2f21Uy9c2/bESVqKQfqfk9pjbfqom0/txesEeAC0PqekFLwBNnOCQvRRwhgWOv04CACKojKD/GwS8TRJZmdh3P9Ro30nWzJljArWEAkIX9Md2w3PDm76qGSVmzbLBvWjBmHuOua7Nr4xhWsaKJh1PJAMTrZS1zOYyOpIwm5zopE5nWP+db5rXuaqGZpsNzbbDhIF8c93WzTdU4jvsPePyDfAG+AGdhnonTC8kQAAAAABJRU5ErkJggg==" alt="" width="128" height="128" />
-              </div>
-              <div>
-                <h3>Network &amp; Security Administrator (Intern)</h3>
-                <p class="muted">Palmgold Management Sdn Bhd &middot; Aug 2025 &mdash; Aug 2026</p>
-              </div>
-            </div>
-            <ul class="bullets">
-              <li>Joined after a ransomware incident and built the company&rsquo;s Security Operations Centre as the only person on security</li>
-              <li>Deployed a Wazuh SIEM integrating firewall, switching, wireless, Windows endpoint, Active Directory and Zeek sensor telemetry, on a Proxmox host I set up in the office</li>
-              <li>Rolled out monitoring agents to 80+ Windows machines via Active Directory Group Policy with an idempotent, re-runnable installer</li>
-              <li>Wrote custom decoders, correlation rules and dashboards for the hardware actually in use</li>
-              <li>Ran authorized purple-team exercises &mdash; red side from Kali Purple, blue side in the SIEM &mdash; and turned each one into detection content</li>
-              <li>Built and analysed malware samples in isolated lab VMs purely to validate signatures</li>
-              <li>Ran an authorized internal vulnerability assessment and delivered three audience-tailored reports</li>
-              <li>Built the SOC&rsquo;s own dashboards, served from the SIEM host behind a hardened reverse proxy</li>
-              <li>Provided day-to-day IT support at head office and on-site support across branch locations</li>
-            </ul>
-          </div>
-        </li>
-
-        <li class="timeline-item reveal">
-          <span class="timeline-dot" aria-hidden="true"></span>
-          <div class="card timeline-card">
-            <div class="timeline-head">
-              <div class="org-logo org-logo-text" aria-hidden="true">CTF</div>
-              <div>
-                <h3>Capture The Flag Competitions</h3>
-                <p class="muted">SekaiCTF &middot; CYNX &middot; BeSec &middot; picoCTF</p>
-              </div>
-            </div>
-            <ul class="bullets">
-              <li><strong>SekaiCTF 2025</strong> &mdash; competed with team Digital Phantoms. Solved &ldquo;Sekai Bank &ndash; Signature&rdquo;, a medium reverse-engineering challenge on an Android APK, using jadx-gui, keytool and Python, plus a cryptography challenge</li>
-              <li><strong>CYNX</strong>, CyberNexus &mdash; web exploitation, forensics and OSINT challenges under time pressure</li>
-              <li><strong>BeSec CTF</strong> &mdash; participant</li>
-              <li><strong>picoCTF</strong> &mdash; ongoing practice across categories</li>
-            </ul>
-            <div class="ctf-logo-row" aria-hidden="true">
-              <span class="ctf-logo"><svg viewBox="0 0 112 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 12 L32 24 L20 36 L8 24 Z" fill="none" stroke="var(--accent)" stroke-width="2.2"/><path d="M20 19 L25 24 L20 29 L15 24 Z" fill="var(--accent)"/><text x="42" y="22" font-family="ui-monospace,monospace" font-size="13" font-weight="600" fill="var(--text-strong)" letter-spacing="0.5">SEKAI</text><text x="42" y="37" font-family="ui-monospace,monospace" font-size="9" fill="var(--accent)" letter-spacing="2.4">CTF</text></svg></span>
-              <span class="ctf-logo"><svg viewBox="0 0 112 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M25 11 L18 11 L18 21 L12 24 L18 27 L18 37 L25 37" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 11 L36 11 L36 21 L42 24 L36 27 L36 37 L29 37" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="50" y="22" font-family="ui-monospace,monospace" font-size="13" font-weight="600" fill="var(--text-strong)" letter-spacing="0.5">CYNX</text><text x="50" y="37" font-family="ui-monospace,monospace" font-size="9" fill="var(--accent)" letter-spacing="2.4">CTF</text></svg></span>
-              <span class="ctf-logo"><svg viewBox="0 0 112 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20 9 L32 15 L32 26 Q32 35 20 40 Q8 35 8 26 L8 15 Z" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 24 L18 28 L26 18" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><text x="42" y="22" font-family="ui-monospace,monospace" font-size="13" font-weight="600" fill="var(--text-strong)" letter-spacing="0.5">BeSec</text><text x="42" y="37" font-family="ui-monospace,monospace" font-size="9" fill="var(--accent)" letter-spacing="2.4">CTF</text></svg></span>
-              <span class="ctf-logo"><svg viewBox="0 0 112 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 15 L18 24 L10 33" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="22" y="30" width="11" height="3" rx="1.5" fill="var(--accent)"/><text x="42" y="22" font-family="ui-monospace,monospace" font-size="13" font-weight="600" fill="var(--text-strong)" letter-spacing="0.5">pico</text><text x="42" y="37" font-family="ui-monospace,monospace" font-size="9" fill="var(--accent)" letter-spacing="2.4">CTF</text></svg></span>
-            </div>
-          </div>
-        </li>
-
-        <li class="timeline-item reveal">
-          <span class="timeline-dot" aria-hidden="true"></span>
-          <div class="card timeline-card">
-            <div class="timeline-head">
-              <div class="org-logo org-logo-text" aria-hidden="true">APU</div>
-              <div>
-                <h3>BSc (Hons) Cybersecurity &mdash; Final Year</h3>
-                <p class="muted">Asia Pacific University &middot; Kuala Lumpur, Malaysia</p>
-              </div>
-            </div>
-            <ul class="bullets">
-              <li>Coursework across network security, forensics, and secure development</li>
-              <li>Lab work in Kali, Ubuntu, Wireshark, and Cisco Packet Tracer</li>
-              <li>Industrial internship completed at Palmgold Management, with the SOC build-out as the primary project</li>
-            </ul>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <!-- ============ ABOUT ============ -->
-    <section class="section shell" id="about">
-      <header class="section-head reveal">
-        <p class="eyebrow">04 &mdash; Background</p>
-        <h2>About</h2>
-      </header>
-
-      <div class="about-grid">
-        <div class="card about-card reveal">
-          <p class="about-lead">
-            I am a final-year Cybersecurity student at Asia Pacific University, and I run security
-            operations for Palmgold Management, a licensed gaming operator in Malaysia. It has been
-            the steepest learning curve I have had so far.
-          </p>
-          <p>
-            The ransomware incident in August 2025 is what shaped the work. Afterwards, nobody could
-            answer the first question anyone asks: what happened, and when. There were no central
-            logs to check. Everything I have built since comes back to that &mdash; getting the
-            telemetry in, making it queryable, and putting it somewhere an analyst will actually
-            look.
-          </p>
-          <p>
-            The habit I picked up from doing it alone is distrust of surface signals. A rule that
-            loads is not a rule that works. A clean service start does not mean your rules loaded.
-            A bulk request that reports success does not mean the documents were indexed. I have
-            been caught by each of those, so now I check the artefact rather than the message about
-            the artefact &mdash; and I have found more real problems that way than from any alert.
-          </p>
-          <p>
-            Running both sides of a purple-team exercise changed how I write detections. Being the
-            attacker for a week taught me more about what a rule needs to catch than any template
-            did, and the most useful thing to come out of it was not the catch &mdash; it was
-            discovering a segment whose egress the sensor could not see at all. No rule helps on
-            traffic you never collect.
-          </p>
-          <p>
-            Next I want to take the SOC from detection into response: automated blocking and host
-            isolation through firewall and switch APIs, and interval-regularity analysis for
-            beaconing that a rule engine cannot express. I am also looking for a team where I can
-            learn from people who have run this at a larger scale.
-          </p>
-          <p class="note">
-            Thanks are owed to
-            <a href="https://www.linkedin.com/in/hong-yaw-lim-0517235b/" target="_blank" rel="noreferrer">Hong Yaw Lim</a>,
-            my senior in the IT department, who taught me an enormous amount of general IT
-            knowledge. The colleagues here are genuinely some of the nicest people I have worked
-            with, and that matters more than any stack.
-          </p>
-        </div>
-
-        <div class="card facts-card reveal">
-          <h3 class="panel-title">Details</h3>
-          <dl class="spec">
-            <div class="spec-row">
-              <dt>Education</dt>
-              <dd>BSc (Hons) Cybersecurity, APU &mdash; final year</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Current role</dt>
-              <dd>Network &amp; Security Administrator, Palmgold Management Sdn Bhd</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Location</dt>
-              <dd>Kuala Lumpur, Malaysia</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Languages</dt>
-              <dd>English, Mandarin, Malay, Cantonese</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Interests</dt>
-              <dd>Detection engineering, purple teaming, SOC automation, forensics</dd>
-            </div>
-            <div class="spec-row">
-              <dt>Status</dt>
-              <dd><span class="inline-live"><span class="status-dot" aria-hidden="true"></span>Open to opportunities</span></dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ CONTACT ============ -->
-    <section class="section shell" id="contact">
-      <header class="section-head reveal">
-        <p class="eyebrow">05 &mdash; Contact</p>
-        <h2>Get in touch</h2>
-      </header>
-
-      <div class="contact-band card reveal">
+    <!-- Case 1 — the SOC build-out, with the real production screenshot -->
+    <article class="case rv">
+      <div class="case-head">
         <div>
-          <h3>Hiring a graduate security engineer or junior analyst?</h3>
-          <p class="muted">
-            I am happy to talk through the SOC build, the decisions behind it, and where I
-            could contribute to your team.
+          <div class="badges">
+          <span class="badge live"><span class="dot" aria-hidden="true"></span>In production</span>
+          <span class="badge">Flagship</span>
+        </div>
+          <h3>Enterprise SOC build-out</h3>
+          <p>
+          From a proof of concept on a spare desktop to the production stack that now runs the
+          company&rsquo;s monitoring. I am the only person on security, so the architecture, the
+          detection content, the incident response and the reporting are all mine.
+        </p>
+        </div>
+        <div>
+          <div class="chips">
+          <span class="chip">Wazuh</span><span class="chip">OpenSearch</span><span class="chip">Zeek</span>
+          <span class="chip">Suricata</span><span class="chip">Proxmox</span><span class="chip">Nginx</span>
+          <span class="chip">Detection engineering</span><span class="chip">Incident response</span>
+        </div>
+        </div>
+      </div>
+
+      <div class="case-visual">
+        <figure class="shot" style="margin:0">
+          <div class="shot-bar" aria-hidden="true">
+            <i></i><i></i><i></i><span>traffic overview — production</span>
+          </div>
+          <img src="soc-dashboard.png"
+               alt="Traffic overview from the production SOC dashboard: session event counts, a severity timeline, a global activity map, top countries, top firewall signatures, targeted services and top applications."
+               width="1280" height="717" loading="lazy" decoding="async" />
+          <button class="shot-open" type="button" data-lightbox="soc-dashboard.png"
+                  data-caption="Traffic overview from the production SOC — 22,246 events in a 30-minute window across 45 countries, drawn live from Wazuh and OpenSearch. The addresses listed are external traffic arriving at the firewall; one row naming an internal host is masked."
+                  aria-label="Enlarge the production dashboard screenshot"></button>
+          <figcaption class="shot-cap">
+            22,246 events in a 30-minute window across 45 countries, drawn live from Wazuh and
+            OpenSearch. The addresses listed are external traffic arriving at the firewall; one row
+            naming an internal host is masked.
+          </figcaption>
+        </figure>
+      </div>
+
+      <ul class="facts">
+          <li><b>Platform</b><span>Wazuh manager with co-located OpenSearch, on a Proxmox host, tuned at the systemd level to stay stable under sustained ingest.</span></li>
+          <li><b>Collection</b><span>Six sources normalised through custom ingest pipelines that resolve field-mapping conflicts between them.</span></li>
+          <li><b>Sensor</b><span>Port mirroring from the core and access switches into a multi-node Zeek cluster through a Python decapsulation stage.</span></li>
+          <li><b>Detection</b><span>Custom decoders and correlation rules written for the hardware actually in use, deliberately without an endpoint-agent dependency I have no authority to deploy.</span></li>
+          <li><b>Reliability</b><span>Retention policies after archive logging filled the disk and silently flipped every index read-only; SQLite recovery across dozens of corrupt agent databases; NIC-level fixes for link flapping and transmit-engine hangs.</span></li>
+        </ul>
+    </article>
+
+    <!-- Case 2 — purple team -->
+    <article class="case rv">
+      <div class="case-head">
+        <div>
+          <div class="badges">
+          <span class="badge">Purple team</span>
+          <span class="badge">Authorized exercise</span>
+        </div>
+          <h3>Both chairs: running the attack and the detection</h3>
+          <p>
+          I ran the red side and the blue side of the same exercise. A command-and-control listener
+          reached through a tunnelling service, implants beaconing on a fixed interval, then caught
+          from the SIEM alone. Being the attacker taught me more about detection than any rule
+          template did.
+        </p>
+        </div>
+        <div>
+          <div class="chips">
+          <span class="chip">Kali Purple</span><span class="chip">C2 &amp; beaconing</span>
+          <span class="chip">MITRE ATT&amp;CK</span><span class="chip">Detection engineering</span>
+        </div>
+        </div>
+      </div>
+
+      <div class="case-visual">
+        <div class="shot pad">
+          <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span>exercise — red path vs. what the sensor saw</span></div>
+          <svg viewBox="0 0 640 400" role="img" aria-label="Diagram: the red team's C2 traffic reaches victims through a tunnel whose destination address is shared infrastructure, so only DNS resolution logging identifies the internal victims. One network segment's egress is not mirrored to the sensor and is therefore invisible." style="display:block;width:100%;height:auto;background:var(--bg-2)">
+            <defs>
+              <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-4)"/>
+              </marker>
+              <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/>
+              </marker>
+            </defs>
+            <g font-family="ui-monospace,monospace" font-size="12">
+              <rect x="26" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--crit)" stroke-width="1.4"/>
+              <text x="42" y="78" fill="var(--crit)" font-size="12.5">red team box</text>
+              <text x="42" y="96" fill="var(--ink-4)" font-size="11">C2 listener</text>
+
+              <rect x="254" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--ink-4)" stroke-width="1.4"/>
+              <text x="270" y="78" fill="var(--ink-2)" font-size="12.5">tunnel edge</text>
+              <text x="270" y="96" fill="var(--ink-4)" font-size="11">shared address</text>
+
+              <rect x="482" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+              <text x="498" y="78" fill="var(--accent)" font-size="12.5">victims</text>
+              <text x="498" y="96" fill="var(--ink-4)" font-size="11">beacon, fixed interval</text>
+
+              <line x1="160" y1="80" x2="248" y2="80" stroke="var(--ink-4)" stroke-width="1.4" marker-end="url(#ar)"/>
+              <line x1="388" y1="80" x2="476" y2="80" stroke="var(--ink-4)" stroke-width="1.4" marker-end="url(#ar)"/>
+
+              <line x1="548" y1="112" x2="548" y2="168" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arA)"/>
+              <rect x="392" y="170" width="222" height="52" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+              <text x="410" y="194" fill="var(--accent)" font-size="12.5">DNS resolution logging</text>
+              <text x="410" y="211" fill="var(--ink-3)" font-size="11">the only thing that named them</text>
+
+              <rect x="26" y="170" width="330" height="52" rx="9" fill="none" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="5 4"/>
+              <text x="44" y="194" fill="var(--ink-3)" font-size="12.5">firewall &amp; tunnel destination</text>
+              <text x="44" y="211" fill="var(--ink-4)" font-size="11">shared / NAT&#8217;d — useless for attribution</text>
+
+              <line x1="26" y1="262" x2="614" y2="262" stroke="var(--line-strong)" stroke-width="1"/>
+              <text x="26" y="292" fill="var(--ink-2)" font-size="13">What the exercise actually found</text>
+
+              <circle cx="33" cy="318" r="3.5" fill="var(--crit)"/>
+              <text x="48" y="322" fill="var(--ink-3)" font-size="11.5">one segment&#8217;s egress was never mirrored — invisible to the sensor</text>
+              <circle cx="33" cy="344" r="3.5" fill="var(--med)"/>
+              <text x="48" y="348" fill="var(--ink-3)" font-size="11.5">beacon rule false-positived on a vendor cloud — documented, not silenced</text>
+              <circle cx="33" cy="370" r="3.5" fill="var(--good)"/>
+              <text x="48" y="374" fill="var(--ink-3)" font-size="11.5">tunnelled C2 was easier to catch than a plain one; the plain one was missed</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <ul class="facts">
+          <li><b>Red</b><span>A C2 listener on Kali Purple, exposed through a tunnel, with implants polling on a fixed interval.</span></li>
+          <li><b>Blue</b><span>Watched the same activity land in Wazuh, then wrote the detection rules for that signature.</span></li>
+          <li><b>Proved from data</b><span>The tunnel launders the destination, so the firewall, the tunnel edge and the C2 side all point at shared or NAT&rsquo;d addresses. Only the DNS-resolution rules identified the actual internal victims.</span></li>
+          <li><b>The real finding</b><span>An egress path the sensor could not see at all. A rule cannot help on traffic you never collect &mdash; that gap mattered more than the catch.</span></li>
+          <li><b>Tested honestly</b><span>A plain implant to a clean host on 443 was <strong>missed</strong>. The tunnel was itself the signature; a bare beacon has none, so detection falls back to behaviour.</span></li>
+        </ul>
+    </article>
+
+    <!-- Case 3 — the consoles, with a live embed -->
+    <article class="case rv">
+      <div class="case-head">
+        <div>
+          <div class="badges">
+          <span class="badge live"><span class="dot" aria-hidden="true"></span>Live demo</span>
+          <span class="badge">Open source</span>
+        </div>
+          <h3>The console I use every day</h3>
+          <p>
+          I built the tool I work in. Two single-file consoles served from the SOC host: a global
+          traffic map and an endpoint alert console. Writing them changed how I think about what an
+          operator actually needs on screen &mdash; and both are now published as de-identified
+          templates.
+        </p>
+        </div>
+        <div>
+          <div class="chips">
+          <span class="chip">JavaScript</span><span class="chip">D3.js</span><span class="chip">Canvas</span>
+          <span class="chip">OpenSearch DSL</span><span class="chip">Single file</span>
+        </div>
+          <div class="case-links">
+          <a class="alink" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
+            Open the traffic map
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </a>
+          <a class="alink" href="./soc-alert-console.html" target="_blank" rel="noreferrer">
+            Open the alert console
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+          </a>
+        </div>
+        </div>
+      </div>
+
+      <div class="case-visual">
+        <div class="shot">
+          <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span>soc-traffic-map.html — running now, synthetic data</span></div>
+          <div class="embed" id="embed">
+            <div class="embed-veil">Loading live demo…</div>
+            <iframe title="SOC traffic map running on synthetic demo data"
+                    data-src="./soc-traffic-map.html" scrolling="no"
+                    referrerpolicy="no-referrer" loading="lazy"></iframe>
+          </div>
+          <p class="shot-cap">
+            The published template, live on a synthetic feed. Nothing on it describes a real
+            network — every name, address and coordinate is a placeholder.
           </p>
         </div>
-        <div class="contact-actions">
-          <a class="btn btn-primary" href="mailto:zamsonlim@gmail.com">Email me</a>
-          <a class="btn btn-ghost" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Download resume</a>
-        </div>
       </div>
 
-      <div class="contact-grid">
-        <a class="card contact-card reveal" href="mailto:zamsonlim@gmail.com">
-          <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
-          </span>
-          <span class="contact-label">Email</span>
-          <span class="contact-value">zamsonlim@gmail.com</span>
-        </a>
+      <ul class="facts">
+          <li><b>Posture</b><span>The threat score decays over time instead of ratcheting up, so a wall display that had one bad morning does not still read SEVERE at midnight on an idle network.</span></li>
+          <li><b>Timing</b><span>Rate buckets key off the event timestamp, not arrival time — one batched poll returns events spanning minutes, and charging them all to the arrival minute invents spikes that never happened.</span></li>
+          <li><b>Triage</b><span>Every filter routes through one dispatcher, so the counters, the ranked lists and the feed cannot drift apart.</span></li>
+          <li><b>Theming</b><span>Seven surface themes crossed with six severity palettes on two independent axes, every combination checked for contrast.</span></li>
+          <li><b>Shipping</b><span>One HTML file each. No build step, no dependencies, and zero external requests.</span></li>
+        </ul>
+    </article>
 
-        <a class="card contact-card reveal" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">
-          <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05a3.75 3.75 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg>
-          </span>
-          <span class="contact-label">LinkedIn</span>
-          <span class="contact-value">zamson-lim</span>
-        </a>
+  </div>
+</section>
 
-        <a class="card contact-card reveal" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">
-          <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.97.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/></svg>
-          </span>
-          <span class="contact-label">GitHub</span>
-          <span class="contact-value">github.com/zamsonl</span>
-        </a>
+<!-- ========================== OPEN SOURCE ========================== -->
+<section class="sec shell" id="open-source">
+  <header class="sec-head rv">
+    <p class="tag">02 — Open source</p>
+    <h2>SOC console templates</h2>
+    <p>
+      The two consoles above, de-identified and published so anyone with a Wazuh or OpenSearch
+      backend can use them. Every organisation name, hostname, address and coordinate is a
+      placeholder. Both open in demo mode with a synthetic feed, so the links below just work.
+    </p>
+  </header>
+
+  <div class="grid two rv">
+    <article class="item">
+      <div class="item-top">
+        <span class="item-n">TEMPLATE / 01</span>
+        <span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span>
       </div>
-    </section>
-
-    <footer class="footer">
-      <div class="shell footer-inner">
-        <p>&copy; <span id="year"></span> Zamson Lim</p>
-        <p class="muted">Built from scratch with HTML, CSS &amp; JavaScript &middot; Hosted on GitHub Pages</p>
+      <h3>SOC Traffic Map</h3>
+      <p>
+        A global traffic operations map over a firewall-fed alert index: a D3 world map with live
+        arcs, a rolling threat-posture score, a per-minute activity timeline, an applications
+        explorer and a filterable event feed.
+      </p>
+      <ul>
+        <li>Posture scores off a rolling window and decays with no new events</li>
+        <li>Rate buckets use the event timestamp, so a batched poll cannot invent a spike</li>
+        <li>D3, TopoJSON and the world atlas all inlined — works with no network at all</li>
+      </ul>
+      <div class="chips">
+        <span class="chip">D3.js</span><span class="chip">TopoJSON</span><span class="chip">Canvas</span>
       </div>
-    </footer>
-  </main>
+      <a class="alink" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
+        Open the demo
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    </article>
 
-  <a href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer" class="floating-resume" id="floatingResume">
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>
-    </svg>
-    Resume
-  </a>
+    <article class="item">
+      <div class="item-top">
+        <span class="item-n">TEMPLATE / 02</span>
+        <span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span>
+      </div>
+      <h3>SOC Alert Console</h3>
+      <p>
+        An endpoint alert console over a Wazuh alert index: incremental polling, severity bucketing,
+        a unified filter and triage layer, a vulnerability backlog and an ATT&amp;CK coverage matrix.
+      </p>
+      <ul>
+        <li>One filter dispatcher, so counters, ranked lists and the feed cannot disagree</li>
+        <li>The coverage matrix renders all fourteen tactics even when empty — coverage, not silence</li>
+        <li>Seven surface themes across six severity palettes, on two independent axes</li>
+      </ul>
+      <div class="chips">
+        <span class="chip">JavaScript</span><span class="chip">OpenSearch DSL</span><span class="chip">ATT&amp;CK</span>
+      </div>
+      <a class="alink" href="./soc-alert-console.html" target="_blank" rel="noreferrer">
+        Open the demo
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    </article>
+  </div>
+</section>
 
-  <script src="script.js"></script>
+<!-- =========================== PROJECTS =========================== -->
+<section class="sec shell" id="projects">
+  <header class="sec-head rv">
+    <p class="tag">03 — Everything else</p>
+    <h2>Project index</h2>
+    <p>The rest of the build, plus coursework. Filter by discipline.</p>
+  </header>
+
+  <div class="filters rv" role="group" aria-label="Filter projects by discipline" id="filters">
+    <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>13</i></button>
+    <button class="filter" type="button" data-f="detection" aria-pressed="false">Detection <i>3</i></button>
+    <button class="filter" type="button" data-f="collection" aria-pressed="false">Collection <i>3</i></button>
+    <button class="filter" type="button" data-f="offensive" aria-pressed="false">Offensive &amp; forensics <i>2</i></button>
+    <button class="filter" type="button" data-f="tooling" aria-pressed="false">Tooling <i>3</i></button>
+    <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>3</i></button>
+  </div>
+
+  <p class="tag" id="fcount" aria-live="polite" style="margin-bottom:18px">Showing all 13</p>
+
+  <div class="grid" id="pgrid">
+
+    <article class="item rv" data-cat="detection">
+      <div class="item-top"><span class="item-n">01 / DETECTION</span></div>
+      <h3>Malicious code analysis for detection validation</h3>
+      <p>In isolated lab VMs I built and analysed samples purely to test signatures.</p>
+      <ul>
+        <li>Ransomware behaviour in Rust, a browser credential stealer in Python, a C2 client in C++</li>
+        <li>Macro abuse and DLL injection, analysed for the artefacts they leave behind</li>
+        <li>Encryption testing stayed hard-guarded to a canary folder — benign by construction</li>
+        <li>Every one became Wazuh rules, Zeek scripts and OpenSearch queries</li>
+      </ul>
+      <div class="chips"><span class="chip">Rust</span><span class="chip">Python</span><span class="chip">C++</span><span class="chip">FIM</span></div>
+    </article>
+
+    <article class="item rv" data-cat="collection">
+      <div class="item-top"><span class="item-n">02 / COLLECTION</span></div>
+      <h3>Zeek network monitoring pipeline</h3>
+      <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
+      <ul>
+        <li>A Python stage strips encapsulation headers and replays traffic onto a virtual interface</li>
+        <li>Decoders classify each log stream by fields unique to it, not by guessing from field presence</li>
+        <li>Detections for domain-generation bursts, DNS tunnelling, exfiltration and inbound scans</li>
+        <li>Re-characterised an alarming reported capture loss as an MTU artefact of the mirror tunnel, not real loss — which decides which detections you may trust</li>
+      </ul>
+      <div class="chips"><span class="chip">Zeek</span><span class="chip">Python</span><span class="chip">NSM</span></div>
+    </article>
+
+    <article class="item rv" data-cat="detection">
+      <div class="item-top"><span class="item-n">03 / DETECTION</span></div>
+      <h3>Active Directory security monitoring</h3>
+      <p>I had to learn AD properly — domain structure, Group Policy, event log semantics — before I could monitor it.</p>
+      <ul>
+        <li>Domain controller channels forwarded and ranked by volume, so an unusual lockout spike surfaces before anyone reports it</li>
+        <li>Written against native process-creation events rather than an agent I have no authority to push fleet-wide</li>
+        <li>Saved searches for authentication failure, log clearing and account enumeration</li>
+      </ul>
+      <div class="chips"><span class="chip">Active Directory</span><span class="chip">Windows Event Log</span><span class="chip">OpenSearch</span></div>
+    </article>
+
+    <article class="item rv" data-cat="collection">
+      <div class="item-top"><span class="item-n">04 / COLLECTION</span></div>
+      <h3>Agent rollout to 80+ endpoints via GPO</h3>
+      <p>Agents deployed across the Windows estate through Group Policy, without visiting each desk.</p>
+      <ul>
+        <li>Idempotent installer with three-state logic — running, stopped or absent — safe to re-run</li>
+        <li>MSI distribution over a network share with per-machine install logging</li>
+        <li>Guards so hand-tuned servers keep their custom log channel configuration</li>
+        <li>Recovered every agent&rsquo;s group membership from backup after an upgrade silently reset them</li>
+      </ul>
+      <div class="chips"><span class="chip">Group Policy</span><span class="chip">Batch</span><span class="chip">Windows Server</span></div>
+    </article>
+
+    <article class="item rv" data-cat="collection">
+      <div class="item-top"><span class="item-n">05 / COLLECTION</span></div>
+      <h3>Wireless &amp; access point monitoring</h3>
+      <p>Wireless syslog brought into the SIEM, with enrichment that turns a hardware address into a name a human recognises.</p>
+      <ul>
+        <li>Custom decoders for association, authentication and roaming events</li>
+        <li>A scheduled enrichment pipeline resolving hardware addresses to hostnames</li>
+        <li>Auth-failure bursts and cross-AP hopping raised as alerts rather than buried in syslog</li>
+      </ul>
+      <div class="chips"><span class="chip">Syslog</span><span class="chip">Custom decoders</span><span class="chip">Python</span></div>
+    </article>
+
+    <article class="item rv" data-cat="offensive">
+      <div class="item-top"><span class="item-n">06 / OFFENSIVE</span></div>
+      <h3>Authorized internal vulnerability assessment</h3>
+      <p>With written authorization from my senior, an internal assessment run from Kali Purple — written up three times for three readers.</p>
+      <ul>
+        <li>OpenVAS for the full scan, plus Nmap, Nikto and command-line work to verify by hand what the scanner claimed</li>
+        <li>Findings included unauthenticated printer administration, exposed print services and a reverse-proxy bypass on an office device</li>
+        <li>Delivered as three reports: technical, non-technical, and plain language</li>
+        <li>Re-scanned and honestly downgraded one finding to &ldquo;unconfirmed&rdquo; when it could not be reproduced</li>
+      </ul>
+      <div class="chips"><span class="chip">OpenVAS</span><span class="chip">Nmap</span><span class="chip">Nikto</span><span class="chip">Reporting</span></div>
+    </article>
+
+    <article class="item rv" data-cat="tooling">
+      <div class="item-top"><span class="item-n">07 / TOOLING</span></div>
+      <h3>Packet-Highway — 3D traffic visualizer</h3>
+      <p>Firewall traffic rendered as vehicles on a night highway, to make network activity legible to people who do not read log lines.</p>
+      <ul>
+        <li>Three.js with instanced meshes and object pooling, to hold frame rate on a live feed</li>
+        <li>Vehicle size tracks bytes, colour tracks protocol, blocked traffic moves to the emergency lane</li>
+        <li>Self-contained: no CDN, no external assets</li>
+      </ul>
+      <div class="chips"><span class="chip">Three.js</span><span class="chip">WebGL</span></div>
+    </article>
+
+    <article class="item rv" data-cat="tooling">
+      <div class="item-top"><span class="item-n">08 / TOOLING</span></div>
+      <h3>Building with AI tooling</h3>
+      <p>Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship.</p>
+      <ul>
+        <li>Built and debugged much of the tooling here with Claude Code, and used Claude Cowork for longer multi-step work</li>
+        <li>Put an assistant in the analyst seat during a purple-team exercise, watching the SIEM alongside me</li>
+        <li>Ran local models through Ollama to learn what genuinely needs a hosted one</li>
+        <li>The judgement is the point: what to delegate, what to verify, and never trusting a &ldquo;done&rdquo; message over the artefact</li>
+      </ul>
+      <div class="chips"><span class="chip">Claude Code</span><span class="chip">Ollama</span><span class="chip">Automation</span></div>
+    </article>
+
+    <article class="item soon rv" data-cat="tooling">
+      <div class="item-top"><span class="item-n">09 / TOOLING</span><span class="badge">In progress</span></div>
+      <h3>Physical floor-plan agent map</h3>
+      <p>A live map that resolves an alerting machine to a desk on the office plan, instead of to a hostname nobody can place.</p>
+      <ul>
+        <li>An OCR pipeline lifts every network port code off the building floor plan</li>
+        <li>A binder ties each monitored machine to its port code</li>
+        <li>The map joins agent status, bindings and positions so an alert lands on a location</li>
+      </ul>
+      <div class="chips"><span class="chip">Python</span><span class="chip">OCR</span></div>
+    </article>
+
+    <article class="item soon rv" data-cat="offensive">
+      <div class="item-top"><span class="item-n">10 / FORENSICS</span><span class="badge">In progress</span></div>
+      <h3>DFIR memory analysis</h3>
+      <p>Reconstructing what ran on a machine from a memory image — the skill the August 2025 incident showed we did not have.</p>
+      <ul>
+        <li>Volatility process trees, with injected and unparented processes flagged</li>
+        <li>Windows artefact analysis and timeline reconstruction</li>
+        <li>Practising against samples I build myself, so I know the ground truth</li>
+      </ul>
+      <div class="chips"><span class="chip">Volatility</span><span class="chip">Windows forensics</span></div>
+    </article>
+
+    <article class="item rv" data-cat="coursework">
+      <div class="item-top"><span class="item-n">11 / COURSEWORK</span></div>
+      <h3>Community library management system</h3>
+      <p>A command-line library system with role-based access, built for a programming module.</p>
+      <ul>
+        <li>Separate member, librarian and administrator roles</li>
+        <li>Attempt limiting, so a guest account locks out before brute force gets anywhere</li>
+        <li>File-backed persistence with input validation throughout</li>
+      </ul>
+      <div class="chips"><span class="chip">Python</span><span class="chip">RBAC</span></div>
+      <a class="alink" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">
+        Repository
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    </article>
+
+    <article class="item rv" data-cat="coursework">
+      <div class="item-top"><span class="item-n">12 / COURSEWORK</span></div>
+      <h3>Switching &amp; routing labs</h3>
+      <p>Packet Tracer labs covering the groundwork the SOC work later depended on.</p>
+      <ul>
+        <li>VLANs segmented across two switches, trunked and routed</li>
+        <li>Static and dynamic routing, verified end to end with ping and the routing table</li>
+        <li>Port security and basic device hardening</li>
+      </ul>
+      <div class="chips"><span class="chip">Cisco</span><span class="chip">VLANs</span><span class="chip">Routing</span></div>
+      <a class="alink" href="https://github.com/zamsonl/Switching-And-Routing-Essentials" target="_blank" rel="noreferrer">
+        Repository
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    </article>
+
+    <article class="item rv" data-cat="coursework">
+      <div class="item-top"><span class="item-n">13 / COURSEWORK</span></div>
+      <h3>Object-oriented Java system</h3>
+      <p>A team project built around inheritance and interfaces rather than one long branch statement.</p>
+      <ul>
+        <li>An abstract base with three concrete roles</li>
+        <li>Encapsulation and polymorphism applied where they earn their keep</li>
+        <li>Delivered as a team, with shared version control</li>
+      </ul>
+      <div class="chips"><span class="chip">Java</span><span class="chip">OOP</span></div>
+      <a class="alink" href="https://github.com/zamsonl/Java-assignment" target="_blank" rel="noreferrer">
+        Repository
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+      </a>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============================ SKILLS ============================ -->
+<section class="sec shell" id="skills">
+  <header class="sec-head rv">
+    <p class="tag">04 — Capability</p>
+    <h2>Skills &amp; tooling</h2>
+    <p>What I work with day to day, grouped by how I actually use it.</p>
+  </header>
+
+  <div class="skills rv">
+    <div class="skill">
+      <span class="skill-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+      <h3>SIEM &amp; detection engineering</h3>
+      <p>Getting the right events in, and writing the rules that catch them.</p>
+      <ul>
+        <li>Wazuh deployment &amp; agent management</li>
+        <li>Custom decoders &amp; correlation rules</li>
+        <li>OpenSearch query DSL &amp; aggregations</li>
+        <li>Log &amp; ingest pipeline design</li>
+        <li>File integrity monitoring &amp; canary detection</li>
+        <li>Alert triage &amp; incident response</li>
+      </ul>
+    </div>
+
+    <div class="skill">
+      <span class="skill-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="10" cy="18" r="1.6"/></svg></span>
+      <h3>Network &amp; infrastructure</h3>
+      <p>The systems the monitoring runs on.</p>
+      <ul>
+        <li>Zeek &amp; Suricata network security monitoring</li>
+        <li>FortiGate policy &amp; syslog integration</li>
+        <li>Aruba switching &amp; wireless monitoring</li>
+        <li>Traffic mirroring &amp; decapsulation pipelines</li>
+        <li>Proxmox, Ubuntu/Linux, systemd tuning</li>
+        <li>Nginx reverse proxy &amp; TLS</li>
+      </ul>
+    </div>
+
+    <div class="skill">
+      <span class="skill-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+      <h3>Automation &amp; engineering</h3>
+      <p>Scripts and tools that make the work repeatable.</p>
+      <ul>
+        <li>Python for automation, enrichment and pipelines</li>
+        <li>Bash &amp; Windows batch scripting</li>
+        <li>JavaScript, D3.js, Three.js</li>
+        <li>Rust, C++, Java</li>
+        <li>Active Directory &amp; Group Policy at scale</li>
+        <li>AI-assisted development, OCR pipelines, Git</li>
+      </ul>
+    </div>
+
+    <div class="skill">
+      <span class="skill-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+      <h3>Offensive &amp; forensics</h3>
+      <p>Testing the network, and reconstructing what happened afterwards.</p>
+      <ul>
+        <li>Authorized vulnerability assessment</li>
+        <li>Purple-team exercise design &amp; execution</li>
+        <li>Malicious code analysis in isolated labs</li>
+        <li>Reporting for technical and non-technical readers</li>
+        <li>Memory forensics (Volatility), Autopsy</li>
+        <li>Windows artifact analysis &amp; timelines</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== EXPERIENCE ========================== -->
+<section class="sec shell" id="experience">
+  <header class="sec-head rv">
+    <p class="tag">05 — Track record</p>
+    <h2>Experience</h2>
+    <p>Where the work above actually happened.</p>
+  </header>
+
+  <ol class="tl rv">
+    <li class="tl-row">
+      <div class="tl-when"><b>Aug 2025 — Aug 2026</b>Palmgold Management Sdn Bhd<br />Kuala Lumpur</div>
+      <div class="tl-body">
+        <h3>Network &amp; Security Administrator (Intern)</h3>
+        <p class="tl-org">Sole owner of security operations</p>
+        <ul>
+          <li>Joined after a ransomware incident and built the company&rsquo;s Security Operations Centre as the <b>only person on security</b></li>
+          <li>Deployed a Wazuh SIEM integrating firewall, switching, wireless, Windows endpoint, Active Directory and Zeek sensor telemetry, on a Proxmox host I set up in the office</li>
+          <li>Rolled out monitoring agents to <b>80+ Windows machines</b> via Group Policy with an idempotent, re-runnable installer</li>
+          <li>Wrote custom decoders, correlation rules and dashboards for the hardware actually in use</li>
+          <li>Ran authorized purple-team exercises — red from Kali Purple, blue in the SIEM — and turned each into detection content</li>
+          <li>Built and analysed malware samples in isolated lab VMs purely to validate signatures</li>
+          <li>Ran an authorized internal vulnerability assessment and delivered three audience-tailored reports</li>
+          <li>Built the SOC&rsquo;s own dashboards, served from the SIEM host behind a hardened reverse proxy</li>
+          <li>Provided day-to-day IT support at head office and on-site across branch locations</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="tl-row">
+      <div class="tl-when"><b>2024 — present</b>SekaiCTF · CYNX<br />BeSec · picoCTF</div>
+      <div class="tl-body">
+        <h3>Capture The Flag competitions</h3>
+        <p class="tl-org">Team Digital Phantoms</p>
+        <ul>
+          <li><b>SekaiCTF 2025</b> — solved &ldquo;Sekai Bank – Signature&rdquo;, a medium reverse-engineering challenge on an Android APK, using jadx-gui, keytool and Python, plus a cryptography challenge</li>
+          <li><b>CYNX</b>, CyberNexus — web exploitation, forensics and OSINT under time pressure</li>
+          <li><b>BeSec CTF</b> — participant</li>
+          <li><b>picoCTF</b> — ongoing practice across categories</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="tl-row">
+      <div class="tl-when"><b>Final year</b>Asia Pacific University<br />Kuala Lumpur</div>
+      <div class="tl-body">
+        <h3>BSc (Hons) Cybersecurity</h3>
+        <p class="tl-org">Asia Pacific University, Malaysia</p>
+        <ul>
+          <li>Coursework across network security, forensics and secure development</li>
+          <li>Lab work in Kali, Ubuntu, Wireshark and Cisco Packet Tracer</li>
+          <li>Industrial internship completed at Palmgold Management, with the SOC build-out as the primary project</li>
+        </ul>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- ============================ ABOUT ============================= -->
+<section class="sec shell" id="about">
+  <header class="sec-head rv">
+    <p class="tag">06 — Background</p>
+    <h2>About</h2>
+  </header>
+
+  <div class="about rv">
+    <div class="prose">
+      <p class="big">
+        I am a final-year Cybersecurity student at Asia Pacific University, and I run security
+        operations for Palmgold Management, a licensed gaming operator in Malaysia. It has been the
+        steepest learning curve I have had so far.
+      </p>
+      <p>
+        The habit I picked up from doing it alone is distrust of surface signals. A rule that loads
+        is not a rule that works. A clean service start does not mean your rules loaded. A bulk
+        request that reports success does not mean the documents were indexed. I have been caught
+        by each of those, so now I check the artefact rather than the message about the artefact
+        &mdash; and I have found more real problems that way than from any alert.
+      </p>
+      <p>
+        Running both sides of a purple-team exercise changed how I write detections. Being the
+        attacker for a week taught me more about what a rule needs to catch than any template did,
+        and the most useful thing to come out of it was not the catch &mdash; it was discovering a
+        segment whose egress the sensor could not see at all.
+      </p>
+      <p>
+        Next I want to take the SOC from detection into response: automated blocking and host
+        isolation through firewall and switch APIs, and interval-regularity analysis for beaconing
+        that a rule engine cannot express. I am also looking for a team where I can learn from
+        people who have run this at a larger scale.
+      </p>
+      <p class="thanks">
+        Thanks are owed to
+        <a href="https://www.linkedin.com/in/hong-yaw-lim-0517235b/" target="_blank" rel="noreferrer">Hong Yaw Lim</a>,
+        my senior in the IT department, who taught me an enormous amount of general IT knowledge.
+        The colleagues here are genuinely some of the nicest people I have worked with, and that
+        matters more than any stack.
+      </p>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h3>Details</h3>
+        <dl class="spec">
+          <div><dt>Education</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
+          <div><dt>Role</dt><dd>Network &amp; Security Administrator, Palmgold Management Sdn Bhd</dd></div>
+          <div><dt>Focus</dt><dd>Detection engineering, purple teaming, SOC automation</dd></div>
+          <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
+          <div><dt>Status</dt><dd>Open to graduate &amp; junior analyst roles</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== CONTACT ============================ -->
+<section class="sec shell" id="contact">
+  <header class="sec-head rv">
+    <p class="tag">07 — Contact</p>
+    <h2>Get in touch</h2>
+  </header>
+
+  <div class="cta rv">
+    <div>
+      <h2>Hiring a graduate security engineer or junior analyst?</h2>
+      <p>
+        I am happy to walk through the SOC build, the decisions behind it, and where I could
+        contribute to your team.
+      </p>
+    </div>
+    <div class="cta-btns">
+      <a class="btn btn-fill" href="mailto:zamsonlim@gmail.com">Email me</a>
+      <a class="btn btn-line" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
+    </div>
+  </div>
+
+  <div class="links rv">
+    <a class="link" href="mailto:zamsonlim@gmail.com">
+      <span class="link-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></span>
+      <span><b>Email</b><span>zamsonlim@gmail.com</span></span>
+    </a>
+    <a class="link" href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">
+      <span class="link-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 20.5H17v-5.6c0-1.3 0-3-1.9-3s-2.1 1.5-2.1 2.9v5.7H9.4V9h3.4v1.6h.1a3.7 3.7 0 0 1 3.3-1.9c3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4a2.1 2.1 0 1 1 0-4.1 2.1 2.1 0 0 1 0 4.1zm1.8 13.1H3.6V9h3.5v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7c0-.9-.8-1.7-1.8-1.7z"/></svg></span>
+      <span><b>LinkedIn</b><span>zamson-lim</span></span>
+    </a>
+    <a class="link" href="https://github.com/zamsonl" target="_blank" rel="noreferrer">
+      <span class="link-ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12a11.5 11.5 0 0 0 7.9 10.9c.5.1.8-.2.8-.5v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.4-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.2-1.3-5.2-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.7.1 3 .7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.1v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z"/></svg></span>
+      <span><b>GitHub</b><span>github.com/zamsonl</span></span>
+    </a>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="shell foot-in">
+    <p>&copy; <span id="yr"></span> Zamson Lim</p>
+    <p>Built from scratch with HTML, CSS &amp; JavaScript · Hosted on GitHub Pages</p>
+  </div>
+</footer>
+</main>
+
+<!-- ========================== LIGHTBOX ============================ -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Enlarged screenshot" hidden>
+  <button class="lb-x" id="lbx" type="button" aria-label="Close">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <figure>
+    <img id="lbimg" alt="" />
+    <figcaption id="lbcap"></figcaption>
+  </figure>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
