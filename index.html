@@ -425,10 +425,10 @@
       <div class="chips">
         <span class="chip">D3.js</span><span class="chip">TopoJSON</span><span class="chip">Canvas</span>
       </div>
-      <a class="alink" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
-        Open the demo
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-      </a>
+      <div class="links-row">
+        <a class="alink" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">Open the demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-traffic-map.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
     </article>
 
     <article class="item">
@@ -449,10 +449,10 @@
       <div class="chips">
         <span class="chip">JavaScript</span><span class="chip">OpenSearch DSL</span><span class="chip">ATT&amp;CK</span>
       </div>
-      <a class="alink" href="./soc-alert-console.html" target="_blank" rel="noreferrer">
-        Open the demo
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
-      </a>
+      <div class="links-row">
+        <a class="alink" href="./soc-alert-console.html" target="_blank" rel="noreferrer">Open the demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-alert-console.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
     </article>
   </div>
 </section>
@@ -474,16 +474,17 @@
   </div>
 
   <div class="filters rv" role="group" aria-label="Filter projects by discipline" id="filters">
-    <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>13</i></button>
+    <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>15</i></button>
     <button class="filter" type="button" data-f="detection" aria-pressed="false">Detection <i>3</i></button>
     <button class="filter" type="button" data-f="collection" aria-pressed="false">Collection <i>3</i></button>
     <button class="filter" type="button" data-f="offensive" aria-pressed="false">Offensive &amp; forensics <i>2</i></button>
     <button class="filter" type="button" data-f="tooling" aria-pressed="false">Tooling <i>3</i></button>
+    <button class="filter" type="button" data-f="opensource" aria-pressed="false">Open source <i>2</i></button>
     <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>3</i></button>
   </div>
 
   <div class="index-bar rv">
-    <p class="tag" id="fcount" aria-live="polite">Showing all 13</p>
+    <p class="tag" id="fcount" aria-live="polite">Showing all 15</p>
     <button class="toggle-all" id="toggleAll" type="button" aria-expanded="false">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span>Expand all</span>
@@ -493,7 +494,7 @@
   <div class="grid" id="pgrid">
 
     <article class="item rv" data-cat="detection">
-      <div class="item-top"><span class="item-n">01 / DETECTION</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg></span><span class="item-n">01 / DETECTION</span></div>
       <h3>Malicious code analysis for detection validation</h3>
       <p>In isolated lab VMs I built and analysed samples purely to test signatures.</p>
 <details class="more">
@@ -509,9 +510,10 @@
     </article>
 
     <article class="item rv" data-cat="collection">
-      <div class="item-top"><span class="item-n">02 / COLLECTION</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
       <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
+      <ul class="item-stats"><li><b>4-node</b><span>zeek cluster</span></li><li><b>~970k</b><span>alerts/day</span></li></ul>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -525,7 +527,7 @@
     </article>
 
     <article class="item rv" data-cat="detection">
-      <div class="item-top"><span class="item-n">03 / DETECTION</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg></span><span class="item-n">03 / DETECTION</span></div>
       <h3>Active Directory security monitoring</h3>
       <p>I had to learn AD properly — domain structure, Group Policy, event log semantics — before I could monitor it.</p>
 <details class="more">
@@ -540,9 +542,10 @@
     </article>
 
     <article class="item rv" data-cat="collection">
-      <div class="item-top"><span class="item-n">04 / COLLECTION</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">04 / COLLECTION</span></div>
       <h3>Agent rollout to 80+ endpoints via GPO</h3>
       <p>Agents deployed across the Windows estate through Group Policy, without visiting each desk.</p>
+      <ul class="item-stats"><li><b>80+</b><span>endpoints</span></li><li><b>55</b><span>agents</span></li></ul>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -556,7 +559,7 @@
     </article>
 
     <article class="item rv" data-cat="collection">
-      <div class="item-top"><span class="item-n">05 / COLLECTION</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">05 / COLLECTION</span></div>
       <h3>Wireless &amp; access point monitoring</h3>
       <p>Wireless syslog brought into the SIEM, with enrichment that turns a hardware address into a name a human recognises.</p>
 <details class="more">
@@ -571,9 +574,10 @@
     </article>
 
     <article class="item rv" data-cat="offensive">
-      <div class="item-top"><span class="item-n">06 / OFFENSIVE</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span><span class="item-n">06 / OFFENSIVE</span></div>
       <h3>Authorized internal vulnerability assessment</h3>
       <p>With written authorization from my senior, an internal assessment run from Kali Purple — written up three times for three readers.</p>
+      <ul class="item-stats"><li><b>3</b><span>formal reports</span></li></ul>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -587,7 +591,7 @@
     </article>
 
     <article class="item rv" data-cat="tooling">
-      <div class="item-top"><span class="item-n">07 / TOOLING</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">07 / TOOLING</span></div>
       <h3>Packet-Highway — 3D traffic visualizer</h3>
       <p>Firewall traffic rendered as vehicles on a night highway, to make network activity legible to people who do not read log lines.</p>
 <details class="more">
@@ -602,7 +606,7 @@
     </article>
 
     <article class="item rv" data-cat="tooling">
-      <div class="item-top"><span class="item-n">08 / TOOLING</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">08 / TOOLING</span></div>
       <h3>Building with AI tooling</h3>
       <p>Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship.</p>
 <details class="more">
@@ -618,9 +622,10 @@
     </article>
 
     <article class="item soon rv" data-cat="tooling">
-      <div class="item-top"><span class="item-n">09 / TOOLING</span><span class="badge">In progress</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">09 / TOOLING</span><span class="badge">In progress</span></div>
       <h3>Physical floor-plan agent map</h3>
       <p>A live map that resolves an alerting machine to a desk on the office plan, instead of to a hostname nobody can place.</p>
+      <ul class="item-stats"><li><b>~310</b><span>port codes</span></li><li><b>88</b><span>ocr tiles</span></li></ul>
 <details class="more">
         <summary>Details <i>3</i></summary>
         <ul>
@@ -633,7 +638,7 @@
     </article>
 
     <article class="item soon rv" data-cat="offensive">
-      <div class="item-top"><span class="item-n">10 / FORENSICS</span><span class="badge">In progress</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span><span class="item-n">10 / FORENSICS</span><span class="badge">In progress</span></div>
       <h3>DFIR memory analysis</h3>
       <p>Reconstructing what ran on a machine from a memory image — the skill the August 2025 incident showed we did not have.</p>
 <details class="more">
@@ -647,8 +652,50 @@
       <div class="chips"><span class="chip">Volatility</span><span class="chip">Windows forensics</span></div>
     </article>
 
+    <article class="item rv" data-cat="opensource">
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">14 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <h3>SOC Traffic Map &mdash; open-source template</h3>
+      <p>The production traffic map, de-identified and published so anyone with a Wazuh or OpenSearch backend can run it.</p>
+      <ul class="item-stats"><li><b>0</b><span>external requests</span></li><li><b>15m</b><span>posture window</span></li></ul>
+      <details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
+        <li>A D3 world map with live arcs over a firewall-fed alert index</li>
+        <li>Threat posture scores off a rolling window and decays with no new events</li>
+        <li>D3, TopoJSON and the world atlas all inlined &mdash; zero external requests</li>
+        <li>Opens in demo mode on a synthetic feed, so the link just works</li>
+      </ul>
+      </details>
+      <div class="chips"><span class="chip">D3.js</span><span class="chip">TopoJSON</span><span class="chip">Canvas</span><span class="chip">Single file</span></div>
+      <div class="links-row">
+        <a class="alink" href="./soc-traffic-map.html" target="_blank" rel="noreferrer">Live demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-traffic-map.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
+    </article>
+
+    <article class="item rv" data-cat="opensource">
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">15 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <h3>SOC Alert Console &mdash; open-source template</h3>
+      <p>The endpoint alert console, de-identified and published alongside the traffic map.</p>
+      <ul class="item-stats"><li><b>0</b><span>external requests</span></li><li><b>42</b><span>theme combos</span></li></ul>
+      <details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
+        <li>Incremental polling with severity bucketing over a Wazuh alert index</li>
+        <li>One filter dispatcher, so counters, ranked lists and the feed cannot disagree</li>
+        <li>An ATT&amp;CK matrix that renders all fourteen tactics &mdash; coverage, not silence</li>
+        <li>Seven surface themes across six severity palettes, on two independent axes</li>
+      </ul>
+      </details>
+      <div class="chips"><span class="chip">JavaScript</span><span class="chip">OpenSearch DSL</span><span class="chip">ATT&amp;CK</span><span class="chip">Single file</span></div>
+      <div class="links-row">
+        <a class="alink" href="./soc-alert-console.html" target="_blank" rel="noreferrer">Live demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-alert-console.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
+    </article>
+
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-n">11 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">16 / COURSEWORK</span></div>
       <h3>Community library management system</h3>
       <p>A command-line library system with role-based access, built for a programming module.</p>
 <details class="more">
@@ -667,7 +714,7 @@
     </article>
 
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-n">12 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">17 / COURSEWORK</span></div>
       <h3>Switching &amp; routing labs</h3>
       <p>Packet Tracer labs covering the groundwork the SOC work later depended on.</p>
 <details class="more">
@@ -686,7 +733,7 @@
     </article>
 
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-n">13 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">18 / COURSEWORK</span></div>
       <h3>Object-oriented Java system</h3>
       <p>A team project built around inheritance and interfaces rather than one long branch statement.</p>
 <details class="more">

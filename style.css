@@ -923,10 +923,101 @@ mark {
 .item-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 14px;
 }
+.item-top .badge { margin-left: auto; }
+
+/* Each discipline gets one hue, used ONLY on the icon chip and the card's top
+   edge. Everything else stays neutral, so the grid reads as a set rather than
+   a bag of colours. */
+.item-ic {
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid var(--cat-line, var(--line-solid));
+  background: var(--cat-soft, var(--plane-2));
+  color: var(--cat, var(--ink-3));
+}
+.item-ic svg { width: 16px; height: 16px; }
+
+.item { position: relative; overflow: hidden; }
+.item::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--cat, var(--line-strong));
+  opacity: 0;
+  transition: opacity .22s var(--ease);
+}
+.item:hover::before { opacity: .85; }
+
+.item[data-cat='detection']  { --cat: #f0883e; --cat-soft: #f0883e14; --cat-line: #f0883e33; }
+.item[data-cat='collection'] { --cat: #4aa8e8; --cat-soft: #4aa8e814; --cat-line: #4aa8e833; }
+.item[data-cat='offensive']  { --cat: #e05561; --cat-soft: #e0556114; --cat-line: #e0556133; }
+.item[data-cat='tooling']    { --cat: #a684e8; --cat-soft: #a684e814; --cat-line: #a684e833; }
+.item[data-cat='opensource'] { --cat: #43b581; --cat-soft: #43b58114; --cat-line: #43b58133; }
+.item[data-cat='coursework'] { --cat: #8b93a5; --cat-soft: #8b93a514; --cat-line: #8b93a533; }
+
+:root[data-theme='light'] .item[data-cat='detection']  { --cat: #b45309; }
+:root[data-theme='light'] .item[data-cat='collection'] { --cat: #0369a1; }
+:root[data-theme='light'] .item[data-cat='offensive']  { --cat: #b91c1c; }
+:root[data-theme='light'] .item[data-cat='tooling']    { --cat: #6d28d9; }
+:root[data-theme='light'] .item[data-cat='opensource'] { --cat: #15803d; }
+:root[data-theme='light'] .item[data-cat='coursework'] { --cat: #52525b; }
+
+/* Grounded numbers, so a card is not just four paragraphs of prose. */
+/* `.item ul` sets display:grid at higher specificity and later in the sheet,
+   so this needs the extra `.item` or the stats stack instead of sitting in a
+   row. Same trap as the li rules below. */
+.item .item-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+/* `.item li` carries the dash bullet and a 17px indent, and it appears later
+   in this sheet at equal specificity, so it would win. The extra `.item`
+   here is deliberate — the stat row is a different kind of list and has to
+   opt out of both the bullet and the indent. */
+.item .item-stats li {
+  padding: 12px 14px 4px 0;
+  margin-right: 14px;
+  border-right: 1px solid var(--line);
+  position: static;
+}
+.item .item-stats li::before { content: none; }
+.item .item-stats li:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.item-stats li:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.item-stats b {
+  display: block;
+  font: 600 1.2rem/1 var(--sans);
+  letter-spacing: -.02em;
+  color: var(--cat, var(--ink));
+  margin-bottom: 5px;
+}
+.item-stats span {
+  display: block;
+  font: 400 11px/1.3 var(--mono);
+  letter-spacing: .04em;
+  color: var(--ink-4);
+}
+
+.links-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+}
+.alink.mute-link { color: var(--ink-3); }
+.alink.mute-link:hover { color: var(--ink); }
 .item-n {
   font: 500 11px/1 var(--mono);
   color: var(--ink-4);
