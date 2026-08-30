@@ -38,7 +38,7 @@
   --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --shell: 1240px;
-  --gut: clamp(1.15rem, 4vw, 2.5rem);
+  --gut: clamp(1.4rem, 5vw, 2.5rem);
   --r-s: 8px;
   --r-m: 14px;
   --r-l: 20px;
@@ -534,7 +534,11 @@ h1.hero-h em {
 }
 
 /* ---- 6. Sections -------------------------------------------------------- */
-.sec { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+/* padding-block, NOT the shorthand: `.sec` is always paired with `.shell`
+   and appears later in this sheet at equal specificity, so `padding: X 0`
+   silently cancelled the shell's horizontal gutter and pushed content to
+   the window edge on anything narrower than the 1240px max-width. */
+.sec { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
 .sec-head { margin-bottom: clamp(2rem, 4vw, 3rem); }
 .sec-head h2 {
   font-size: clamp(1.75rem, 3.6vw, 2.6rem);
@@ -546,58 +550,6 @@ h1.hero-h em {
   max-width: 66ch;
   color: var(--ink-2);
   font-size: 1.0125rem;
-}
-
-/* ---- 7. Origin band ----------------------------------------------------- */
-.origin {
-  border-block: 1px solid var(--line-solid);
-  background:
-    linear-gradient(180deg, var(--bg-2), transparent 60%),
-    var(--bg);
-}
-.origin-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  gap: clamp(1.75rem, 5vw, 4.5rem);
-  align-items: start;
-  padding: clamp(3rem, 7vw, 5rem) 0;
-}
-.origin blockquote {
-  margin: 0;
-  font: 500 clamp(1.35rem, 2.7vw, 2rem)/1.3 var(--sans);
-  letter-spacing: -.025em;
-  color: var(--ink);
-}
-.origin blockquote em { font-style: normal; color: var(--accent); }
-.origin-body { display: grid; gap: 16px; }
-.origin-body p { color: var(--ink-2); }
-
-.chain {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 0;
-  list-style: none;
-}
-.chain li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border: 1px solid var(--line-solid);
-  border-radius: 100px;
-  background: var(--plane);
-  font: 500 12px/1 var(--mono);
-  color: var(--ink-2);
-  letter-spacing: .02em;
-}
-.chain li::before {
-  content: '';
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--accent);
 }
 
 /* ---- 8. Case studies ---------------------------------------------------- */
@@ -1098,6 +1050,21 @@ mark {
 .more.wide { margin-top: 0; }
 .more.wide > summary { margin-bottom: 18px; }
 
+/* The production screenshot sits behind an explicit reveal. */
+.more.shot-reveal { margin: 0 0 4px; }
+.more.shot-reveal > summary {
+  padding: 11px 18px 11px 15px;
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.more.shot-reveal > summary:hover { border-color: var(--accent); }
+.more.shot-reveal > summary::before { border-color: var(--accent); }
+.more.shot-reveal[open] > summary { margin-bottom: 16px; }
+.more.shot-reveal[open] > figure { animation: fade .3s var(--ease) both; }
+
 /* Reveal is a fade, not a height animation -- animating height on a <details>
    fights the browser's own open/close and janks on long lists. */
 .more[open] > ul, .more[open] > .facts { animation: fade .28s var(--ease) both; }
@@ -1449,7 +1416,6 @@ mark {
   .case-head { grid-template-columns: minmax(0, 1fr); align-items: start; }
   .facts { grid-template-columns: minmax(0, 1fr); }
   .about { grid-template-columns: minmax(0, 1fr); }
-  .origin-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 860px) {
@@ -1502,7 +1468,6 @@ mark {
   .item p, .case-head p, .prose p { font-size: 1rem; line-height: 1.72; }
   .item li, .skill li { font-size: .95rem; line-height: 1.62; }
   .facts li, .tl-body li { font-size: .96rem; line-height: 1.68; }
-  .origin-body p { font-size: 1rem; line-height: 1.72; }
   .shot-cap, .lb figcaption { font-size: .875rem; line-height: 1.65; }
 
   /* Tap targets. */
@@ -1520,9 +1485,13 @@ mark {
   .link { padding: 18px; }
 
   /* Breathing room -- cramped padding is half of why phone copy reads badly. */
-  .item, .skill, .card, .prose { padding: 20px 18px; }
-  .case { padding: 20px 18px; }
-  .sec { padding: 3rem 0; }
+  .item, .skill, .card, .prose { padding: 22px 20px; }
+  .case { padding: 22px 20px; }
+  .cta { padding: 24px 20px; }
+  .tl-row { padding: 22px 20px; }
+  .sec { padding-block: 3rem; }   /* shorthand here would cancel the shell gutter too */
+  .shot-cap { padding: 14px 16px; }
+  .shot.pad { padding: 14px 12px; }
 
   /* The full pill and location wrap to two ragged lines beside a 68px
      portrait; drop the least load-bearing words instead. */

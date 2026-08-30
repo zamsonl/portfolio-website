@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Zamson Lim — SOC Engineering, Detection &amp; Purple Team</title>
-<meta name="description" content="Final-year Cybersecurity student at APU. Spent a year as Network &amp; Security Administrator at Palmgold Management, where after a ransomware incident I proposed a Security Operations Centre, got approval, and built it as the only person on security: Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and two open-source SOC consoles." />
+<meta name="description" content="Final-year Cybersecurity student at APU. Spent a year as Network &amp; Security Administrator at Palmgold Management, where after a ransomware incident I proposed a Security Operations Centre, got approval, and built it as the only person on security: Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and three open-source SOC tools." />
 <meta name="author" content="Zamson Lim" />
 <meta name="theme-color" content="#08090d" />
 <meta property="og:type" content="profile" />
@@ -111,7 +111,7 @@
     <aside class="hero-aside rv" aria-label="At a glance">
       <div class="card demos">
         <h3><span class="dot" aria-hidden="true"></span> Running right now</h3>
-        <p>Two consoles from the SOC, de-identified and live on synthetic data.</p>
+        <p>Three tools from the SOC, de-identified and live on synthetic data.</p>
         <a href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
           <span>SOC Traffic Map</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
@@ -120,13 +120,17 @@
           <span>SOC Alert Console</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
         </a>
+        <a href="./soc-packet-highway.html" target="_blank" rel="noreferrer">
+          <span>Packet Highway</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
       </div>
       <div class="card">
         <h3>At a glance</h3>
         <dl class="spec">
           <div><dt>Focus</dt><dd>SOC engineering · Detection · Purple team</dd></div>
           <div><dt>SIEM</dt><dd>Wazuh, OpenSearch, custom decoders &amp; rules</dd></div>
-          <div><dt>Network</dt><dd>Zeek, Suricata, FortiGate, Aruba</dd></div>
+          <div><dt>Network</dt><dd>Zeek, FortiGate, Aruba, Wireshark</dd></div>
           <div><dt>Code</dt><dd>Python, JavaScript, Bash, Rust, C++, Java</dd></div>
           <div><dt>Study</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
           <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
@@ -138,41 +142,9 @@
     <ul class="stats rv">
       <li><span class="stat-v amber">Solo</span><span class="stat-l">Only person on security</span></li>
       <li><span class="stat-v">80+</span><span class="stat-l">Endpoints monitored</span></li>
-      <li><span class="stat-v">6</span><span class="stat-l">Log sources integrated</span></li>
-      <li><span class="stat-v">12&nbsp;mo</span><span class="stat-l">Aug 2025 &ndash; Aug 2026</span></li>
+      <li><span class="stat-v">3</span><span class="stat-l">Open-source tools published</span></li>
+      <li><span class="stat-v">Final year</span><span class="stat-l">BSc Cybersecurity, APU</span></li>
     </ul>
-  </div>
-</section>
-
-<!-- ============================ ORIGIN ============================ -->
-<section class="origin">
-  <div class="shell origin-grid">
-    <blockquote class="rv">
-      There was no monitoring, so there was no way to reconstruct how it got in
-      &mdash; <em>or how far it reached</em>.
-    </blockquote>
-    <div class="origin-body rv">
-      <p>
-        That is the whole reason any of this exists. After the August 2025 ransomware incident,
-        nobody could answer the first question anyone asks. There were no central logs to check.
-      </p>
-      <p>
-        What it turned into: Wazuh for endpoint detection and file integrity monitoring, Zeek for
-        network visibility, the firewall integrated into Wazuh, wireless syslog with
-        address-to-hostname enrichment, and mirrored feeds from the core and access switches so
-        the sensor sees the network instead of a slice of it &mdash; all on a Proxmox host I set
-        up myself in the office.
-      </p>
-      <ul class="chain">
-        <li>Endpoint</li>
-        <li>Network</li>
-        <li>Firewall</li>
-        <li>Wireless</li>
-        <li>Active Directory</li>
-        <li>Detection</li>
-        <li>Response</li>
-      </ul>
-    </div>
   </div>
 </section>
 
@@ -207,13 +179,15 @@
         <div>
           <div class="chips">
           <span class="chip">Wazuh</span><span class="chip">OpenSearch</span><span class="chip">Zeek</span>
-          <span class="chip">Suricata</span><span class="chip">Proxmox</span><span class="chip">Nginx</span>
+          <span class="chip">Proxmox</span><span class="chip">Nginx</span>
           <span class="chip">Detection engineering</span><span class="chip">Incident response</span>
         </div>
         </div>
       </div>
 
       <div class="case-visual">
+      <details class="more shot-reveal">
+        <summary>Show the real dashboard</summary>
         <figure class="shot" style="margin:0">
           <div class="shot-bar" aria-hidden="true">
             <i></i><i></i><i></i><span>traffic overview — production</span>
@@ -230,9 +204,10 @@
             naming an internal host is masked.
           </figcaption>
         </figure>
+      </details>
       </div>
 
-<details class="more wide" open>
+<details class="more wide">
         <summary>What it involved <i>5</i></summary>
         <ul class="facts">
           <li><b>Platform</b><span>Wazuh manager with co-located OpenSearch, on a Proxmox host, tuned at the systemd level to stay stable under sustained ingest.</span></li>
@@ -252,12 +227,13 @@
           <span class="badge">Purple team</span>
           <span class="badge">Authorized exercise</span>
         </div>
-          <h3>Both chairs: running the attack and the detection</h3>
+          <h3>I attacked my own network, then caught it</h3>
           <p>
-          I ran the red side and the blue side of the same exercise. A command-and-control listener
-          reached through a tunnelling service, implants beaconing on a fixed interval, then caught
-          from the SIEM alone. Being the attacker taught me more about detection than any rule
-          template did.
+          I played both sides of the same exercise. First I set up the attack: a machine of mine
+          acting as a remote-control server, hidden behind a tunnelling service so its real address
+          never showed, with test machines checking in with it every few seconds. Then I switched
+          seats and tried to find it using nothing but the monitoring. Being the attacker taught me
+          more about writing detections than any rule template did.
         </p>
         </div>
         <div>
@@ -271,63 +247,56 @@
       <div class="case-visual">
         <div class="shot pad">
           <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span>exercise — red path vs. what the sensor saw</span></div>
-          <svg viewBox="0 0 640 400" role="img" aria-label="Diagram: the red team's C2 traffic reaches victims through a tunnel whose destination address is shared infrastructure, so only DNS resolution logging identifies the internal victims. One network segment's egress is not mirrored to the sensor and is therefore invisible." style="display:block;width:100%;height:auto;background:var(--bg-2)">
+          <svg viewBox="0 0 760 330" role="img" aria-label="Diagram: my attack machine reaches the office PCs through a tunnel. The firewall and the tunnel both show only a shared address, so neither identifies the infected machine. The DNS records were the only thing that named them." style="display:block;width:100%;height:auto;background:var(--bg-2)">
             <defs>
-              <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M0 0 L10 5 L0 10 z" fill="var(--ink-4)"/>
-              </marker>
-              <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-                <path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/>
-              </marker>
+              <marker id="pa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink-4)"/></marker>
+              <marker id="pb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
             </defs>
-            <g font-family="ui-monospace,monospace" font-size="12">
-              <rect x="26" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--crit)" stroke-width="1.4"/>
-              <text x="42" y="78" fill="var(--crit)" font-size="12.5">red team box</text>
-              <text x="42" y="96" fill="var(--ink-4)" font-size="11">C2 listener</text>
+            <g font-family="ui-monospace,monospace">
+              <rect x="16" y="26" width="196" height="66" rx="10" fill="none" stroke="var(--crit)" stroke-width="1.4"/>
+              <text x="34" y="55" fill="var(--crit)" font-size="14">Me, attacking</text>
+              <text x="34" y="76" fill="var(--ink-4)" font-size="12">remote-control server</text>
 
-              <rect x="254" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--ink-4)" stroke-width="1.4"/>
-              <text x="270" y="78" fill="var(--ink-2)" font-size="12.5">tunnel edge</text>
-              <text x="270" y="96" fill="var(--ink-4)" font-size="11">shared address</text>
+              <line x1="216" y1="59" x2="274" y2="59" stroke="var(--ink-4)" stroke-width="1.5" marker-end="url(#pa)"/>
 
-              <rect x="482" y="52" width="132" height="56" rx="9" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
-              <text x="498" y="78" fill="var(--accent)" font-size="12.5">victims</text>
-              <text x="498" y="96" fill="var(--ink-4)" font-size="11">beacon, fixed interval</text>
+              <rect x="282" y="26" width="196" height="66" rx="10" fill="none" stroke="var(--ink-4)" stroke-width="1.4"/>
+              <text x="300" y="55" fill="var(--ink-2)" font-size="14">A tunnel</text>
+              <text x="300" y="76" fill="var(--ink-4)" font-size="12">hides the real address</text>
 
-              <line x1="160" y1="80" x2="248" y2="80" stroke="var(--ink-4)" stroke-width="1.4" marker-end="url(#ar)"/>
-              <line x1="388" y1="80" x2="476" y2="80" stroke="var(--ink-4)" stroke-width="1.4" marker-end="url(#ar)"/>
+              <line x1="482" y1="59" x2="540" y2="59" stroke="var(--ink-4)" stroke-width="1.5" marker-end="url(#pa)"/>
 
-              <line x1="548" y1="112" x2="548" y2="168" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arA)"/>
-              <rect x="392" y="170" width="222" height="52" rx="9" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
-              <text x="410" y="194" fill="var(--accent)" font-size="12.5">DNS resolution logging</text>
-              <text x="410" y="211" fill="var(--ink-3)" font-size="11">the only thing that named them</text>
+              <rect x="548" y="26" width="196" height="66" rx="10" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+              <text x="566" y="55" fill="var(--accent)" font-size="14">Office PCs</text>
+              <text x="566" y="76" fill="var(--ink-4)" font-size="12">check in every 10s</text>
 
-              <rect x="26" y="170" width="330" height="52" rx="9" fill="none" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="5 4"/>
-              <text x="44" y="194" fill="var(--ink-3)" font-size="12.5">firewall &amp; tunnel destination</text>
-              <text x="44" y="211" fill="var(--ink-4)" font-size="11">shared / NAT&#8217;d — useless for attribution</text>
+              <line x1="646" y1="96" x2="646" y2="146" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#pb)"/>
 
-              <line x1="26" y1="262" x2="614" y2="262" stroke="var(--line-strong)" stroke-width="1"/>
-              <text x="26" y="292" fill="var(--ink-2)" font-size="13">What the exercise actually found</text>
+              <rect x="16" y="150" width="462" height="66" rx="10" fill="none" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="6 5"/>
+              <text x="34" y="179" fill="var(--ink-3)" font-size="14">Firewall and tunnel</text>
+              <text x="34" y="200" fill="var(--ink-4)" font-size="12">both show a shared address &#8212; neither names the PC</text>
 
-              <circle cx="33" cy="318" r="3.5" fill="var(--crit)"/>
-              <text x="48" y="322" fill="var(--ink-3)" font-size="11.5">one segment&#8217;s egress was never mirrored — invisible to the sensor</text>
-              <circle cx="33" cy="344" r="3.5" fill="var(--med)"/>
-              <text x="48" y="348" fill="var(--ink-3)" font-size="11.5">beacon rule false-positived on a vendor cloud — documented, not silenced</text>
-              <circle cx="33" cy="370" r="3.5" fill="var(--good)"/>
-              <text x="48" y="374" fill="var(--ink-3)" font-size="11.5">tunnelled C2 was easier to catch than a plain one; the plain one was missed</text>
+              <rect x="548" y="150" width="196" height="66" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+              <text x="566" y="179" fill="var(--accent)" font-size="14">DNS records</text>
+              <text x="566" y="200" fill="var(--ink-3)" font-size="12">named the PCs</text>
+
+              <line x1="16" y1="256" x2="744" y2="256" stroke="var(--line-strong)" stroke-width="1"/>
+              <circle cx="23" cy="290" r="4" fill="var(--crit)"/>
+              <text x="40" y="295" fill="var(--ink-3)" font-size="13">Biggest finding: one part of the network was not being watched at all.</text>
             </g>
           </svg>
         </div>
       </div>
 
-<details class="more wide" open>
-        <summary>What it involved <i>5</i></summary>
-        <ul class="facts">
-          <li><b>Red</b><span>A C2 listener on Kali Purple, exposed through a tunnel, with implants polling on a fixed interval.</span></li>
-          <li><b>Blue</b><span>Watched the same activity land in Wazuh, then wrote the detection rules for that signature.</span></li>
-          <li><b>Proved from data</b><span>The tunnel launders the destination, so the firewall, the tunnel edge and the C2 side all point at shared or NAT&rsquo;d addresses. Only the DNS-resolution rules identified the actual internal victims.</span></li>
-          <li><b>The real finding</b><span>An egress path the sensor could not see at all. A rule cannot help on traffic you never collect &mdash; that gap mattered more than the catch.</span></li>
-          <li><b>Tested honestly</b><span>A plain implant to a clean host on 443 was <strong>missed</strong>. The tunnel was itself the signature; a bare beacon has none, so detection falls back to behaviour.</span></li>
-        </ul>
+<details class="more wide">
+        <summary>What it involved <i>6</i></summary>
+      <ul class="facts">
+        <li><b>The attack</b><span>A remote-control server on my own Kali machine, reached through a tunnel so the traffic looked ordinary from the outside.</span></li>
+        <li><b>The defence</b><span>I switched sides, watched the same activity arrive in Wazuh, and wrote the rules that catch it.</span></li>
+        <li><b>Why it was hard</b><span>A tunnel hides where traffic really goes. The firewall, the tunnel and the server all showed a shared address, so none of them could say which machine was infected.</span></li>
+        <li><b>What found it</b><span>The DNS lookups. Those records were the only thing that named the infected machines.</span></li>
+        <li><b>The bigger finding</b><span>Part of the network was not being monitored at all. No rule can help with traffic you never collect &mdash; that gap mattered more than the catch.</span></li>
+        <li><b>Tested honestly</b><span>A plain attack straight to an ordinary server was <strong>missed</strong>. The tunnel was itself the giveaway; without one there is no signature to match.</span></li>
+      </ul>
       </details>
     </article>
 
@@ -341,10 +310,10 @@
         </div>
           <h3>The console I use every day</h3>
           <p>
-          I built the tool I work in. Two single-file consoles served from the SOC host: a global
-          traffic map and an endpoint alert console. Writing them changed how I think about what an
-          operator actually needs on screen &mdash; and both are now published as de-identified
-          templates.
+          I built the tools I work in. Single-file consoles served from the SOC host: a global
+          traffic map, an endpoint alert console, and a 3D traffic visualizer. Writing them changed
+          how I think about what an operator actually needs on screen &mdash; and all three are now
+          published as de-identified templates.
         </p>
         </div>
         <div>
@@ -381,7 +350,7 @@
         </div>
       </div>
 
-<details class="more wide" open>
+<details class="more wide">
         <summary>What it involved <i>2</i></summary>
         <ul class="facts">
           <li><b>Posture</b><span>The threat score decays over time instead of ratcheting up, so a wall display that had one bad morning does not still read SEVERE at midnight on an idle network.</span></li>
@@ -397,15 +366,15 @@
 <section class="sec shell" id="open-source">
   <header class="sec-head rv">
     <p class="tag">02 — Open source</p>
-    <h2>SOC console templates</h2>
+    <h2>SOC tooling templates</h2>
     <p>
-      The two consoles above, de-identified and published so anyone with a Wazuh or OpenSearch
+      Three tools from the SOC, de-identified and published so anyone with a Wazuh or OpenSearch
       backend can use them. Every organisation name, hostname, address and coordinate is a
-      placeholder. Both open in demo mode with a synthetic feed, so the links below just work.
+      placeholder. They all open in demo mode with a synthetic feed, so the links below just work.
     </p>
   </header>
 
-  <div class="grid two rv">
+  <div class="grid rv">
     <article class="item">
       <div class="item-top">
         <span class="item-n">TEMPLATE / 01</span>
@@ -434,6 +403,30 @@
     <article class="item">
       <div class="item-top">
         <span class="item-n">TEMPLATE / 02</span>
+        <span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span>
+      </div>
+      <h3>Packet Highway</h3>
+      <p>
+        Firewall traffic drawn as vehicles on a night highway, so network activity is legible to
+        people who do not read log lines. Vehicle size tracks bytes, colour tracks protocol.
+      </p>
+      <ul>
+        <li>Three.js with instanced meshes and object pooling, to hold frame rate on a live feed</li>
+        <li>three.js is inlined and no web fonts are fetched &mdash; zero external requests</li>
+        <li>Generates its own traffic with no backend, so the link just works</li>
+      </ul>
+      <div class="chips">
+        <span class="chip">Three.js</span><span class="chip">WebGL</span><span class="chip">Single file</span>
+      </div>
+      <div class="links-row">
+        <a class="alink" href="./soc-packet-highway.html" target="_blank" rel="noreferrer">Open the demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-packet-highway.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
+    </article>
+
+    <article class="item">
+      <div class="item-top">
+        <span class="item-n">TEMPLATE / 03</span>
         <span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span>
       </div>
       <h3>SOC Alert Console</h3>
@@ -475,12 +468,12 @@
 
   <div class="filters rv" role="group" aria-label="Filter projects by discipline" id="filters">
     <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>15</i></button>
-    <button class="filter" type="button" data-f="detection" aria-pressed="false">Detection <i>3</i></button>
+    <button class="filter" type="button" data-f="detection" aria-pressed="false">Detection <i>2</i></button>
     <button class="filter" type="button" data-f="collection" aria-pressed="false">Collection <i>3</i></button>
-    <button class="filter" type="button" data-f="offensive" aria-pressed="false">Offensive &amp; forensics <i>2</i></button>
-    <button class="filter" type="button" data-f="tooling" aria-pressed="false">Tooling <i>3</i></button>
-    <button class="filter" type="button" data-f="opensource" aria-pressed="false">Open source <i>2</i></button>
-    <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>3</i></button>
+    <button class="filter" type="button" data-f="offensive" aria-pressed="false">Offensive &amp; forensics <i>1</i></button>
+    <button class="filter" type="button" data-f="tooling" aria-pressed="false">Tooling <i>2</i></button>
+    <button class="filter" type="button" data-f="opensource" aria-pressed="false">Open source <i>3</i></button>
+    <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>4</i></button>
   </div>
 
   <div class="index-bar rv">
@@ -513,7 +506,6 @@
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
       <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
-      <ul class="item-stats"><li><b>4-node</b><span>zeek cluster</span></li><li><b>~970k</b><span>alerts/day</span></li></ul>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -577,7 +569,6 @@
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span><span class="item-n">06 / OFFENSIVE</span></div>
       <h3>Authorized internal vulnerability assessment</h3>
       <p>With written authorization from my senior, an internal assessment run from Kali Purple — written up three times for three readers.</p>
-      <ul class="item-stats"><li><b>3</b><span>formal reports</span></li></ul>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -592,21 +583,6 @@
 
     <article class="item rv" data-cat="tooling">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">07 / TOOLING</span></div>
-      <h3>Packet-Highway — 3D traffic visualizer</h3>
-      <p>Firewall traffic rendered as vehicles on a night highway, to make network activity legible to people who do not read log lines.</p>
-<details class="more">
-        <summary>Details <i>3</i></summary>
-        <ul>
-        <li>Three.js with instanced meshes and object pooling, to hold frame rate on a live feed</li>
-        <li>Vehicle size tracks bytes, colour tracks protocol, blocked traffic moves to the emergency lane</li>
-        <li>Self-contained: no CDN, no external assets</li>
-      </ul>
-      </details>
-      <div class="chips"><span class="chip">Three.js</span><span class="chip">WebGL</span></div>
-    </article>
-
-    <article class="item rv" data-cat="tooling">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">08 / TOOLING</span></div>
       <h3>Building with AI tooling</h3>
       <p>Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship.</p>
 <details class="more">
@@ -622,10 +598,9 @@
     </article>
 
     <article class="item soon rv" data-cat="tooling">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">09 / TOOLING</span><span class="badge">In progress</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span><span class="item-n">08 / TOOLING</span><span class="badge">In progress</span></div>
       <h3>Physical floor-plan agent map</h3>
       <p>A live map that resolves an alerting machine to a desk on the office plan, instead of to a hostname nobody can place.</p>
-      <ul class="item-stats"><li><b>~310</b><span>port codes</span></li><li><b>88</b><span>ocr tiles</span></li></ul>
 <details class="more">
         <summary>Details <i>3</i></summary>
         <ul>
@@ -637,26 +612,44 @@
       <div class="chips"><span class="chip">Python</span><span class="chip">OCR</span></div>
     </article>
 
-    <article class="item soon rv" data-cat="offensive">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span><span class="item-n">10 / FORENSICS</span><span class="badge">In progress</span></div>
-      <h3>DFIR memory analysis</h3>
-      <p>Reconstructing what ran on a machine from a memory image — the skill the August 2025 incident showed we did not have.</p>
-<details class="more">
+    <article class="item rv" data-cat="coursework">
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">09 / COURSEWORK</span></div>
+      <h3>Malicious file analysis with Autopsy</h3>
+      <p>A forensics exercise at Asia Pacific University, examining a suspicious file supplied by my lecturer.</p>
+      <details class="more">
         <summary>Details <i>3</i></summary>
         <ul>
-        <li>Volatility process trees, with injected and unparented processes flagged</li>
-        <li>Windows artefact analysis and timeline reconstruction</li>
-        <li>Practising against samples I build myself, so I know the ground truth</li>
+        <li>Examined a lecturer-provided sample in Autopsy to work out whether it was malicious</li>
+        <li>Worked through the file&rsquo;s contents and metadata rather than trusting a verdict from a scanner</li>
+        <li>Written up as a university forensics assignment</li>
       </ul>
       </details>
-      <div class="chips"><span class="chip">Volatility</span><span class="chip">Windows forensics</span></div>
+      <div class="chips"><span class="chip">Autopsy</span><span class="chip">Digital forensics</span></div>
     </article>
 
     <article class="item rv" data-cat="opensource">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">14 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">10 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <h3>Packet Highway &mdash; open-source template</h3>
+      <p>The 3D traffic visualizer, published alongside the two consoles above.</p>
+      <details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
+        <li>Firewall traffic drawn as vehicles on a night highway &mdash; size tracks bytes, colour tracks protocol</li>
+        <li>Three.js with instanced meshes and object pooling to hold frame rate on a live feed</li>
+        <li>three.js inlined and no web fonts fetched, so it makes zero external requests</li>
+      </ul>
+      </details>
+      <div class="chips"><span class="chip">Three.js</span><span class="chip">WebGL</span><span class="chip">Single file</span></div>
+      <div class="links-row">
+        <a class="alink" href="./soc-packet-highway.html" target="_blank" rel="noreferrer">Live demo <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-packet-highway.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
+    </article>
+
+    <article class="item rv" data-cat="opensource">
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">11 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
       <h3>SOC Traffic Map &mdash; open-source template</h3>
       <p>The production traffic map, de-identified and published so anyone with a Wazuh or OpenSearch backend can run it.</p>
-      <ul class="item-stats"><li><b>0</b><span>external requests</span></li><li><b>15m</b><span>posture window</span></li></ul>
       <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -674,10 +667,9 @@
     </article>
 
     <article class="item rv" data-cat="opensource">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">15 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">12 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
       <h3>SOC Alert Console &mdash; open-source template</h3>
       <p>The endpoint alert console, de-identified and published alongside the traffic map.</p>
-      <ul class="item-stats"><li><b>0</b><span>external requests</span></li><li><b>42</b><span>theme combos</span></li></ul>
       <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -695,7 +687,7 @@
     </article>
 
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">16 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">13 / COURSEWORK</span></div>
       <h3>Community library management system</h3>
       <p>A command-line library system with role-based access, built for a programming module.</p>
 <details class="more">
@@ -714,7 +706,7 @@
     </article>
 
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">17 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">14 / COURSEWORK</span></div>
       <h3>Switching &amp; routing labs</h3>
       <p>Packet Tracer labs covering the groundwork the SOC work later depended on.</p>
 <details class="more">
@@ -733,7 +725,7 @@
     </article>
 
     <article class="item rv" data-cat="coursework">
-      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">18 / COURSEWORK</span></div>
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><span class="item-n">15 / COURSEWORK</span></div>
       <h3>Object-oriented Java system</h3>
       <p>A team project built around inheritance and interfaces rather than one long branch statement.</p>
 <details class="more">
@@ -782,7 +774,7 @@
       <h3>Network &amp; infrastructure</h3>
       <p>The systems the monitoring runs on.</p>
       <ul>
-        <li>Zeek &amp; Suricata network security monitoring</li>
+        <li>Zeek network security monitoring</li>
         <li>FortiGate policy &amp; syslog integration</li>
         <li>Aruba switching &amp; wireless monitoring</li>
         <li>Traffic mirroring &amp; decapsulation pipelines</li>
@@ -814,8 +806,8 @@
         <li>Purple-team exercise design &amp; execution</li>
         <li>Malicious code analysis in isolated labs</li>
         <li>Reporting for technical and non-technical readers</li>
-        <li>Memory forensics (Volatility), Autopsy</li>
-        <li>Windows artifact analysis &amp; timelines</li>
+        <li>Autopsy &mdash; file and disk analysis</li>
+        <li>Incident write-ups and handover documentation</li>
       </ul>
     </div>
   </div>
@@ -892,15 +884,7 @@
         I am a final-year Cybersecurity student at Asia Pacific University. For the past year I
         ran security operations for Palmgold Management, a licensed gaming operator in Malaysia —
         the steepest learning curve I have had so far.
-      </p>
-      <p>
-        The habit I picked up from doing it alone is distrust of surface signals. A rule that loads
-        is not a rule that works. A clean service start does not mean your rules loaded. A bulk
-        request that reports success does not mean the documents were indexed. I have been caught
-        by each of those, so now I check the artefact rather than the message about the artefact
-        &mdash; and I have found more real problems that way than from any alert.
-      </p>
-      <p>
+      </p>      <p>
         Running both sides of a purple-team exercise changed how I write detections. Being the
         attacker for a week taught me more about what a rule needs to catch than any template did,
         and the most useful thing to come out of it was not the catch &mdash; it was discovering a
