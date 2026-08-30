@@ -1215,6 +1215,30 @@ h1, h2, h3 {
   background: var(--bg-elevated);
 }
 .spotlight-shot img { width: 100%; height: auto; display: block; }
+
+/* The back face carries a LIVE, scaled-down render of the published console
+   rather than a screenshot. The frame is laid out at a desktop width and then
+   scaled to fit, so the miniature reads like the real thing instead of like a
+   dashboard squeezed into a phone. --shot-scale is set from JS against the
+   measured container width. pointer-events stay off so the card's own
+   click-to-flip keeps working over the top of it. */
+.spotlight-shot.is-live {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 260px;
+}
+.spotlight-shot.is-live iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1600px;
+  height: 900px;
+  border: 0;
+  display: block;
+  transform: scale(var(--shot-scale, 0.34));
+  transform-origin: top left;
+  pointer-events: none;
+}
 .spotlight-back .flip-cap { text-align: left; }
 .spotlight.flip:hover .flip-hint,
 .spotlight.flip:focus-visible .flip-hint { color: var(--accent); }

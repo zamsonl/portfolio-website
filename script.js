@@ -333,13 +333,125 @@
     return s;
   })());
 
+  ART.purple = win('purple-team-exercise', (function () {
+    var s = box(12, 30, 84, 34, CR) + label(20, 44, 'red side', CR, 7) + label(20, 56, 'C2 listener', FT, 6.5);
+    s += arrow(98, 118, 47);
+    s += box(118, 30, 84, 34, MU) + label(126, 44, 'tunnel', MU, 7) + label(126, 56, 'shared edge IP', FT, 6.5);
+    s += arrow(204, 224, 47);
+    s += box(224, 30, 84, 34, A) + label(232, 44, 'victims', A, 7) + label(232, 56, 'beacon 10s', FT, 6.5);
+    s += '<line x1="266" y1="66" x2="266" y2="86" stroke="' + BD + '" stroke-dasharray="2 2"/>';
+    s += box(12, 86, 296, 30, BD) + label(20, 99, 'sensor', FT, 6.5);
+    var ticks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    for (var i = 0; i < ticks.length; i++) {
+      s += '<rect x="' + (74 + i * 20) + '" y="94" width="3" height="14" rx="1.5" fill="' + A + '" opacity="0.8"/>';
+    }
+    s += label(20, 112, 'dns', FT, 6);
+    s += box(12, 124, 296, 26, CR, 'var(--accent-soft)');
+    s += label(20, 141, 'the DNS rules were the only thing that named the internal victims', CR, 7);
+    s += label(12, 166, 'the finding beat the catch: one segment was never mirrored at all', FT, 7);
+    return s;
+  })());
+
+  ART.malware = win('detection-validation-lab', (function () {
+    var names = ['ransomware.rs', 'stealer.py', 'c2client.cpp', 'macro.docm'];
+    var s = '';
+    for (var i = 0; i < 4; i++) {
+      var y = 30 + i * 26;
+      s += box(12, y, 108, 20, BD) + label(19, y + 14, names[i], i === 0 ? CR : MU, 7);
+      s += arrow(122, 146, y + 10);
+    }
+    s += box(146, 30, 74, 98, A, 'var(--accent-soft)');
+    s += label(154, 50, 'isolated', A, 7) + label(154, 62, 'lab VM', A, 7);
+    s += label(154, 84, 'observe', FT, 6.5) + label(154, 96, 'artefacts', FT, 6.5);
+    s += arrow(222, 244, 79);
+    var out = ['wazuh rules', 'zeek scripts', 'os queries'];
+    for (var j = 0; j < 3; j++) {
+      s += box(244, 46 + j * 26, 64, 20, BD) + label(250, 60 + j * 26, out[j], A2, 6.5);
+    }
+    s += label(12, 148, 'benign by construction · hard-guarded to a canary folder', FT, 7);
+    s += label(12, 164, 'never a live sample, never outside the lab', FT, 7);
+    return s;
+  })());
+
+  ART.ai = win('build · verify · keep', (function () {
+    var s = box(12, 32, 90, 30, BD) + label(20, 51, 'draft it fast', MU, 7);
+    s += arrow(104, 126, 47);
+    s += box(126, 32, 90, 30, A, 'var(--accent-soft)') + label(134, 51, 'run the thing', A, 7);
+    s += arrow(218, 240, 47);
+    s += box(240, 32, 68, 30, BD) + label(247, 51, 'keep / bin', MU, 7);
+    s += '<path d="M274 64 L274 82 L57 82 L57 66" stroke="' + BD + '" stroke-width="1.1" fill="none" stroke-dasharray="3 3"/>';
+    s += '<path d="M54 71 L57 64 L60 71Z" fill="' + BD + '"/>';
+    s += label(120, 78, 'and again', FT, 6.5);
+    s += box(12, 94, 296, 26, CR, 'var(--accent-soft)');
+    s += label(20, 111, 'a "done" message is not evidence — check the artefact', CR, 7);
+    var rows = ['hash the deploy, do not trust the deploy tool',
+                'read the count out of the binary, not the README',
+                'a rule that loads is not a rule that works'];
+    for (var i = 0; i < 3; i++) {
+      s += '<circle cx="17" cy="' + (134 + i * 12) + '" r="1.8" fill="' + A + '"/>';
+      s += label(24, 137 + i * 12, rows[i], FT, 6.5);
+    }
+    return s;
+  })());
+
+  ART.console = win('soc-alert-console', (function () {
+    var tiles = [['CRIT', CR], ['HIGH', HI], ['MED', ME], ['LOW', LO]];
+    var s = '';
+    for (var i = 0; i < 4; i++) {
+      s += box(12 + i * 50, 28, 44, 28, BD) + label(18 + i * 50, 40, tiles[i][0], tiles[i][1], 6.5);
+      s += label(18 + i * 50, 52, ['31', '28', '19', '10'][i], MU, 8);
+    }
+    s += box(214, 28, 94, 28, A) + label(221, 46, 'triage · one path', A, 6.5);
+    s += box(12, 62, 296, 60, BD) + label(19, 74, 'live alert feed', FT, 6.5);
+    var sev = [CR, HI, ME, CR, LO];
+    for (var j = 0; j < 5; j++) {
+      s += '<rect x="19" y="' + (80 + j * 9) + '" width="3" height="6" fill="' + sev[j] + '"/>';
+      s += '<rect x="27" y="' + (81 + j * 9) + '" width="' + (150 - j * 14) + '" height="4" rx="2" fill="' + BS + '"/>';
+      s += '<rect x="' + (196 + j * 6) + '" y="' + (81 + j * 9) + '" width="' + (44 - j * 4) + '" height="4" rx="2" fill="' + BD + '"/>';
+    }
+    s += label(12, 138, 'filters, counters and the feed all read one dispatcher,', FT, 7);
+    s += label(12, 152, 'so they cannot drift apart · 7 themes × 6 severity palettes', FT, 7);
+    return s;
+  })());
+
+  ART.tmap = win('soc-traffic-map', (function () {
+    var s = box(12, 28, 214, 96, BD);
+    var pts = [[42, 52], [70, 44], [96, 60], [128, 48], [150, 70], [176, 56], [200, 78],
+               [58, 88], [110, 96], [164, 100], [86, 74], [190, 40]];
+    for (var i = 0; i < pts.length; i++) {
+      s += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="' + (1.8 + (i % 3)) + '" fill="' +
+           (i % 5 === 0 ? CR : A) + '" opacity="0.85"/>';
+    }
+    s += '<path d="M42 52 Q110 20 176 56" stroke="' + A + '" stroke-width="1.2" fill="none" opacity="0.8"/>';
+    s += '<path d="M200 78 Q150 112 58 88" stroke="' + A2 + '" stroke-width="1.2" fill="none" opacity="0.8"/>';
+    s += '<circle cx="176" cy="56" r="4.5" fill="none" stroke="' + A + '"/>';
+    s += label(18, 40, 'global activity', FT, 6.5);
+    s += box(232, 28, 76, 44, BD) + label(238, 40, 'posture', FT, 6.5);
+    s += '<rect x="238" y="46" width="42" height="5" rx="2.5" fill="' + ME + '"/>';
+    s += '<rect x="238" y="46" width="64" height="5" rx="2.5" fill="' + BD + '" opacity="0.35"/>';
+    s += label(238, 64, 'decays, not ratchets', A, 6);
+    s += box(232, 78, 76, 46, BD) + label(238, 90, 'events/min', FT, 6.5);
+    for (var j = 0; j < 11; j++) {
+      s += '<rect x="' + (238 + j * 6) + '" y="' + (118 - (4 + (j * 5) % 22)) + '" width="4" height="' +
+           (4 + (j * 5) % 22) + '" rx="1" fill="' + (j === 10 ? CR : A) + '" opacity="0.8"/>';
+    }
+    s += label(12, 142, 'rate buckets use the EVENT timestamp, not arrival time,', FT, 7);
+    s += label(12, 156, 'so one batched poll cannot invent a spike', FT, 7);
+    return s;
+  })());
+
   var MAP = [
+    [/purple team/i, 'purple', 'Red side ran a tunnelled C2 with implants beaconing on a fixed interval; blue side watched the same activity land in the SIEM and wrote the rules for it.'],
+    [/malicious code/i, 'malware', 'Samples built and detonated in an isolated lab purely to see what they leave behind, then turned into rules, scripts and queries.'],
+    [/ai tooling/i, 'ai', 'Draft fast, then verify against the artefact rather than the message about the artefact. The verification habit is the transferable part.'],
+    [/traffic map/i, 'tmap', 'A world map with live arcs and a threat-posture score that decays with no new events, so an idle network stops reading SEVERE.'],
+    [/alert console/i, 'console', 'Severity counters, ranked lists and the feed all read one filter dispatcher, so they cannot disagree with each other.'],
+    [/visualization suite/i, 'dashboard', 'Activity map on one side, alert queue on the other, with filters and CSV export for working through the day.'],
     [/zeek/i, 'zeek', 'Mirrored traffic is decapsulated in Python, replayed onto a virtual interface, then processed by a four-node Zeek cluster.'],
     [/gpo|endpoint/i, 'gpo', 'One Group Policy object and one idempotent installer, so the whole Windows estate reports in without a desk visit.'],
     [/active directory/i, 'ad', 'Domain controller event channels ranked by volume, so an unusual lockout spike is visible before anyone reports it.'],
     [/wireless|access point/i, 'wifi', 'Association tracking per access point, with auth-failure bursts and cross-AP SSID hopping raised as alerts.'],
     [/vulnerability assessment/i, 'vuln', 'Findings grouped by severity and written up three ways, so the person fixing it and the person funding it both got a readable version.'],
-    [/dashboard suite/i, 'dashboard', 'Activity map on one side, alert queue on the other, with filters and CSV export for working through the day.'],
     [/packet-highway/i, 'highway', 'Every vehicle is a packet. Size tracks bytes, colour tracks protocol, and blocked traffic moves into the emergency lane.'],
     [/floor-plan/i, 'floor', 'OCR lifted every port code off the building plan, so an alerting agent resolves to a desk instead of a hostname.'],
     [/memory analysis/i, 'dfir', 'A process tree from a memory image, with injected and unparented processes flagged for the write-up.'],
@@ -446,11 +558,14 @@
   var back = document.createElement('div');
   back.className = 'spotlight-back';
   back.innerHTML =
-    '<div class="spotlight-shot">' +
-      '<img src="soc-dashboard.png" alt="Traffic overview dashboard from the production SOC, showing session event counts, a severity timeline, a global activity map, top countries, top firewall signatures, targeted services and top applications." loading="lazy" width="1280" height="717" />' +
+    '<div class="spotlight-shot is-live">' +
+      '<iframe title="SOC traffic map running on synthetic demo data" ' +
+        'data-src="./soc-traffic-map.html" loading="lazy" scrolling="no" ' +
+        'referrerpolicy="no-referrer" ' +
+        'style="background:var(--bg-elevated)"></iframe>' +
     '</div>' +
-    '<h4>Traffic Overview \u2014 running in production</h4>' +
-    '<p class="flip-cap">22,246 events in a 30-minute window across 45 countries, drawn live from Wazuh and OpenSearch. The addresses listed are external traffic arriving at the firewall; one row naming an internal host has been masked.</p>' +
+    '<h4>The same console, running right here</h4>' +
+    '<p class="flip-cap">This is the real traffic map, de-identified and published as a template, running live on a synthetic feed. Nothing on it describes a real network. Open it full size, or read the source \u2014 it is one HTML file with no build step and no external requests.</p>' +
     '<span class="flip-hint">' + ICON + '<span>Click to go back</span></span>';
 
   inner.appendChild(front);
@@ -461,12 +576,44 @@
   spot.setAttribute('tabindex', '0');
   spot.setAttribute('role', 'button');
   spot.setAttribute('aria-pressed', 'false');
-  spot.setAttribute('aria-label', 'Enterprise SOC Build-out \u2014 press to show the production dashboard');
+  spot.setAttribute('aria-label', 'Enterprise SOC Build-out \u2014 press to show the live console demo');
+
+  var shot = back.querySelector('.spotlight-shot');
+
+  // The frame is laid out at a desktop width (1600px) and scaled down, so the
+  // miniature keeps real desktop proportions instead of collapsing to a phone
+  // layout. Its logical HEIGHT is derived from the container's own aspect ratio
+  // so the render fills the panel exactly -- a fixed 16:9 frame left a large
+  // empty band under the dashboard, since the back face is as tall as the
+  // (much longer) front face.
+  var BASE_W = 1600;
+  function fitShot() {
+    if (!shot) return;
+    var w = shot.clientWidth, h = shot.clientHeight;
+    if (w <= 0 || h <= 0) return;
+    var scale = w / BASE_W;
+    shot.style.setProperty('--shot-scale', scale.toFixed(4));
+    var frame = shot.querySelector('iframe');
+    if (frame) frame.style.height = Math.round(h / scale) + 'px';
+  }
 
   function toggle() {
     var on = spot.classList.toggle('is-flipped');
     spot.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (on) {
+      var frame = back.querySelector('iframe[data-src]');
+      if (frame) {
+        frame.src = frame.getAttribute('data-src');
+        frame.removeAttribute('data-src');
+      }
+      fitShot();
+      var f = back.querySelector('iframe');
+      if (f) f.addEventListener('load', fitShot, { once: true });
+    }
   }
+
+  window.addEventListener('resize', fitShot);
+  fitShot();
 
   spot.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('a')) return;

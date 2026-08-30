@@ -1,0 +1,2672 @@
+<!doctype html>
+<!--
+  ============================================================================
+  SOC ALERT CONSOLE — single-file template
+  ============================================================================
+  An endpoint alert console over a Wazuh / OpenSearch alert index: incremental
+  polling, severity bucketing, a unified filter and triage layer, a vulnerability
+  backlog, an ATT&CK coverage matrix, and seven surface themes crossed with six
+  severity palettes on two independent axes.
+
+  WHAT THIS IS
+    A single self-contained HTML file. No build step, no dependencies, no
+    package manager — open it in a browser and it runs. Everything it needs
+    (styles, scripts) is inlined, and it makes ZERO external requests.
+
+  DEMO MODE IS ON BY DEFAULT
+    With no backend behind it the page generates a synthetic feed so you can
+    see it working immediately. All demo data is fabricated; addresses come
+    from the RFC 5737 documentation ranges wherever the feature allows it.
+    Add ?demo=0 to the URL to poll a real backend instead.
+
+  POINTING IT AT A REAL BACKEND
+    Serve this file from the same origin as a reverse proxy that forwards to
+    your OpenSearch/Wazuh indexer, then set the proxy path and index name in
+    Settings (or edit CFG near the top of the script). The page issues
+    POST {proxyBase}/{index}/_search and expects standard Wazuh alert
+    documents. It never stores or transmits credentials itself — put auth on
+    the proxy.
+
+  BEFORE YOU DEPLOY IT
+    Search for ACME and replace the placeholder brand, and swap the
+    placeholder logo (a neutral inline SVG) for your own mark.
+
+  NO REAL DATA
+    This template was derived from a console built for a production SOC. Every
+    organisation name, hostname, address, coordinate and account name has been
+    replaced with a placeholder. Nothing here describes a real network.
+  ============================================================================
+-->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="SOC alert console template — a single-file Wazuh/OpenSearch endpoint alert console. Ships with synthetic demo data.">
+<title>SOC Alert Console — Template</title>
+<!-- Placeholder mark. Swap in your own logo (any data: URI or same-folder file). -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2312141a'/%3E%3Cg fill='none' stroke='%23d9a53f' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M16 26a10 10 0 0 1 0-20'/%3E%3Cpath d='M16 21a5 5 0 0 1 0-10'/%3E%3C/g%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23d9a53f'/%3E%3C/svg%3E">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   SOC ALERT CONSOLE — single-file template
+   Identity: precision ops instrument. Charcoal planes, hairline seams,
+   a single burnished-gold brand accent, and severity hues that are the
+   only loud colours on screen — colour is information, chrome is quiet.
+   Two voices of type: uppercase mono micro-labels for chrome, humanist
+   sans for content, tabular figures wherever numbers align.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#0a0b0e; --panel:#12141a; --panel-2:#191c23; --panel-3:#222631;
+  --ink:#eef0f4; --ink-2:#adb3bf; --ink-3:#6f7686;
+  --line:rgba(255,255,255,.065); --line-2:rgba(255,255,255,.13);
+  --gold:#d9a53f; --gold-2:#e8bd63; --gold-ink:#2a1f06;
+  /* brand lockup gold — deliberately independent of the UI accent above, so a
+     user-chosen theme can retint the interface without ever recolouring the
+     brand lockup. Only the lockup may use these. */
+  --brand-gold:#d9a53f; --brand-gold-2:#e8bd63;
+  --crit:#d84545; --high:#ec835a; --med:#fab219; --low:#7c8290; --good:#3fae3f;
+  --on-crit:#ffffff; --on-high:#2a1305; --on-med:#241a00;
+  --mono:"Cascadia Mono","Cascadia Code",ui-monospace,Consolas,monospace;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:10px; --r-sm:7px;
+  --shadow:0 18px 50px rgba(0,0,0,.55);
+  --header-h:54px;
+}
+:root[data-theme="light"]{
+  --bg:#f2f1ec; --panel:#ffffff; --panel-2:#f6f5f1; --panel-3:#eceae2;
+  --ink:#1c1e24; --ink-2:#454a54; --ink-3:#767c88;
+  --line:rgba(28,30,36,.09); --line-2:rgba(28,30,36,.17);
+  --gold:#8a6a1c; --gold-2:#a5822b; --gold-ink:#ffffff;
+  --brand-gold:#8a6a1c; --brand-gold-2:#a5822b;
+  --shadow:0 18px 50px rgba(28,30,36,.22);
+}
+
+/* ── additional themes ───────────────────────────────────────────────────
+   A theme owns the SURFACE only: planes, seams, ink and the UI accent.
+   Severity colour is a separate axis (see the palettes below) so any surface
+   can pair with any palette. --brand-gold stays gold in all of them so the
+   brand lockup never shifts.
+   ─────────────────────────────────────────────────────────────────────── */
+:root[data-theme="midnight"]{
+  --bg:#070c18; --panel:#0e1626; --panel-2:#152034; --panel-3:#1e2c45;
+  --ink:#e8eef8; --ink-2:#a8b6cc; --ink-3:#6b7b96;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.15);
+  --gold:#3d9be9; --gold-2:#6cb9f7; --gold-ink:#04182b;
+  --brand-gold:#d9a53f; --brand-gold-2:#e8bd63;
+  --shadow:0 18px 50px rgba(0,0,0,.6);
+}
+:root[data-theme="slate"]{
+  --bg:#14181c; --panel:#1b2126; --panel-2:#222a30; --panel-3:#2c353d;
+  --ink:#e6ebef; --ink-2:#aab5bd; --ink-3:#727e88;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.14);
+  --gold:#2fa89a; --gold-2:#4ec9ba; --gold-ink:#04211e;
+  --brand-gold:#d9a53f; --brand-gold-2:#e8bd63;
+  --shadow:0 18px 50px rgba(0,0,0,.5);
+}
+:root[data-theme="carbon"]{
+  --bg:#000000; --panel:#0c0c0e; --panel-2:#141417; --panel-3:#1e1e23;
+  --ink:#f2f2f4; --ink-2:#a9a9b2; --ink-3:#6e6e78;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.16);
+  --gold:#8b6cf0; --gold-2:#a98ffa; --gold-ink:#0d0522;
+  --brand-gold:#d9a53f; --brand-gold-2:#e8bd63;
+  --shadow:0 18px 50px rgba(0,0,0,.75);
+}
+:root[data-theme="sandstone"]{
+  --bg:#efe7db; --panel:#fffaf2; --panel-2:#f7efe3; --panel-3:#e9ddc9;
+  --ink:#241d16; --ink-2:#4d4237; --ink-3:#7d7266;
+  --line:rgba(36,29,22,.10); --line-2:rgba(36,29,22,.19);
+  --gold:#b1541f; --gold-2:#c8672c; --gold-ink:#ffffff;
+  --brand-gold:#8a6a1c; --brand-gold-2:#a5822b;
+  --shadow:0 18px 50px rgba(36,29,22,.2);
+}
+/* NOC wall / low-vision: maximum separation, heavier seams */
+:root[data-theme="contrast"]{
+  --bg:#000000; --panel:#0a0a0a; --panel-2:#161616; --panel-3:#262626;
+  --ink:#ffffff; --ink-2:#e2e2e2; --ink-3:#b2b2b2;
+  --line:rgba(255,255,255,.22); --line-2:rgba(255,255,255,.44);
+  --gold:#ffd200; --gold-2:#ffe14d; --gold-ink:#000000;
+  --brand-gold:#e8bd63; --brand-gold-2:#f2ce85;
+  --shadow:0 18px 50px rgba(0,0,0,.85);
+}
+
+/* ── severity palettes ───────────────────────────────────────────────────
+   The second axis. Each palette ships two variants: the base rule targets
+   dark planes, the [data-polarity="light"] rule darkens the same hues so
+   they hold up on paper-white surfaces. JS stamps both data-sevpal and
+   data-polarity on <html>. (Note: `data-sev` is already taken — the KPI tiles
+   use it for the severity FILTER. These are different things; keep them apart.)
+
+   Whatever the hues, three invariants hold in every palette:
+     1. severity ORDER stays legible — crit reads hotter/heavier than high,
+        high than med, med than low;
+     2. --on-crit/-high/-med are chosen for contrast against their own chip,
+        never assumed to be white;
+     3. --good never collides with --crit for a red-green colour-blind viewer.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Classic — the reserved house severity hues. Default. */
+:root[data-sevpal="classic"]{
+  --crit:#d84545; --high:#ec835a; --med:#fab219; --low:#7c8290; --good:#3fae3f;
+  --on-crit:#ffffff; --on-high:#2a1305; --on-med:#241a00;
+}
+:root[data-polarity="light"][data-sevpal="classic"]{
+  --crit:#c0362c; --high:#b45a1e; --med:#9c6f00; --low:#83878f; --good:#2f7a2f;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#ffffff;
+}
+
+/* Vivid — maximum punch for wall displays. Dark chips need dark ink. */
+:root[data-sevpal="vivid"]{
+  --crit:#ff3b30; --high:#ff9500; --med:#ffd60a; --low:#9a9aa2; --good:#32d74b;
+  --on-crit:#000000; --on-high:#000000; --on-med:#000000;
+}
+:root[data-polarity="light"][data-sevpal="vivid"]{
+  --crit:#d70015; --high:#b85200; --med:#8a6a00; --low:#7c8087; --good:#1c7c33;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#ffffff;
+}
+
+/* Ember — deep warm ramp, crimson through rust to gold. */
+:root[data-sevpal="ember"]{
+  --crit:#d93a48; --high:#e07a3c; --med:#e8ab21; --low:#8a8175; --good:#57a86a;
+  --on-crit:#ffffff; --on-high:#2a1305; --on-med:#241a00;
+}
+:root[data-polarity="light"][data-sevpal="ember"]{
+  --crit:#ad2233; --high:#a05418; --med:#7d6a08; --low:#7d766c; --good:#2b6e3d;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#ffffff;
+}
+
+/* Colour-blind safe — red/green swapped for a blue "good" and a
+   luminance-stepped warm ramp, so deuteranopes keep the ordering. */
+:root[data-sevpal="cvd"]{
+  --crit:#d64231; --high:#f0862a; --med:#f5d000; --low:#8896a5; --good:#4d9de0;
+  --on-crit:#ffffff; --on-high:#2a1305; --on-med:#241a00;
+}
+:root[data-polarity="light"][data-sevpal="cvd"]{
+  --crit:#bd3421; --high:#a35a0e; --med:#7d6a00; --low:#6f7d8c; --good:#175f96;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#ffffff;
+}
+
+/* Ultraviolet — cool alternative; heat reads as magenta→violet→blue. */
+:root[data-sevpal="ultraviolet"]{
+  /* #f72585 is the prettier magenta but only reaches 3.8:1 under white chip
+     text; #e01f7f keeps the character and clears the 4.32 house floor */
+  --crit:#e01f7f; --high:#b75cff; --med:#5e9bff; --low:#78798c; --good:#39d3bb;
+  --on-crit:#ffffff; --on-high:#1a0526; --on-med:#04122b;
+}
+:root[data-polarity="light"][data-sevpal="ultraviolet"]{
+  --crit:#b4006b; --high:#7b32c7; --med:#2f5fb8; --low:#74758a; --good:#0f7c6d;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#ffffff;
+}
+
+/* Monochrome — pure luminance ramp for print and colour-free reading. */
+:root[data-sevpal="mono"]{
+  /* --low lifted from #4a4a52: it must recede, not vanish (1.85:1 on Slate) */
+  --crit:#f0f0f2; --high:#b4b4bb; --med:#7c7c86; --low:#63636e; --good:#9aa39a;
+  /* dark ink on the mid-grey med chip reads 5.1:1 where white reads 4.1 —
+     and darkening the grey instead would collapse med into low */
+  --on-crit:#101014; --on-high:#101014; --on-med:#101014;
+}
+:root[data-polarity="light"][data-sevpal="mono"]{
+  --crit:#1c1c20; --high:#55555e; --med:#87878f; --low:#a3a3aa; --good:#6d786d;
+  --on-crit:#ffffff; --on-high:#ffffff; --on-med:#1c1c20;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scrollbar-color:var(--panel-3) var(--bg)}
+body{background:var(--bg);color:var(--ink-2);font:13px/1.55 var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--panel-3);border-radius:5px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+::selection{background:color-mix(in srgb,var(--gold) 30%,transparent);color:var(--ink)}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:1px;border-radius:4px}
+a{color:var(--gold-2);text-decoration:none}
+a:hover{text-decoration:underline}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body.no-motion *,body.no-motion *::before,body.no-motion *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+
+.u-mono{font:600 10px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em}
+.icon{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ── header ─────────────────────────────────────────────────────────── */
+header{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:14px;height:var(--header-h);padding:0 18px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .mark{width:30px;height:30px;flex:none;object-fit:contain}
+/* the lockup text is nowrap, so without this it printed straight through the
+   status pill instead of yielding once the header ran out of room */
+.brand .bt{min-width:0;overflow:hidden}
+.hdr-status{flex:none}
+/* `header` prefix is deliberate: the base width rule for input[type=search]
+   is declared later in this sheet, so an unqualified override would lose */
+@media (max-width:1000px){
+  .brand .bt{display:none}
+  header input[type=search]{width:150px}
+  header input[type=search]:focus{width:186px}
+}
+@media (max-width:840px){.hdr-status .ago{display:none}}
+@media (max-width:740px){.clock{display:none}}
+.brand .bt h1{font:800 13.5px/1.1 var(--sans);color:var(--ink);letter-spacing:.22em;white-space:nowrap}
+.brand .bt h1 b{color:var(--brand-gold-2);font-weight:800}
+.brand .bt .sub{font:600 8.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.24em;color:var(--ink-3);white-space:nowrap}
+.hdr-status{display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid var(--line)}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);font:650 9.5px/1.4 var(--mono);letter-spacing:.12em;color:var(--ink-2);cursor:pointer}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
+.pill.live .dot{animation:breath 2.4s ease-in-out infinite}
+.pill.off .dot{background:var(--crit)}
+.pill.paused .dot{background:var(--med)}
+.pill.demo .dot{background:var(--gold);animation:breath 2.4s ease-in-out infinite}
+@keyframes breath{0%,100%{opacity:1}50%{opacity:.4}}
+.clock{font:650 12px/1 var(--mono);color:var(--ink);letter-spacing:.06em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ago{font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+.hdr-div{width:1px;height:20px;background:var(--line-2);margin:0 4px}
+.searchbox{position:relative;margin-right:4px}
+.searchbox .icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--ink-3);pointer-events:none}
+input[type=search]{background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:6px 10px 6px 28px;color:var(--ink);font-size:12px;width:200px;transition:border-color .12s,width .18s}
+input[type=search]:focus{border-color:var(--gold);width:250px;outline:none}
+input[type=search]::placeholder{color:var(--ink-3)}
+.hbtn{position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:none;border-radius:8px;color:var(--ink-3);cursor:pointer;transition:background .12s,color .12s}
+.hbtn:hover{background:var(--panel-2);color:var(--ink)}
+.hbtn.on{color:var(--gold-2);background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.hbtn .badge{position:absolute;top:1px;right:1px;display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;padding:0 4px;border-radius:999px;background:var(--crit);color:var(--on-crit);font:700 9px/1 var(--mono)}
+
+/* ── KPI strip ──────────────────────────────────────────────────────── */
+main{padding:14px 18px 10px;max-width:1840px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(8,1fr);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+@media (max-width:1500px){.kpis{grid-template-columns:repeat(4,1fr)}.kpi:nth-child(4n+1){border-left:none}.kpi:nth-child(n+5){border-top:1px solid var(--line)}}
+.kpi{position:relative;display:flex;flex-direction:column;align-items:flex-start;padding:12px 16px 11px;border-left:1px solid var(--line);background:none;border-top:none;border-right:none;border-bottom:none;text-align:left;cursor:default}
+.kpi:first-child{border-left:none}
+.kpi.pick{cursor:pointer;transition:background .12s}
+.kpi.pick:hover{background:var(--panel-2)}
+.kpi.pick.sel{background:color-mix(in srgb,var(--gold) 7%,var(--panel))}
+.kpi.pick.sel::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--gold)}
+.kpi .lbl{display:flex;align-items:center;gap:6px;font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.13em;color:var(--ink-3)}
+.kpi .val{font-size:27px;font-weight:700;color:var(--ink);margin-top:7px;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:10.5px;color:var(--ink-3);margin-top:4px;min-height:15px}
+.kpi .sub.warn{color:var(--crit);font-weight:650}
+.kpi .sub .up{color:var(--high);font-weight:650} .kpi .sub .dn{color:var(--good);font-weight:650}
+.kpi.k-quiet .val{color:var(--ink)} .kpi.k-quiet.hot .val{color:var(--med)}
+.kpi.k-crit{box-shadow:inset 0 2px 0 var(--crit)} .kpi.k-crit .val{color:var(--crit)}
+.kpi.k-high{box-shadow:inset 0 2px 0 var(--high)} .kpi.k-high .val{color:var(--high)}
+.kpi.k-med{box-shadow:inset 0 2px 0 var(--med)} .kpi.k-med .val{color:var(--med)}
+.kpi.k-low{box-shadow:inset 0 2px 0 var(--low)}
+.blink{width:6px;height:6px;border-radius:50%;background:var(--crit);animation:breath 1.6s ease-in-out infinite}
+
+/* ── grid & cards ─────────────────────────────────────────────────────
+   Three rails of EQUAL height. The row is at least a screenful tall, every
+   rail stretches to the row, and each rail hands its slack to one nominated
+   `.grow` card — one whose list gets genuinely better with height (more feed
+   rows, more signatures, more CVEs), never to blank padding. Rails used to be
+   `align-items:start`, so the short ones stopped where their content did and
+   left a hole in the page under them. */
+.grid{display:grid;grid-template-columns:300px minmax(0,1fr) 330px;gap:12px;align-items:stretch;
+      min-height:clamp(560px, calc(100vh - 240px), 1180px)}
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0}
+.rail>.card{flex:0 0 auto}
+/* `flex-basis:0` is the load-bearing bit. With `auto` the card's own content
+   counts toward the row height, so one long feed drags every rail down with it
+   and "equal height" stops meaning anything. At 0 the grow cards claim a share
+   of what is left over instead, and the row height is set by the fixed cards
+   and the min-height above — deterministically, whatever the data does. */
+.rail>.card.grow{flex:1 1 0;min-height:170px}
+.rail>.card.grow.grow-2{flex-grow:1.7}          /* denser list, bigger share */
+.rail>.card.grow.feedcard{min-height:260px}
+@media (max-width:1360px){
+  .grid{grid-template-columns:1fr;min-height:0}
+  .rail>.card.grow{flex:0 0 auto}
+  .rail>.card.grow .rank{max-height:272px}
+  .rail>.card.grow .vscroll{max-height:300px}
+  .rail>.card.grow .feed-wrap{max-height:540px}
+}
+.card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.card.grow .card-b{flex:1;min-height:0;display:flex;flex-direction:column}
+/* inside a grown card only the scroller stretches — tallies, sub-labels and
+   footnotes keep their natural height instead of being squeezed by flex */
+.card.grow .card-b>*{flex:none}
+/* the scroll caps are what a short card needs and a grown card must drop.
+   Must stay AFTER the rule above — same specificity, later wins. */
+.card.grow .rank,.card.grow .vscroll{max-height:none;flex:1 1 auto;min-height:0}
+.card.grow .empty{flex:1;justify-content:center}
+.card-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line)}
+.card-h h2{display:flex;align-items:center;gap:8px;font:600 10px/1.3 var(--mono);color:var(--ink);text-transform:uppercase;letter-spacing:.13em}
+.card-h h2::before{content:'';width:7px;height:7px;border-radius:2px;background:var(--gold);flex:none}
+.card-h .hmeta{font-size:11px;color:var(--ink-3);white-space:nowrap}
+.card-h select{background:var(--panel-2);border:1px solid var(--line-2);border-radius:6px;padding:3px 6px;font-size:10.5px;color:var(--ink-2)}
+.card-b{padding:11px 13px}
+.muted{color:var(--ink-3);font-size:11.5px}
+.empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 10px;color:var(--ink-3);font-size:11.5px;text-align:center}
+.empty .icon{width:22px;height:22px;opacity:.5}
+
+body.compact main{padding:8px 14px}
+body.compact .kpis{margin-bottom:8px}
+body.compact .kpi{padding:7px 12px 6px}
+body.compact .kpi .val{font-size:19px;margin-top:3px}
+body.compact .kpi .sub{display:none}
+body.compact .grid{gap:8px;min-height:clamp(480px, calc(100vh - 190px), 1200px)}
+body.compact .rail{gap:8px}
+body.compact .card-h{padding:6px 10px}
+body.compact .card-b{padding:6px 10px}
+body.compact table.feed td{padding:3px 9px;font-size:11.5px}
+body.compact .rank li{padding:4px 0;font-size:11px}
+/* `.rank li.pv` bleeds 6px either side with a negative margin and pays it back
+   as padding. The rule above outranks that padding but not the margin, so in
+   compact every pivot row lost its first character and its count off the right
+   edge. Restate the padding at a specificity that wins. */
+body.compact .rank li.pv{padding:4px 6px}
+body.compact .deck{margin-top:8px;gap:8px}
+body.compact .deck-row{gap:8px}
+body.compact .atk-cell .nm{display:none}
+
+/* ── ranked lists ───────────────────────────────────────────────────── */
+/* overflow-x:hidden is load-bearing — the .pv rows are 12px wider than this box
+   by design, and without it that overhang makes the list sideways-scrollable */
+.rank{list-style:none;display:flex;flex-direction:column;max-height:272px;overflow-y:auto;overflow-x:hidden}
+.rank li{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px 10px;padding:6px 0;font-size:12px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+.rank li:last-child{border-bottom:none}
+.rank .name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-2)}
+.rank .n{font:650 11.5px/1.4 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.rank .track{grid-column:1/-1;height:4px;border-radius:2px;background:color-mix(in srgb,var(--panel-3) 70%,transparent);overflow:hidden}
+.rank .track i{display:block;height:100%;border-radius:2px;background:var(--gold);opacity:.85;transition:width .3s ease}
+/* pivot rows — every ranked item filters the feed */
+.rank li.pv{cursor:pointer;padding-left:6px;padding-right:6px;margin:0 -6px;border-radius:5px;transition:background .1s}
+.rank li.pv:hover{background:var(--panel-2)}
+.rank li.pv:hover .name{color:var(--ink)}
+.rank li.pv.on{background:color-mix(in srgb,var(--gold) 11%,transparent)}
+.rank li.pv.on .name{color:var(--ink)} .rank li.pv.on .track i{background:var(--gold-2);opacity:1}
+.rank li .dot-s{width:6px;height:6px;border-radius:50%;flex:none;display:inline-block;margin-right:6px;vertical-align:1px}
+.rank li .ago-s{font:600 9.5px/1 var(--mono);color:var(--ink-3);letter-spacing:.04em}
+.rank li .ago-s.stale{color:var(--med)} .rank li .ago-s.gone{color:var(--crit)}
+
+/* ── active-filter breadcrumbs ──────────────────────────────────────── */
+.crumbs{display:none;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--gold) 4%,transparent)}
+.crumbs.show{display:flex}
+.crumbs .lead{font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3)}
+.crumb{display:inline-flex;align-items:center;gap:6px;padding:2px 5px 2px 9px;border-radius:6px;background:color-mix(in srgb,var(--gold) 12%,transparent);border:1px solid color-mix(in srgb,var(--gold) 32%,transparent);font-size:11px;color:var(--ink);max-width:290px}
+.crumb .k{font:700 8.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--gold-2);flex:none}
+.crumb .v{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crumb button{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:0 1px;font-size:12px;line-height:1;flex:none}
+.crumb button:hover{color:var(--crit)}
+.crumbs .clear-all{margin-left:auto;background:none;border:none;color:var(--ink-3);cursor:pointer;font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;padding:3px 5px;border-radius:5px}
+.crumbs .clear-all:hover{color:var(--ink);background:var(--panel-2)}
+
+/* ── timeline ───────────────────────────────────────────────────────── */
+.tl-wrap{padding:10px 12px;position:relative}
+canvas.chart{width:100%;display:block;cursor:crosshair;user-select:none;touch-action:none}
+.tl-hint{position:absolute;left:12px;bottom:12px;font:600 8.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);opacity:0;transition:opacity .15s;pointer-events:none}
+.tl-wrap:hover .tl-hint{opacity:.75}
+.legend{display:inline-flex;gap:10px;font:600 9px/1 var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+#tl-tip{position:absolute;z-index:10;background:var(--panel-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:7px 10px;font-size:11px;box-shadow:var(--shadow);pointer-events:none;opacity:0;transition:opacity .1s;min-width:120px}
+#tl-tip .t{color:var(--ink);font:650 10.5px/1.4 var(--mono);margin-bottom:4px}
+#tl-tip .r{display:flex;align-items:center;gap:6px;color:var(--ink-2);padding:1px 0}
+#tl-tip .r i{width:8px;height:8px;border-radius:2px;flex:none}
+#tl-tip .r b{margin-left:auto;color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* ── buttons, chips, badges ─────────────────────────────────────────── */
+.btn{background:var(--panel-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:6px 11px;font-size:12px;color:var(--ink-2);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .12s,border-color .12s,color .12s}
+.btn:hover{background:var(--panel-3);color:var(--ink)}
+.btn.on{border-color:var(--gold);color:var(--ink)}
+.btn.gold{background:color-mix(in srgb,var(--gold) 16%,var(--panel));border-color:color-mix(in srgb,var(--gold) 45%,transparent);color:var(--ink)}
+.btn.gold:hover{background:color-mix(in srgb,var(--gold) 26%,var(--panel))}
+.lvl{display:inline-flex;align-items:center;justify-content:center;min-width:38px;padding:1px 6px;border-radius:4px;font:700 9.5px/1.7 var(--mono);letter-spacing:.05em}
+.lvl.crit{background:var(--crit);color:var(--on-crit)}
+.lvl.high{background:var(--high);color:var(--on-high)}
+.lvl.med{background:var(--med);color:var(--on-med)}
+.lvl.low{background:var(--panel-3);color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;padding:1px 8px;border-radius:5px;background:color-mix(in srgb,var(--panel-3) 65%,transparent);border:1px solid var(--line);font-size:10.5px;color:var(--ink-3);margin:1px 3px 1px 0;white-space:nowrap}
+.chip.mitre{color:var(--gold-2);background:color-mix(in srgb,var(--gold) 10%,transparent);border-color:color-mix(in srgb,var(--gold) 30%,transparent)}
+.nbadge{display:inline-flex;padding:0 6px;border-radius:999px;background:var(--panel-3);border:1px solid var(--line-2);font:700 10px/1.6 var(--mono);color:var(--ink-2)}
+
+/* ── feed ───────────────────────────────────────────────────────────── */
+.feed-toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.feed-toolbar select{background:var(--panel-2);border:1px solid var(--line-2);border-radius:6px;padding:4px 6px;font-size:11.5px}
+.muted-row{display:none;flex-wrap:wrap;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid var(--line)}
+.muted-row.show{display:flex}
+.muted-row .lead{font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3)}
+.mute-chip{display:inline-flex;align-items:center;gap:6px;padding:2px 5px 2px 9px;border-radius:6px;background:color-mix(in srgb,var(--crit) 11%,transparent);border:1px solid color-mix(in srgb,var(--crit) 30%,transparent);font-size:11px;color:var(--ink-2)}
+.mute-chip button{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:0;font-size:12px;line-height:1}
+.mute-chip button:hover{color:var(--crit)}
+.feed-toolbar,.crumbs,.muted-row{flex:none}
+.feed-shell{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+/* no max-height on wide layouts: the feed is the centre rail's `.grow` card,
+   so every pixel the rails gain turns into visible alerts rather than padding */
+.feed-wrap{flex:1 1 auto;min-height:0;overflow-y:auto;scroll-behavior:auto}
+.feed-new{position:absolute;top:36px;left:50%;transform:translateX(-50%) translateY(-6px);z-index:3;display:none;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--gold);color:var(--gold-ink);border:none;font:700 10px/1.6 var(--mono);letter-spacing:.09em;cursor:pointer;box-shadow:var(--shadow);opacity:0;transition:opacity .16s,transform .16s}
+.feed-new.show{display:flex;opacity:1;transform:translateX(-50%) translateY(0)}
+table.feed{width:100%;border-collapse:collapse;font-size:12px}
+table.feed th{text-align:left;font:600 9px/1.4 var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.12em;padding:8px 11px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+table.feed td{padding:6px 11px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);vertical-align:top}
+table.feed tbody tr{cursor:pointer;transition:background .1s}
+table.feed tbody tr:hover td{background:var(--panel-2)}
+table.feed td.t{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);white-space:nowrap}
+table.feed tr.watched td.t{box-shadow:inset 3px 0 var(--gold)}
+table.feed tr.cur td{background:color-mix(in srgb,var(--gold) 13%,var(--panel))!important}
+table.feed tr.cur td.t{box-shadow:inset 3px 0 var(--gold-2)}
+table.feed tr.none{cursor:default}
+table.feed tr.none:hover td{background:transparent}
+.desc{color:var(--ink)}
+.agent{color:var(--ink-3);font-size:11px;white-space:nowrap}
+
+/* ── FIM & vulnerabilities ──────────────────────────────────────────── */
+.fim-tally{display:flex;gap:9px;margin-bottom:10px}
+.fim-tally div{flex:1;text-align:center;background:color-mix(in srgb,var(--panel-2) 80%,transparent);border:1px solid var(--line);border-radius:8px;padding:8px 4px}
+.fim-tally .v{font-size:17px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.fim-tally .k{font:600 8.5px/1 var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em;margin-top:3px}
+.vscroll{max-height:300px;overflow-y:auto}
+.vuln-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);font-size:12px}
+.vuln-row:last-child{border-bottom:none}
+.vuln-row .p{flex:1;min-width:0}
+.vuln-row .nm{display:flex;align-items:center;gap:7px;min-width:0;font-family:var(--mono);font-size:11.5px}
+.vuln-row .nm .cve{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vuln-row .nm a.cve:hover{color:var(--gold-2)}
+.vuln-row .meta{font-size:10.5px;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vuln-row .score{font:700 12px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.vsev{flex:none;display:inline-flex;align-items:center;padding:0 5px;height:14px;border-radius:3px;font:700 8.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.vsev.crit{background:var(--crit);color:var(--on-crit)}
+.vsev.high{background:var(--high);color:var(--on-high)}
+.vsev.med{background:var(--med);color:var(--on-med)}
+.vsev.low{background:var(--panel-3);color:var(--ink-2)}
+
+/* ── analysis deck ──────────────────────────────────────────────────────
+   The rails answer "what is happening right now". The deck answers "what did
+   this window add up to" — which adversary techniques fired, who is knocking
+   and at which account, which control frameworks are lit. Each panel is
+   width-filling BY CONSTRUCTION (a fixed 14-column tactic matrix, paired rank
+   lists, auto-fit framework blocks), so no amount of sparse data can reopen
+   the hole this band was built to close.
+   ─────────────────────────────────────────────────────────────────────── */
+.deck{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.deck-row{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:12px;align-items:stretch}
+@media (max-width:1100px){.deck-row{grid-template-columns:1fr}}
+.sub-lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);margin-bottom:8px}
+.sub-lbl b{font:650 10px/1 var(--mono);color:var(--ink-2);letter-spacing:.04em}
+.note{margin-top:9px;padding-top:8px;border-top:1px solid var(--line);color:var(--ink-3);font-size:10.5px;line-height:1.45}
+
+/* ATT&CK coverage matrix — all 14 tactics always present. The empty columns
+   carry the point: they are the part of the kill chain this window is blind
+   to, which a top-N tactic list can never show you. */
+/* 14 columns need ~1500px; below that the matrix scrolls sideways, so fade the
+   edge that still has content behind it rather than letting a tactic column be
+   sliced off with no hint that more exists. JS toggles the two classes. */
+.atk-scroll{overflow-x:auto;padding-bottom:3px}
+.atk-scroll.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
+.atk-scroll.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px);mask-image:linear-gradient(90deg,transparent,#000 44px)}
+.atk-scroll.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,transparent,#000 44px,#000 calc(100% - 44px),transparent)}
+.atk{display:grid;grid-template-columns:repeat(14,minmax(102px,1fr));gap:6px;align-items:start;min-width:min-content}
+.atk-col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.atk-h{display:flex;flex-direction:column;gap:4px;padding:6px 7px 5px;border:none;border-bottom:2px solid var(--line);background:none;color:var(--ink-3);text-align:left;cursor:default;border-radius:6px 6px 0 0;transition:background .1s,color .1s}
+.atk-h .tn{font:600 8.5px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.atk-h .tc{font:700 13px/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.atk-col.hit .atk-h{cursor:pointer;color:var(--ink-2);border-bottom-color:var(--gold)}
+.atk-col.hit .atk-h .tc{color:var(--ink)}
+.atk-col.hit .atk-h:hover{background:var(--panel-2);color:var(--ink)}
+.atk-col.on .atk-h{background:color-mix(in srgb,var(--gold) 15%,transparent);color:var(--ink)}
+.atk-cells{display:flex;flex-direction:column;gap:5px;min-height:30px}
+.atk-void{height:30px;border-radius:6px;border:1px dashed var(--line);opacity:.6}
+.atk-cell{display:block;width:100%;text-align:left;padding:5px 7px 6px;border-radius:6px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;transition:transform .1s,box-shadow .1s}
+.atk-cell:hover{transform:translateY(-1px)}
+.atk-cell .id{display:flex;align-items:baseline;justify-content:space-between;gap:6px;font:700 10.5px/1.3 var(--mono);color:var(--ink);letter-spacing:.02em}
+.atk-cell .id .tid{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atk-cell .id b{flex:none;font-variant-numeric:tabular-nums;font-weight:700}
+.atk-cell .nm{display:block;margin-top:2px;font-size:9.5px;line-height:1.3;color:var(--ink-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atk-cell.s-crit{background:color-mix(in srgb,var(--crit) 26%,var(--panel-2));border-color:color-mix(in srgb,var(--crit) 55%,transparent)}
+.atk-cell.s-high{background:color-mix(in srgb,var(--high) 22%,var(--panel-2));border-color:color-mix(in srgb,var(--high) 48%,transparent)}
+.atk-cell.s-med{background:color-mix(in srgb,var(--med) 17%,var(--panel-2));border-color:color-mix(in srgb,var(--med) 40%,transparent)}
+.atk-cell.on{box-shadow:0 0 0 2px var(--gold);border-color:transparent}
+.atk-more{padding:2px 7px;font:600 9px/1.5 var(--mono);letter-spacing:.06em;color:var(--ink-3)}
+
+/* threat sources — two paired rank lists so the panel fills its width even
+   when only one of the two dimensions has data */
+.src-split{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;align-content:start}
+.src-split>div{min-width:0;display:flex;flex-direction:column;min-height:0}
+@media (max-width:640px){.src-split{grid-template-columns:1fr}}
+/* the two panels in a deck row are equal height, so pin their footnotes to the
+   bottom — otherwise the shorter panel's note floats mid-card */
+.deck-row>.card>.card-b{flex:1;min-height:0;display:flex;flex-direction:column}
+.deck-row>.card>.card-b>.note{margin-top:auto}
+
+/* compliance exposure — one full-width row per framework rather than a grid of
+   blocks: five items never tile evenly into an auto-fit grid, and the leftover
+   cells are the same species of hole this whole pass is about. Rows also make
+   the five bars directly comparable, which blocks never did. */
+.comp{display:flex;flex-direction:column;gap:8px}
+.comp-fw{display:grid;grid-template-columns:106px 42px minmax(90px,1fr) auto;align-items:center;gap:4px 14px;
+         min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:8px;
+         background:color-mix(in srgb,var(--panel-2) 70%,transparent)}
+.comp-fw.none{opacity:.45}
+.comp-fw .fw-n{font:600 8.5px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-2)}
+.comp-fw .fw-v{justify-self:end;font:700 16px/1 var(--sans);color:var(--ink);font-variant-numeric:tabular-nums}
+.comp-fw .fw-bar{height:5px;border-radius:3px;background:color-mix(in srgb,var(--panel-3) 70%,transparent);overflow:hidden}
+.comp-fw .fw-bar i{display:block;height:100%;border-radius:3px;background:var(--gold);opacity:.85;transition:width .3s ease}
+@media (max-width:900px){
+  .comp-fw{grid-template-columns:1fr auto;gap:6px 10px}
+  .comp-fw .fw-bar,.comp-fw .comp-ctl{grid-column:1/-1}
+}
+.comp-ctl{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+button.chip{cursor:pointer;margin:0;transition:color .1s,border-color .1s,background .1s}
+button.chip:hover{color:var(--ink);border-color:var(--line-2)}
+button.chip.on{color:var(--ink);background:color-mix(in srgb,var(--gold) 14%,transparent);border-color:color-mix(in srgb,var(--gold) 40%,transparent)}
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+footer{display:flex;align-items:center;gap:16px;max-width:1840px;margin:0 auto;padding:6px 18px 18px;font:600 9.5px/1.6 var(--mono);letter-spacing:.08em;color:var(--ink-3)}
+footer .sep{color:var(--line-2)}
+footer .right{margin-left:auto}
+footer b{color:var(--ink-2);font-weight:650}
+
+/* ── slide-over panels (detail drawer + settings) ───────────────────── */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;opacity:0;pointer-events:none;transition:opacity .18s}
+.scrim.show{opacity:1;pointer-events:auto}
+.panel-r{position:fixed;top:0;right:0;bottom:0;width:470px;max-width:94vw;background:var(--panel);border-left:1px solid var(--line-2);z-index:95;display:flex;flex-direction:column;transform:translateX(102%);transition:transform .2s ease;box-shadow:var(--shadow)}
+.panel-r.show{transform:translateX(0)}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex:none}
+.panel-h h2{font:700 11px/1.5 var(--mono);color:var(--ink);letter-spacing:.13em;text-transform:uppercase}
+.panel-x{background:none;border:none;color:var(--ink-3);cursor:pointer;padding:4px;border-radius:6px;display:flex}
+.panel-x:hover{color:var(--ink);background:var(--panel-2)}
+.panel-b{flex:1;overflow-y:auto;padding:14px 18px}
+.panel-f{padding:12px 18px;border-top:1px solid var(--line);flex:none;display:flex;gap:8px;flex-wrap:wrap}
+
+.sevband{display:flex;align-items:center;gap:10px;margin:-2px 0 12px;padding:9px 12px;border-radius:8px;border:1px solid var(--line)}
+.sevband .desc2{font-size:13px;color:var(--ink);font-weight:600;line-height:1.4}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:5px 12px;font-size:12px;margin-bottom:12px}
+.kv dt{color:var(--ink-3);font:600 9.5px/1.8 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.kv dd{color:var(--ink);word-break:break-word}
+.dsec{margin:14px 0 4px;display:flex;align-items:center;gap:8px;font:600 9.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--gold-2)}
+.dsec::after{content:'';flex:1;height:1px;background:var(--line)}
+pre{background:var(--panel-3);border-radius:var(--r-sm);padding:10px;font:11px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;color:var(--ink-2)}
+details.raw summary{cursor:pointer;font:600 9.5px/2 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3)}
+details.raw summary:hover{color:var(--ink)}
+.tagline{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 10px}
+
+/* ── settings form ──────────────────────────────────────────────────── */
+.set-sec{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.set-sec:first-child{margin-top:0;padding-top:0;border-top:none}
+.set-sec h3{font:600 9.5px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--gold-2);margin-bottom:10px}
+.f-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0}
+.f-row .l{font-size:12.5px;color:var(--ink);font-weight:550}
+.f-row .hint{font-size:10.5px;color:var(--ink-3);margin-top:2px;font-weight:400}
+.f-field{padding:7px 0}
+.f-field label{display:block;font-size:11.5px;color:var(--ink);font-weight:550;margin-bottom:5px}
+.f-field .hint{font-size:10.5px;color:var(--ink-3);margin-top:4px}
+.f-grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+#settings input[type=text],#settings input[type=number],#settings textarea{width:100%;background:var(--panel-2);border:1px solid var(--line-2);border-radius:7px;padding:7px 9px;font-size:12px;color:var(--ink)}
+#settings input:focus,#settings textarea:focus{border-color:var(--gold);outline:none}
+#settings textarea{height:44px;resize:vertical;font:11px var(--mono)}
+.switch{position:relative;display:inline-block;width:36px;height:21px;flex:none}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .tr{position:absolute;inset:0;background:var(--panel-3);border-radius:999px;cursor:pointer;transition:background .15s}
+.switch .th{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.switch input:checked + .tr{background:var(--gold)}
+.switch input:checked + .tr .th{transform:translateX(15px)}
+/* ── appearance chips ───────────────────────────────────────────────────
+   One compact control used in two places: the header popover and Settings.
+   A chip is a literal miniature of what it does — the surface chip paints
+   the plane with its accent dot, the severity chip paints its own ramp — so
+   the row needs no labels and stays scannable at a glance. */
+.ap-sec{padding:11px 14px;border-bottom:1px solid var(--line)}
+.ap-sec:last-of-type{border-bottom:none}
+.ap-lbl{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:600 9px/1 var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);margin-bottom:9px}
+.ap-lbl b{font:600 10px/1 var(--mono);color:var(--ink);letter-spacing:.06em;text-transform:none}
+.ap-row{display:flex;flex-wrap:wrap;gap:7px}
+.ap-chip{position:relative;width:40px;height:27px;padding:0;border-radius:7px;border:1px solid var(--line-2);background:none;cursor:pointer;overflow:hidden;display:block;transition:box-shadow .12s,transform .12s}
+.ap-chip:hover{transform:translateY(-1px);border-color:var(--ink-3)}
+.ap-chip.on{border-color:transparent;box-shadow:0 0 0 2px var(--gold)}
+.ap-chip .plane{position:absolute;inset:0}
+.ap-chip .acc{position:absolute;right:4px;bottom:4px;width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.ap-chip .stripes{position:absolute;inset:0;display:flex}
+.ap-chip .stripes i{flex:1}
+.ap-note{margin-top:9px;font-size:10.5px;line-height:1.4;color:var(--ink-3);min-height:29px}
+.ap-note b{color:var(--ink);font-weight:650}
+/* sized so all 7 surfaces sit on one row and all 6 palettes on the next —
+   a wrapped orphan chip reads as an accident rather than a set */
+#pop-appear{width:353px}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:11.5px;padding:2px 0}
+.keys kbd{justify-self:start;background:var(--panel-2);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font:10.5px var(--mono);color:var(--ink)}
+.keys span{color:var(--ink-2);align-self:center}
+
+/* ── popovers (notifications / watchlist) ───────────────────────────── */
+.pop{display:none;position:fixed;top:calc(var(--header-h) + 6px);right:16px;z-index:85;background:var(--panel);border:1px solid var(--line-2);border-radius:10px;width:360px;max-height:74vh;flex-direction:column;box-shadow:var(--shadow);overflow:hidden}
+.pop.show{display:flex}
+.pop-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.pop-h h2{font:650 10px/1.5 var(--mono);text-transform:uppercase;letter-spacing:.11em;color:var(--ink)}
+.pop-list{overflow-y:auto;flex:1}
+.pop-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:30px 14px;color:var(--ink-3);text-align:center;font-size:11.5px}
+.pop-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);cursor:pointer;font-size:11.5px}
+.pop-item:hover{background:var(--panel-2)}
+.pop-item .body{flex:1;min-width:0}
+.pop-item .t{color:var(--ink);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pop-item .m{color:var(--ink-3);font-size:10.5px;display:flex;gap:8px}
+.pop-item .act{background:none;border:1px solid var(--line-2);border-radius:5px;color:var(--ink-3);cursor:pointer;font-size:10px;padding:2px 7px}
+.pop-item .act:hover{color:var(--ink);border-color:var(--gold)}
+
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:8px 16px;font-size:12px;color:var(--ink);opacity:0;transition:opacity .2s,transform .2s;z-index:120;pointer-events:none;box-shadow:var(--shadow)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast .icon{color:var(--good)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <!-- Placeholder mark — neutral geometry, no brand. Replace with your own logo. -->
+    <svg class="mark" viewBox="0 0 32 32" role="img" aria-label="Logo">
+      <rect width="32" height="32" rx="7" fill="var(--plane-2)"></rect>
+      <g fill="none" stroke="var(--brand-gold)" stroke-width="2" stroke-linecap="round">
+        <path d="M16 26a10 10 0 0 1 0-20"></path><path d="M16 21a5 5 0 0 1 0-10"></path>
+      </g>
+      <circle cx="16" cy="16" r="2.5" fill="var(--brand-gold)"></circle>
+    </svg>
+    <div class="bt">
+      <h1 id="brand-lockup">ACME<b> SOC</b></h1>
+      <span class="sub" id="brand-unit">Security Operations</span>
+    </div>
+  </div>
+  <div class="hdr-status">
+    <button class="pill off" id="pill-conn" title="Connection status — click to poll now"><span class="dot"></span><span id="pill-txt">CONNECTING</span></button>
+    <span class="clock" id="clock">--:--:--</span>
+    <span class="ago" id="last-poll"></span>
+  </div>
+  <div class="hdr-right">
+    <div class="searchbox">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="search" placeholder="Search feed  ( / )" aria-label="Search feed">
+    </div>
+    <button class="hbtn" id="btn-pause" title="Pause ingest (Space)" aria-label="Pause ingest"><svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
+    <button class="hbtn" id="btn-notif" title="Critical notifications (N)" aria-label="Notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge" id="badge-notif" style="display:none">0</span></button>
+    <button class="hbtn" id="btn-watch" title="Watchlist (W)" aria-label="Watchlist"><svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg><span class="badge" id="badge-watch" style="display:none;background:var(--gold);color:var(--gold-ink)">0</span></button>
+    <div class="hdr-div"></div>
+    <button class="hbtn" id="btn-theme" title="Appearance — surface &amp; severity colours (T / P to cycle)" aria-label="Appearance"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button class="hbtn" id="btn-compact" title="Compact density (C)" aria-label="Compact density"><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <button class="hbtn" id="btn-full" title="Fullscreen (F)" aria-label="Fullscreen"><svg class="icon" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+    <button class="hbtn" id="btn-export" title="Export CSV (E)" aria-label="Export CSV"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></button>
+    <div class="hdr-div"></div>
+    <button class="hbtn" id="btn-settings" title="Settings (S)" aria-label="Settings"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid">
+    <div class="rail"><!-- left rail -->
+      <div class="card grow">
+        <div class="card-h"><h2>Top Rule Groups</h2><span class="hmeta" id="grp-meta">—</span></div>
+        <div class="card-b"><ul class="rank" id="list-groups"></ul></div>
+      </div>
+      <div class="card grow">
+        <div class="card-h"><h2>Top Signatures</h2><span class="hmeta" id="sig-count">—</span></div>
+        <div class="card-b"><ul class="rank" id="list-sigs"></ul></div>
+      </div>
+    </div>
+
+    <div class="rail"><!-- centre rail -->
+      <div class="card">
+        <div class="card-h">
+          <h2>Alert Volume</h2>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="legend"><span><i style="background:var(--crit)"></i>Crit</span><span><i style="background:var(--high)"></i>High</span><span><i style="background:var(--med)"></i>Med</span><span><i style="background:var(--low)"></i>Low</span></span>
+            <span class="hmeta" id="rate-lbl">—</span>
+          </div>
+        </div>
+        <div class="tl-wrap"><canvas class="chart" id="cv-tl" height="150"></canvas><div id="tl-tip"></div><div class="tl-hint">click a bar · drag to brush a range</div></div>
+      </div>
+      <div class="card grow feedcard">
+        <div class="card-h"><h2>Live Alert Feed</h2><span class="hmeta" id="feed-count">0 shown</span></div>
+        <div class="feed-toolbar">
+          <select id="ff-sev" aria-label="Filter by severity"><option value="">All severities</option><option value="crit">Critical</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select>
+          <select id="ff-group" aria-label="Filter by rule group"><option value="">All rule groups</option></select>
+          <select id="ff-agent" aria-label="Filter by agent"><option value="">All agents</option></select>
+          <button class="btn" id="ff-watched" title="Show only watched agents"><svg class="icon" style="width:13px;height:13px" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>Watched</button>
+          <button class="btn" id="ff-clear">Clear</button>
+        </div>
+        <div class="crumbs" id="crumbs"></div>
+        <div class="muted-row" id="muted-row"></div>
+        <div class="feed-shell">
+          <button class="feed-new" id="feed-new"><svg class="icon" style="width:12px;height:12px" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg><span id="feed-new-n">0 new</span></button>
+          <div class="feed-wrap" id="feed-wrap">
+            <table class="feed">
+              <thead><tr><th>Time</th><th>Sev</th><th>Agent</th><th>Rule</th><th>Groups</th><th>MITRE</th></tr></thead>
+              <tbody id="feed-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rail"><!-- right rail -->
+      <div class="card">
+        <div class="card-h"><h2>File Integrity</h2></div>
+        <div class="card-b">
+          <div class="fim-tally">
+            <div><div class="v" id="fim-add">0</div><div class="k">Added</div></div>
+            <div><div class="v" id="fim-mod">0</div><div class="k">Modified</div></div>
+            <div><div class="v" id="fim-del">0</div><div class="k">Deleted</div></div>
+          </div>
+          <div class="muted" style="margin-bottom:4px">Most-changed paths</div>
+          <ul class="rank" id="list-fim"></ul>
+        </div>
+      </div>
+      <div class="card grow grow-2">
+        <div class="card-h"><h2>Vulnerabilities</h2><select id="ff-vuln" aria-label="Filter vulnerabilities by severity"><option value="">All severities</option><option value="crit">Critical</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div>
+        <div class="card-b"><div class="hmeta" id="vuln-tally" style="margin-bottom:7px"></div><div class="vscroll" id="vuln-body"></div></div>
+      </div>
+      <div class="card grow grow-2">
+        <div class="card-h"><h2>Agent Signal</h2><span class="hmeta" id="sig-meta">—</span></div>
+        <div class="card-b">
+          <ul class="rank" id="list-signal"></ul>
+          <div class="muted" style="margin-top:7px;font-size:10.5px">Time since each agent last produced an alert at or above the minimum rule level. Silence is a signal, not proof — a quiet agent may simply be behaving.</div>
+        </div>
+      </div>
+      <div class="card grow">
+        <div class="card-h"><h2>Noisiest Agents</h2><select id="ff-agents-sev" aria-label="Filter agents by severity"><option value="">All severities</option><option value="crit">Critical</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div>
+        <div class="card-b"><ul class="rank" id="list-agents"></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ analysis deck — what the window adds up to ═══════════════════ -->
+  <section class="deck" aria-label="Analysis deck">
+    <div class="card">
+      <div class="card-h">
+        <h2>ATT&amp;CK Coverage</h2>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="legend"><span><i style="background:var(--crit)"></i>Crit</span><span><i style="background:var(--high)"></i>High</span><span><i style="background:var(--med)"></i>Med</span><span><i style="background:var(--panel-3)"></i>Low</span></span>
+          <span class="hmeta" id="atk-meta">—</span>
+        </div>
+      </div>
+      <div class="card-b">
+        <div class="atk-scroll" id="atk-scroll"><div class="atk" id="atk-grid"></div></div>
+        <div class="note">Tactic columns follow the ATT&amp;CK Enterprise kill chain; a cell is one technique, tinted by the worst severity it produced. Click a heading to scope the feed to that tactic, a cell to scope it to that technique. Dashed columns had no qualifying alert this window — coverage, not silence.</div>
+      </div>
+    </div>
+
+    <div class="deck-row">
+      <div class="card">
+        <div class="card-h"><h2>Threat Sources</h2><span class="hmeta" id="src-meta">—</span></div>
+        <div class="card-b">
+          <div class="src-split">
+            <div>
+              <div class="sub-lbl"><span>Source addresses</span><b id="src-ip-n"></b></div>
+              <ul class="rank" id="list-srcip"></ul>
+            </div>
+            <div>
+              <div class="sub-lbl"><span>Targeted accounts</span><b id="src-usr-n"></b></div>
+              <ul class="rank" id="list-user"></ul>
+            </div>
+          </div>
+          <div class="note">Addresses and account names carried by the endpoint decoders this console keeps — Windows logon events and sshd. Network-sensor traffic is filtered out upstream and belongs to the other consoles. The dot marks the worst severity each row produced.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>Compliance Exposure</h2><span class="hmeta" id="comp-meta">—</span></div>
+        <div class="card-b">
+          <div class="comp" id="comp-body"></div>
+          <div class="note">Alerts in the window whose Wazuh rule carries a control mapping, counted per framework. Click a control to scope the feed to it. A dimmed framework means nothing mapped to it this window — not that the estate is compliant.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="foot-conn">—</span>
+  <span class="sep">|</span>
+  <span id="foot-meta">—</span>
+  <span class="right" id="brand-foot">ACME SOC · ALERT CONSOLE <b>v2.1</b></span>
+</footer>
+
+<!-- notifications popover -->
+<div class="pop" id="pop-notif" role="dialog" aria-label="Critical notifications">
+  <div class="pop-h"><h2>Unacknowledged Criticals</h2><button class="btn" id="notif-ackall" style="padding:3px 9px;font-size:11px">Ack all</button></div>
+  <div class="pop-list" id="notif-list"></div>
+</div>
+
+<!-- appearance popover -->
+<div class="pop" id="pop-appear" role="dialog" aria-label="Appearance">
+  <div class="pop-h"><h2>Appearance</h2><button class="btn" id="ap-more" style="padding:3px 9px;font-size:11px">All settings</button></div>
+  <div class="ap-sec">
+    <div class="ap-lbl"><span>Surface</span><b id="ap-tname">—</b></div>
+    <div class="ap-row" id="ap-themes"></div>
+  </div>
+  <div class="ap-sec">
+    <div class="ap-lbl"><span>Severity</span><b id="ap-pname">—</b></div>
+    <div class="ap-row" id="ap-pals"></div>
+    <div class="ap-note" id="ap-note"></div>
+  </div>
+</div>
+
+<!-- watchlist popover -->
+<div class="pop" id="pop-watch" role="dialog" aria-label="Watchlist">
+  <div class="pop-h"><h2>Watched Agents</h2></div>
+  <div class="pop-list" id="watch-list"></div>
+</div>
+
+<!-- shared scrim -->
+<div class="scrim" id="scrim"></div>
+
+<!-- event detail drawer -->
+<div class="panel-r" id="drawer" role="dialog" aria-label="Alert detail">
+  <div class="panel-h"><h2>Alert Detail</h2><button class="panel-x" id="drawer-x" aria-label="Close"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="panel-b" id="drawer-b"></div>
+  <div class="panel-f" id="drawer-f"></div>
+</div>
+
+<!-- settings drawer -->
+<div class="panel-r" id="settings" role="dialog" aria-label="Settings">
+  <div class="panel-h"><h2>Settings</h2><button class="panel-x" id="settings-x" aria-label="Close"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="panel-b">
+    <div class="set-sec">
+      <h3>Connection</h3>
+      <div class="f-field"><label for="set-proxy">Indexer proxy base</label><input type="text" id="set-proxy"><div class="hint">Reverse-proxy path that forwards to the Wazuh indexer, e.g. /opensearch/</div></div>
+      <div class="f-grid2">
+        <div class="f-field"><label for="set-index">Alerts index</label><input type="text" id="set-index"></div>
+        <div class="f-field"><label for="set-vindex">Vulnerability index</label><input type="text" id="set-vindex"></div>
+      </div>
+      <div class="f-grid2">
+        <div class="f-field"><label for="set-minlvl">Min rule level</label><input type="number" id="set-minlvl" min="0" max="16"></div>
+        <div class="f-field"><label for="set-poll">Poll every (s)</label><input type="number" id="set-poll" min="5" max="600"></div>
+      </div>
+      <div class="f-field"><label for="set-excl">Excluded decoder prefixes</label><textarea id="set-excl" spellcheck="false"></textarea><div class="hint">Comma-separated. Network sources handled by other consoles are filtered out here.</div></div>
+      <div style="display:flex;gap:8px;padding:4px 0 2px"><button class="btn" id="btn-test">Test connection</button><button class="btn gold" id="btn-apply">Apply &amp; reconnect</button></div>
+    </div>
+    <div class="set-sec">
+      <h3>Appearance</h3>
+      <div class="ap-lbl" style="margin-bottom:8px"><span>Surface <kbd style="background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:0 4px;font:9px var(--mono)">T</kbd></span><b id="set-tname">—</b></div>
+      <div class="ap-row" id="set-themes"></div>
+      <div class="ap-lbl" style="margin:14px 0 8px"><span>Severity <kbd style="background:var(--panel-2);border:1px solid var(--line-2);border-radius:4px;padding:0 4px;font:9px var(--mono)">P</kbd></span><b id="set-pname">—</b></div>
+      <div class="ap-row" id="set-pals"></div>
+      <div class="ap-note" id="set-note"></div>
+    </div>
+    <div class="set-sec">
+      <h3>Display</h3>
+      <div class="f-grid2">
+        <div class="f-field"><label for="set-window">Window (min)</label><input type="number" id="set-window" min="5" max="1440"></div>
+        <div class="f-field"><label for="set-rows">Max feed rows</label><input type="number" id="set-rows" min="50" max="2000"></div>
+      </div>
+      <div class="f-field"><label for="set-quiet">Quiet-agent threshold (min)</label><input type="number" id="set-quiet" min="1" max="1440"><div class="hint">An agent with no qualifying alert for this long is flagged amber in Agent Signal; three times this long is flagged red.</div></div>
+      <div class="f-row"><div><div class="l">Sound on new critical</div><div class="hint">Short chime, rate-limited</div></div><label class="switch"><input type="checkbox" id="set-sound"><span class="tr"><span class="th"></span></span></label></div>
+      <div class="f-row"><div><div class="l">Reduce motion</div><div class="hint">Disables pulses and transitions</div></div><label class="switch"><input type="checkbox" id="set-motion"><span class="tr"><span class="th"></span></span></label></div>
+    </div>
+    <div class="set-sec">
+      <h3>Diagnostics</h3>
+      <div class="f-row"><div><div class="l">Demo mode</div><div class="hint">Synthetic alerts — no live connection (also ?demo=1)</div></div><label class="switch"><input type="checkbox" id="set-demo"><span class="tr"><span class="th"></span></span></label></div>
+      <div style="display:flex;gap:8px;padding:6px 0"><button class="btn" id="btn-sim">Inject simulated critical</button></div>
+    </div>
+    <div class="set-sec">
+      <h3>Keyboard Shortcuts</h3>
+      <div class="keys">
+        <kbd>/</kbd><span>Focus search</span>
+        <kbd>J</kbd><span>Next alert in feed</span>
+        <kbd>K</kbd><span>Previous alert in feed</span>
+        <kbd>Enter</kbd><span>Open selected alert</span>
+        <kbd>A</kbd><span>Acknowledge selected critical</span>
+        <kbd>X</kbd><span>Clear all filters</span>
+        <kbd>Space</kbd><span>Pause / resume ingest</span>
+        <kbd>N</kbd><span>Notifications</span>
+        <kbd>W</kbd><span>Watchlist</span>
+        <kbd>T</kbd><span>Cycle surface theme (Shift+T goes back)</span>
+        <kbd>P</kbd><span>Cycle severity palette (Shift+P goes back)</span>
+        <kbd>C</kbd><span>Compact density</span>
+        <kbd>F</kbd><span>Fullscreen</span>
+        <kbd>E</kbd><span>Export CSV</span>
+        <kbd>S</kbd><span>Settings</span>
+        <kbd>Esc</kbd><span>Close panels</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span id="toast-txt"></span></div>
+
+<script>
+'use strict';
+/* ══════════════════════════════════════════════════════════════════════
+   1 · HELPERS
+   ══════════════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const fmtHMS = t => { const d=new Date(t); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); };
+const fmtHM  = t => { const d=new Date(t); return pad(d.getHours())+':'+pad(d.getMinutes()); };
+/* compact "time since": 12s / 4m / 2h13 / 3d */
+function fmtAgo(ms){
+  const s = Math.max(0, Math.round(ms/1000));
+  if(s<60) return s+'s';
+  const m = Math.floor(s/60);
+  if(m<60) return m+'m';
+  const h = Math.floor(m/60);
+  if(h<24) return h+'h'+pad(m%60);
+  return Math.floor(h/24)+'d';
+}
+function toast(msg){
+  $('toast-txt').textContent = msg;
+  const el = $('toast');
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=> el.classList.remove('show'), 2300);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   2 · SEVERITY MODEL — Wazuh rule.level → four buckets
+   ══════════════════════════════════════════════════════════════════════ */
+const LVLS = [
+  {key:'crit', min:12, label:'CRIT'},
+  {key:'high', min:8,  label:'HIGH'},
+  {key:'med',  min:4,  label:'MED'},
+  {key:'low',  min:0,  label:'LOW'}
+];
+function sevOf(level){
+  level = +level||0;
+  for(const s of LVLS) if(level>=s.min) return s;
+  return LVLS[3];
+}
+const SEV_CLS = {critical:'crit', high:'high', medium:'med', low:'low'};
+function vulnSev(r){
+  const s = (r.severity||'').toLowerCase();
+  if(SEV_CLS[s]) return {cls:SEV_CLS[s], label:r.severity};
+  const sc = r.score||0;
+  return sc>=9 ? {cls:'crit',label:'Critical'} : sc>=7 ? {cls:'high',label:'High'}
+       : sc>=4 ? {cls:'med',label:'Medium'} : {cls:'low',label:'Low'};
+}
+
+/* Normalise vulnerability payloads across Wazuh versions: classic detector
+   nests under data.vulnerability with .cve; 4.8+ puts a top-level
+   `vulnerability` object keyed by .id with .score.base. */
+function vulnOf(e){
+  const v = (e && e.data && e.data.vulnerability) || (e && e.vulnerability);
+  if(!v || typeof v!=='object') return null;
+  const cve = v.cve || v.id || (Array.isArray(v.cve_id)? v.cve_id[0] : v.cve_id) || '';
+  if(!cve) return null;
+  const score = (v.cvss && v.cvss.cvss3 && v.cvss.cvss3.base_score)
+             || (v.score && (v.score.base ?? v.score.base_score)) || v.cvss3_score || '';
+  return {
+    cve, severity:v.severity||'', score:+score||0,
+    package: v.package ? [v.package.name, v.package.version].filter(Boolean).join(' ') : '',
+    condition: (v.package && v.package.condition) || v.condition || '',
+    status: v.status || (v.under_evaluation===true?'Under evaluation':''),
+    title: v.title||'', reference: v.reference||'', published: v.published||v.published_at||''
+  };
+}
+function vulnFromState(src){
+  if(!src) return null;
+  const v = src.vulnerability; if(!v || typeof v!=='object') return null;
+  const cve = v.id || v.cve; if(!cve) return null;
+  const pkg = src.package || v.package;
+  const score = (v.score && (v.score.base ?? v.score.base_score))
+             ?? (v.cvss && v.cvss.cvss3 && v.cvss.cvss3.base_score) ?? v.cvss3_score;
+  return {
+    agent:(src.agent && src.agent.name)||'', cve,
+    severity:v.severity||'', score:+score||0,
+    package: pkg ? [pkg.name, pkg.version].filter(Boolean).join(' ') : '',
+    condition:(pkg && pkg.condition)||v.condition||'', status:v.status||'',
+    title:v.title||v.description||'', reference:v.reference||'',
+    published:v.published_at||v.published||''
+  };
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   2b · FIELD EXTRACTION — the dimensions the analysis deck reads.
+   Wazuh spreads the same idea across decoders, so each accessor is the one
+   place that knows every spelling. Keep new spellings here, not at call sites.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ATT&CK Enterprise tactics in kill-chain order. Fixed and complete on
+   purpose: the matrix is a coverage view, so the columns that stay empty are
+   as much of the answer as the ones that light up. */
+const TACTICS = ['Reconnaissance','Resource Development','Initial Access','Execution',
+  'Persistence','Privilege Escalation','Defense Evasion','Credential Access','Discovery',
+  'Lateral Movement','Collection','Command and Control','Exfiltration','Impact'];
+/* Spellings seen in the wild for the multi-word tactics. Keys are already
+   lower-cased and trimmed by canonTactic() before lookup. */
+const TACTIC_ALIAS = {
+  'command & control':'Command and Control', 'command-and-control':'Command and Control',
+  'command and control':'Command and Control', 'c2':'Command and Control',
+  'privilege-escalation':'Privilege Escalation', 'defense-evasion':'Defense Evasion',
+  'defence evasion':'Defense Evasion', 'credential-access':'Credential Access',
+  'lateral-movement':'Lateral Movement', 'initial-access':'Initial Access',
+  'resource-development':'Resource Development'
+};
+const TACTIC_CANON = new Map(TACTICS.map(t=>[t.toLowerCase(), t]));
+function canonTactic(t){
+  const k = String(t||'').trim().toLowerCase();
+  return TACTIC_CANON.get(k) || TACTIC_ALIAS[k] || (k?String(t).trim():'');
+}
+/* rule.mitre ships three parallel arrays. When they are the same length they
+   correspond index-for-index; when a rule maps one technique to several
+   tactics they do not, so fall back to attributing the technique to each
+   tactic listed rather than inventing pairs that were never in the rule. */
+function mitrePairs(e){
+  const m = (e.rule && e.rule.mitre) || {};
+  const tac = (m.tactic||[]).map(canonTactic).filter(Boolean);
+  if(!tac.length) return [];
+  const tech = m.technique||[], ids = m.id||[];
+  const n = Math.max(tech.length, ids.length);
+  const out = [];
+  if(n && tac.length === n){
+    for(let i=0;i<n;i++) out.push({tactic:tac[i], id:ids[i]||'', tech:tech[i]||''});
+  } else if(n){
+    for(const t of tac) for(let i=0;i<n;i++) out.push({tactic:t, id:ids[i]||'', tech:tech[i]||''});
+  } else {
+    for(const t of tac) out.push({tactic:t, id:'', tech:''});   // tactic-only mapping
+  }
+  return out;
+}
+
+/* Loopback and the "not applicable" placeholders are noise, not sources. */
+const IP_NOISE = new Set(['-','::1','127.0.0.1','0.0.0.0','localhost','::']);
+function srcIpOf(e){
+  const d = e.data||{}, w = (d.win && d.win.eventdata)||{};
+  const ip = d.srcip || d.src_ip || d.srcaddr || w.ipAddress || w.sourceAddress || '';
+  const s = String(ip).trim();
+  return (!s || IP_NOISE.has(s)) ? '' : s;
+}
+const USER_NOISE = new Set(['-','','n/a','system','local service','network service','anonymous logon']);
+function targetUserOf(e){
+  const d = e.data||{}, w = (d.win && d.win.eventdata)||{};
+  const u = d.dstuser || d.srcuser || d.user || w.targetUserName || w.subjectUserName || '';
+  const s = String(u).trim();
+  /* machine accounts end in $ and are almost always the host talking to itself */
+  return (!s || USER_NOISE.has(s.toLowerCase()) || s.endsWith('$')) ? '' : s;
+}
+
+/* Control frameworks Wazuh stamps onto rules. `key` is the rule field. */
+const FRAMEWORKS = [
+  {key:'pci_dss',     name:'PCI DSS'},
+  {key:'gdpr',        name:'GDPR'},
+  {key:'hipaa',       name:'HIPAA'},
+  {key:'nist_800_53', name:'NIST 800-53'},
+  {key:'tsc',         name:'TSC'}
+];
+const FW_NAME = new Map(FRAMEWORKS.map(f=>[f.key,f.name]));
+/* A compliance filter value is "<field>:<control>" — controls never contain a
+   colon, so the first one is an unambiguous separator. */
+const compKey   = (fw,ctl)=> fw+':'+ctl;
+const compLabel = v => { const i=v.indexOf(':'); return (FW_NAME.get(v.slice(0,i))||v.slice(0,i))+' '+v.slice(i+1); };
+function compHas(e, v){
+  const i = v.indexOf(':');
+  return (((e.rule||{})[v.slice(0,i)])||[]).includes(v.slice(i+1));
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   3 · CONFIG — persisted under soc.cfg.v1
+   ══════════════════════════════════════════════════════════════════════ */
+const CFG = {
+  proxyBase:'/opensearch/', index:'wazuh-alerts-*',
+  vulnIndex:'wazuh-states-vulnerabilities-*',
+  minLevel:3, pollMs:20000, windowMin:60, quietMin:20,
+  /* Decoder-name prefixes to keep OUT of this endpoint view — network sources
+     belong to the traffic map. Edit to match the decoders in your own ruleset;
+     also editable at runtime in Settings. */
+  excludeDecoderPrefixes:['fortigate','zeek','suricata'],
+  maxEvents:3000, maxFeedRows:400,
+  demo:true,  sound:false, noMotion:false, compact:false, theme:'dark', sevPalette:'classic'
+};
+try{ Object.assign(CFG, JSON.parse(localStorage.getItem('soc.cfg.v1')||'{}')); }catch(e){}
+function saveCfg(){
+  try{ localStorage.setItem('soc.cfg.v1', JSON.stringify(CFG)); }catch(e){}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   4 · STATE
+   ══════════════════════════════════════════════════════════════════════ */
+const BLANK_FILTER = ()=>({sev:'',group:'',agent:'',mitre:'',tech:'',sig:'',path:'',
+                           srcip:'',user:'',comp:'',watched:false,from:0,to:0});
+const S = {
+  events:[], lastTs:null, paused:false, search:'',
+  pollTimer:null, demoTimer:null, vulnTimer:null,
+  acks:new Set(), watch:new Set(), muted:new Set(),
+  criticals:[], lastCritTs:0, vulns:[], uid:0,
+  filter:BLANK_FILTER(),
+  agentsSev:'', vulnSev:'',
+  /* agent → epoch ms of its most recent alert. Deliberately NOT windowed:
+     the whole point is to keep knowing about agents that have gone silent
+     and therefore no longer appear in windowEvents(). */
+  agentSeen:new Map(),
+  cursor:0, kbd:false,  // keyboard position in the feed; kbd hides the marker until J/K is used
+  topId:0,             // _id of the newest row the analyst has actually seen
+  brush:null           // {a,b} bucket indices while dragging the timeline
+};
+try{ S.acks  = new Set(JSON.parse(localStorage.getItem('soc.acks.v1')||'[]')); }catch(e){}
+try{ S.watch = new Set(JSON.parse(localStorage.getItem('soc.watch.v1')||'[]')); }catch(e){}
+try{ S.muted = new Set(JSON.parse(localStorage.getItem('soc.muted.v1')||'[]')); }catch(e){}
+const saveAcks  = ()=>{ try{ localStorage.setItem('soc.acks.v1', JSON.stringify([...S.acks].slice(-500))); }catch(e){} };
+const saveWatch = ()=>{ try{ localStorage.setItem('soc.watch.v1', JSON.stringify([...S.watch])); }catch(e){} };
+const saveMuted = ()=>{ try{ localStorage.setItem('soc.muted.v1', JSON.stringify([...S.muted])); }catch(e){} };
+
+/* ══════════════════════════════════════════════════════════════════════
+   5 · THEME — canvas can't read CSS vars live, cache the resolved set
+   ══════════════════════════════════════════════════════════════════════ */
+let _tc = null;
+function themeColors(){
+  if(_tc) return _tc;
+  const cs = getComputedStyle(document.documentElement);
+  const v = n => cs.getPropertyValue(n).trim();
+  _tc = { crit:v('--crit'), high:v('--high'), med:v('--med'), low:v('--low'),
+          ink3:v('--ink-3'), grid:v('--line'), panel:v('--panel'), gold:v('--gold') };
+  return _tc;
+}
+/* Theme registry. `polarity` drives the color-scheme meta (form controls and
+   scrollbars follow it); the swatch fields are only for the picker preview. */
+const THEMES = [
+  {id:'dark',      name:'Console Dark' ,  polarity:'dark',  desc:'Charcoal planes, burnished gold. The house default.',
+   sw:['#12141a','#191c23','#222631','#eef0f4'], acc:'#d9a53f'},
+  {id:'light',     name:'Console Light', polarity:'light', desc:'Warm paper for bright rooms and printing.',
+   sw:['#ffffff','#f6f5f1','#eceae2','#1c1e24'], acc:'#8a6a1c'},
+  {id:'midnight',  name:'Midnight',       polarity:'dark',  desc:'Deep navy with an azure accent. Classic ops room.',
+   sw:['#0e1626','#152034','#1e2c45','#e8eef8'], acc:'#3d9be9'},
+  {id:'slate',     name:'Slate',          polarity:'dark',  desc:'Cool neutral grey, teal accent. Easiest on long shifts.',
+   sw:['#1b2126','#222a30','#2c353d','#e6ebef'], acc:'#2fa89a'},
+  {id:'carbon',    name:'Carbon',         polarity:'dark',  desc:'True black for OLED panels, violet accent.',
+   sw:['#0c0c0e','#141417','#1e1e23','#f2f2f4'], acc:'#8b6cf0'},
+  {id:'sandstone', name:'Sandstone',      polarity:'light', desc:'Warm light alternative with a terracotta accent.',
+   sw:['#fffaf2','#f7efe3','#e9ddc9','#241d16'], acc:'#b1541f'},
+  {id:'contrast',  name:'High Contrast',  polarity:'dark',  desc:'Maximum separation for NOC walls and low vision.',
+   sw:['#0a0a0a','#161616','#262626','#ffffff'], acc:'#ffd200'}
+];
+const themeById = id => THEMES.find(t=>t.id===id) || THEMES[0];
+
+/* Severity palettes — the second, independent axis. `sw` previews the ramp
+   crit→high→med→low as it appears on a DARK plane. */
+const SEV_PALETTES = [
+  {id:'classic', name:'Classic', desc:'The reserved house severity hues. Default.',
+   dark:['#d84545','#ec835a','#fab219','#7c8290','#3fae3f'],
+   light:['#c0362c','#b45a1e','#9c6f00','#83878f','#2f7a2f']},
+  {id:'vivid', name:'Vivid', desc:'Maximum punch — built for wall displays across a room.',
+   dark:['#ff3b30','#ff9500','#ffd60a','#9a9aa2','#32d74b'],
+   light:['#d70015','#b85200','#8a6a00','#7c8087','#1c7c33']},
+  {id:'ember', name:'Ember', desc:'Deeper and warmer: crimson through rust to gold.',
+   dark:['#d93a48','#e07a3c','#e8ab21','#8a8175','#57a86a'],
+   light:['#ad2233','#a05418','#7d6a08','#7d766c','#2b6e3d']},
+  {id:'cvd', name:'Colour-blind Safe', desc:'Blue “good” instead of green, luminance-stepped warm ramp.',
+   dark:['#d64231','#f0862a','#f5d000','#8896a5','#4d9de0'],
+   light:['#bd3421','#a35a0e','#7d6a00','#6f7d8c','#175f96']},
+  {id:'ultraviolet', name:'Ultraviolet', desc:'Cool inversion — heat reads magenta, violet, blue.',
+   dark:['#e01f7f','#b75cff','#5e9bff','#78798c','#39d3bb'],
+   light:['#b4006b','#7b32c7','#2f5fb8','#74758a','#0f7c6d']},
+  {id:'mono', name:'Monochrome', desc:'Pure luminance ramp. Survives greyscale printing.',
+   dark:['#f0f0f2','#b4b4bb','#7c7c86','#63636e','#9aa39a'],
+   light:['#1c1c20','#55555e','#87878f','#a3a3aa','#6d786d']}
+];
+const sevById = id => SEV_PALETTES.find(p=>p.id===id) || SEV_PALETTES[0];
+
+function setTheme(name){
+  const t = themeById(name);
+  CFG.theme = t.id; saveCfg();
+  const d = document.documentElement.dataset;
+  d.theme = t.id;
+  d.polarity = t.polarity;          // severity palettes key off this
+  document.querySelector('meta[name=color-scheme]').setAttribute('content', t.polarity);
+  _tc = null;                       // canvas caches resolved colours — must drop
+  renderAppearance();               // palette chips repaint against the new plane
+  renderTimeline(windowEvents());
+}
+function setSevPalette(id){
+  const p = sevById(id);
+  CFG.sevPalette = p.id; saveCfg();
+  document.documentElement.dataset.sevpal = p.id;
+  _tc = null;                       // severity hues live in the canvas cache too
+  renderAppearance();
+  renderAll();                      // legend, chips and bars all re-tint
+}
+/* One chip renderer feeds both the header popover and Settings, so the two
+   can never drift apart and there is only one place to restyle. */
+function themeChips(){
+  return THEMES.map(t=>
+    '<button class="ap-chip'+(CFG.theme===t.id?' on':'')+'" data-theme="'+t.id+'" '+
+    'aria-pressed="'+(CFG.theme===t.id)+'" title="'+esc(t.name+' — '+t.desc)+'" aria-label="'+esc(t.name)+'">'+
+    '<span class="plane" style="background:'+t.sw[0]+'"></span>'+
+    '<span class="acc" style="background:'+t.acc+'"></span></button>').join('');
+}
+function palChips(){
+  /* paint each ramp in the CURRENT plane's variant — showing dark-plane hues
+     on a light surface would misrepresent the choice about to be made */
+  const pol = themeById(CFG.theme).polarity;
+  const plane = getComputedStyle(document.documentElement).getPropertyValue('--panel').trim() || '#12141a';
+  return SEV_PALETTES.map(p=>{
+    const ramp = p[pol];
+    return '<button class="ap-chip'+(CFG.sevPalette===p.id?' on':'')+'" data-pal="'+p.id+'" '+
+    'aria-pressed="'+(CFG.sevPalette===p.id)+'" title="'+esc(p.name+' — '+p.desc)+'" aria-label="'+esc(p.name)+'">'+
+    '<span class="plane" style="background:'+plane+'"></span>'+
+    '<span class="stripes">'+ramp.slice(0,4).map(c=>'<i style="background:'+c+'"></i>').join('')+'</span>'+
+    '</button>';
+  }).join('');
+}
+/* both mounts, kept in lockstep */
+const AP_MOUNTS = [
+  {t:'ap-themes', p:'ap-pals', tn:'ap-tname', pn:'ap-pname', note:'ap-note'},
+  {t:'set-themes', p:'set-pals', tn:'set-tname', pn:'set-pname', note:'set-note'}
+];
+function renderAppearance(){
+  const tc = themeChips(), pc = palChips();
+  const t = themeById(CFG.theme), p = sevById(CFG.sevPalette);
+  for(const m of AP_MOUNTS){
+    const et = $(m.t); if(!et) continue;
+    et.innerHTML = tc; $(m.p).innerHTML = pc;
+    $(m.tn).textContent = t.name; $(m.pn).textContent = p.name;
+    $(m.note).innerHTML = '<b>'+esc(p.name)+'</b> — '+esc(p.desc);
+  }
+}
+/* hovering a chip previews its name in the readout without committing */
+function wireAppearance(m){
+  const host = [$(m.t), $(m.p)].filter(Boolean);
+  for(const el of host){
+    el.addEventListener('click', e=>{
+      const b = e.target.closest('.ap-chip'); if(!b) return;
+      /* re-rendering detaches this chip, so the document-level dismisser would
+         see a target with no .pop ancestor and close the popover mid-browse */
+      e.stopPropagation();
+      if(b.dataset.theme){ setTheme(b.dataset.theme); }
+      else { setSevPalette(b.dataset.pal); }
+    });
+    el.addEventListener('pointerover', e=>{
+      const b = e.target.closest('.ap-chip'); if(!b) return;
+      if(b.dataset.theme){
+        const t = themeById(b.dataset.theme);
+        $(m.tn).textContent = t.name;
+        $(m.note).innerHTML = '<b>'+esc(t.name)+'</b> — '+esc(t.desc);
+      } else {
+        const p = sevById(b.dataset.pal);
+        $(m.pn).textContent = p.name;
+        $(m.note).innerHTML = '<b>'+esc(p.name)+'</b> — '+esc(p.desc);
+      }
+    });
+    el.addEventListener('pointerleave', ()=>{
+      $(m.tn).textContent = themeById(CFG.theme).name;
+      $(m.pn).textContent = sevById(CFG.sevPalette).name;
+      const p = sevById(CFG.sevPalette);
+      $(m.note).innerHTML = '<b>'+esc(p.name)+'</b> — '+esc(p.desc);
+    });
+  }
+}
+AP_MOUNTS.forEach(wireAppearance);
+$('ap-more').addEventListener('click', ()=>{ hidePops(); fillSettings(); openPanel('settings'); });
+function cycleTheme(back){
+  const i = THEMES.findIndex(t=>t.id===CFG.theme);
+  const n = (i + (back?-1:1) + THEMES.length) % THEMES.length;
+  setTheme(THEMES[n].id);
+  toast(THEMES[n].name);
+}
+function cycleSev(back){
+  const i = SEV_PALETTES.findIndex(p=>p.id===CFG.sevPalette);
+  const n = (i + (back?-1:1) + SEV_PALETTES.length) % SEV_PALETTES.length;
+  setSevPalette(SEV_PALETTES[n].id);
+  toast('Severity: '+SEV_PALETTES[n].name);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   6 · AUDIO — one persistent context, unlocked on first gesture
+   ══════════════════════════════════════════════════════════════════════ */
+let AC = null;
+function audioCtx(){
+  if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+['pointerdown','keydown'].forEach(t=>document.addEventListener(t, ()=>{ if(CFG.sound) audioCtx(); }));
+function chime(){
+  if(!CFG.sound) return;
+  const ctx = audioCtx();
+  const play = c => {
+    const o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.18, c.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime+0.35);
+    o.connect(g); g.connect(c.destination);
+    o.start(); o.stop(c.currentTime+0.36);
+  };
+  if(ctx.state!=='running'){ ctx.resume().then(()=>play(ctx)); } else play(ctx);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   7 · DATA LAYER — OpenSearch queries, ingest, dedup
+   ══════════════════════════════════════════════════════════════════════ */
+function excludeClauses(){
+  return CFG.excludeDecoderPrefixes.filter(Boolean).map(p=>({prefix:{'decoder.name':p.trim()}}));
+}
+async function esSearch(index, body){
+  const url = CFG.proxyBase.replace(/\/$/,'') + '/' + index + '/_search';
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function setConn(state, txt){
+  $('pill-conn').className = 'pill '+state;
+  $('pill-txt').textContent = txt;
+}
+function fingerprint(ev){ return (ev.rule&&ev.rule.id||'')+'|'+((ev.agent&&ev.agent.name)||'')+'|'+(ev['@timestamp']||''); }
+/* rule.id+agent alone is not a safe repeat key: syscheck and the vuln
+   detector reuse one rule.id across many distinct files/CVEs, so the
+   per-object identifier must be part of the key or bursts collapse. */
+function dedupKey(ev){
+  const v = vulnOf(ev);
+  const obj = (ev.syscheck && ev.syscheck.path) || (v && v.cve) || '';
+  return (ev.rule&&ev.rule.id||'')+'|'+((ev.agent&&ev.agent.name)||'')+'|'+obj;
+}
+function ingest(ev){
+  ev._n = ev._n||1;
+  const an = (ev.agent&&ev.agent.name)||'';
+  if(an){
+    const t = new Date(ev['@timestamp']).getTime();
+    if(!(t<=S.agentSeen.get(an))) S.agentSeen.set(an, t);   // NaN-safe max
+  }
+  const key = dedupKey(ev);
+  const top = S.events[S.events.length-1];
+  if(top && top._dk===key && (new Date(ev['@timestamp'])-new Date(top['@timestamp'])) < 90000){
+    top._n = (top._n||1)+1;
+    top['@timestamp'] = ev['@timestamp'];
+  } else {
+    ev._dk = key;
+    ev._fp = fingerprint(ev);
+    ev._id = ++S.uid;
+    S.events.push(ev);
+    if(sevOf(ev.rule&&ev.rule.level).key==='crit'){
+      S.criticals.unshift(ev);
+      if(S.criticals.length>60) S.criticals.length=60;
+      if(Date.now()-S.lastCritTs>1500){ chime(); S.lastCritTs=Date.now(); }
+    }
+  }
+  const cutoff = Date.now() - CFG.windowMin*60000;
+  while(S.events.length && new Date(S.events[0]['@timestamp']).getTime() < cutoff) S.events.shift();
+  if(S.events.length > CFG.maxEvents) S.events.splice(0, S.events.length-CFG.maxEvents);
+}
+function windowEvents(){
+  const cutoff = Date.now() - CFG.windowMin*60000;
+  return S.events.filter(e=> new Date(e['@timestamp']).getTime() >= cutoff);
+}
+
+async function pollLive(){
+  if(CFG.demo) return;
+  try{
+    const filter = [ {range:{'rule.level':{gte:CFG.minLevel}}} ];
+    if(S.lastTs) filter.push({range:{'@timestamp':{gt:S.lastTs}}});
+    else filter.push({range:{'@timestamp':{gte:'now-'+CFG.windowMin+'m'}}});
+    const body = { size:S.lastTs?200:500, sort:[{'@timestamp':'asc'}],
+                   query:{bool:{filter, must_not:excludeClauses()}} };
+    const res = await esSearch(CFG.index, body);
+    const hits = (res.hits && res.hits.hits)||[];
+    for(const h of hits) ingest(h._source);
+    if(hits.length) S.lastTs = hits[hits.length-1]._source['@timestamp'];
+    setConn(S.paused?'paused':'live', S.paused?'PAUSED':'LIVE');
+    $('last-poll').textContent = 'sync '+fmtHMS(Date.now());
+  }catch(err){
+    setConn('off','UNREACHABLE');
+  }
+  renderAll();
+}
+function startLive(){
+  stopLive();
+  pollLive();
+  S.pollTimer = setInterval(()=>{ if(!S.paused) pollLive(); }, CFG.pollMs);
+}
+function stopLive(){ if(S.pollTimer){ clearInterval(S.pollTimer); S.pollTimer=null; } }
+
+/* standing unresolved-CVE inventory from the states index; slower cadence,
+   silent failure keeps the alert-window mining fallback in renderVuln */
+async function pollVulnStates(){
+  if(CFG.demo) return;
+  try{
+    const body = { size:500, query:{match_all:{}},
+                   sort:[{'vulnerability.score.base':{order:'desc', unmapped_type:'float'}}] };
+    const res = await esSearch(CFG.vulnIndex, body);
+    const hits = (res.hits && res.hits.hits)||[];
+    const seen = new Map();
+    for(const h of hits){
+      const r = vulnFromState(h._source); if(!r) continue;
+      const k = r.agent+'|'+r.cve;
+      if(!seen.has(k)) seen.set(k, r);
+    }
+    S.vulns = [...seen.values()];
+    renderVuln();
+  }catch(err){ /* older Wazuh / index missing — fallback stays active */ }
+}
+function startVuln(){
+  stopVuln();
+  pollVulnStates();
+  S.vulnTimer = setInterval(()=>{ if(!S.paused) pollVulnStates(); }, Math.max(CFG.pollMs,60000));
+}
+function stopVuln(){ if(S.vulnTimer){ clearInterval(S.vulnTimer); S.vulnTimer=null; } }
+
+/* ══════════════════════════════════════════════════════════════════════
+   8 · DEMO MODE — synthetic generator mirroring native Wazuh shapes
+   ══════════════════════════════════════════════════════════════════════ */
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const DEMO = {
+  agents:['WKS-1042','LT-0187','LT-0231','SRV-DC01','SRV-SIEM01'],
+  /* enrolled agents that were reporting and then stopped — the case Agent
+     Signal exists to surface. Minutes-ago at seed time. */
+  quiet:[['LT-0074',34],['SRV-DC02',96]],
+  /* Documentation-range addresses only (RFC 5737 TEST-NET-1/2/3) — a demo must
+     never put a routable third-party address on screen as an "attacker". */
+  ips:['203.0.113.44','203.0.113.87','203.0.113.9','198.51.100.23','198.51.100.77','192.0.2.135','192.0.2.61'],
+  users:['administrator','svc-backup','jdoe','root','dbadmin','sqlsvc','helpdesk'],
+  /* The template set is deliberately spread across twelve ATT&CK tactics and
+     all five control frameworks so the analysis deck has something honest to
+     draw. Reconnaissance and Resource Development stay empty on purpose:
+     endpoint telemetry genuinely cannot see pre-attack, and the matrix should
+     say so. Severity coverage is load-bearing too — every bucket (crit ≥12,
+     high 8–11, med 4–7, low 0–3) must keep at least one template or its KPI
+     tile reads zero forever in demo. */
+  templates:[
+    /* ── Credential Access ── */
+    ()=>({rule:{level:5,description:'Logon Failure - Unknown user or bad password',id:'60122',groups:['windows','windows_security','authentication_failed'],mitre:{tactic:['Credential Access'],technique:['Brute Force'],id:['T1110']},pci_dss:['10.2.4','10.2.5'],gdpr:['IV_35.7.d'],hipaa:['164.312.b'],nist_800_53:['AU.14','AC.7'],tsc:['CC6.1','CC6.8']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4625',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users),ipAddress:rnd(DEMO.ips),logonType:'3'}}},full_log:'An account failed to log on.'}),
+    ()=>({rule:{level:10,description:'Multiple authentication failures followed by a success.',id:'40112',groups:['windows','windows_security','authentication_failures'],mitre:{tactic:['Credential Access'],technique:['Brute Force'],id:['T1110']},pci_dss:['10.2.4','10.2.5'],hipaa:['164.312.b'],nist_800_53:['AU.14','AC.7'],tsc:['CC6.1']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4624',channel:'Security'},eventdata:{targetUserName:'svc-backup',ipAddress:rnd(DEMO.ips),logonType:'3'}}},full_log:'Multiple failed logons followed by successful logon.'}),
+    ()=>({rule:{level:5,description:'sshd: authentication failed.',id:'5760',groups:['syslog','sshd','authentication_failed'],mitre:{tactic:['Credential Access'],technique:['Brute Force'],id:['T1110']},pci_dss:['10.2.4','10.2.5'],gdpr:['IV_35.7.d'],hipaa:['164.312.b'],nist_800_53:['AU.14'],tsc:['CC6.1']},decoder:{name:'sshd'},data:{srcip:rnd(DEMO.ips),srcport:String(50000+Math.floor(Math.random()*9000)),dstuser:rnd(DEMO.users),protocol:'ssh'},full_log:'Failed password for an invalid user over ssh2'}),
+    ()=>({rule:{level:13,description:'Credential dumping: LSASS process memory accessed.',id:'92652',groups:['windows','sysmon','sysmon_event10'],mitre:{tactic:['Credential Access'],technique:['LSASS Memory'],id:['T1003.001']},pci_dss:['10.2.5'],nist_800_53:['SI.4'],tsc:['CC7.2']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'10',channel:'Microsoft-Windows-Sysmon/Operational'},eventdata:{targetUserName:rnd(DEMO.users),targetImage:'C:\\Windows\\System32\\lsass.exe',grantedAccess:'0x1410'}}},full_log:'Process accessed lsass.exe with read-memory rights.'}),
+
+    /* ── Initial Access / Execution ── */
+    ()=>({rule:{level:10,description:'SQL injection attempt against a public-facing application.',id:'31103',groups:['web','attack','sql_injection'],mitre:{tactic:['Initial Access'],technique:['Exploit Public-Facing Application'],id:['T1190']},pci_dss:['6.5','11.4'],gdpr:['IV_35.7.d'],nist_800_53:['SA.11','SI.4'],tsc:['CC6.6']},decoder:{name:'web-accesslog'},data:{srcip:rnd(DEMO.ips),url:'/portal/report.php?id=1%27%20OR%20%271%27=%271',protocol:'HTTP/1.1',id:'200'},full_log:'GET /portal/report.php?id=1\' OR \'1\'=\'1 HTTP/1.1 200'}),
+    ()=>({rule:{level:12,description:'PowerShell executed an encoded command block.',id:'91802',groups:['windows','powershell'],mitre:{tactic:['Execution'],technique:['PowerShell'],id:['T1059.001']},pci_dss:['10.6.1'],nist_800_53:['SI.4'],tsc:['CC7.2']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4104',channel:'Microsoft-Windows-PowerShell/Operational'},eventdata:{targetUserName:rnd(DEMO.users),scriptBlockText:'powershell -nop -w hidden -enc <base64>'}}},full_log:'Suspicious script block logged by PowerShell.'}),
+
+    /* ── Persistence ── */
+    ()=>({rule:{level:8,description:'New Windows service installed on the endpoint.',id:'61138',groups:['windows','windows_system','service'],mitre:{tactic:['Persistence'],technique:['Windows Service'],id:['T1543.003']},pci_dss:['10.2.7'],nist_800_53:['CM.7'],tsc:['CC6.8']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'7045',channel:'System'},eventdata:{targetUserName:rnd(DEMO.users),serviceName:'SampleUpdateSvc',imagePath:'C:\\ProgramData\\svcupd.exe'}}},full_log:'A service was installed in the system.'}),
+    ()=>({rule:{level:5,description:'File added to the system.',id:'554',groups:['ossec','syscheck','syscheck_entry_added'],mitre:{tactic:['Persistence'],technique:['Scheduled Task/Job: Cron'],id:['T1053.003']},pci_dss:['11.5'],nist_800_53:['SI.7'],tsc:['CC6.1']},decoder:{name:'syscheck_new_entry'},syscheck:{path:'/etc/cron.d/sample-job',event:'added',mode:'realtime',uname:'root'}}),
+    ()=>({rule:{level:13,description:'Host-based anomaly detection event (rootcheck): trojaned binary.',id:'510',groups:['ossec','rootcheck'],mitre:{tactic:['Persistence'],technique:['Compromise Host Software Binary'],id:['T1554']},pci_dss:['11.5'],nist_800_53:['SI.7'],tsc:['CC6.8']},decoder:{name:'rootcheck'},full_log:"Trojaned version of file '/usr/bin/sample' detected."}),
+
+    /* ── Privilege Escalation / Defense Evasion ── */
+    ()=>({rule:{level:9,description:'User Account Control bypass via a trusted auto-elevating binary.',id:'92300',groups:['windows','sysmon','sysmon_event1'],mitre:{tactic:['Privilege Escalation'],technique:['Bypass User Account Control'],id:['T1548.002']},nist_800_53:['AC.6'],tsc:['CC6.3']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'1',channel:'Microsoft-Windows-Sysmon/Operational'},eventdata:{targetUserName:rnd(DEMO.users),image:'C:\\Windows\\System32\\fodhelper.exe',parentImage:'C:\\Windows\\System32\\cmd.exe'}}},full_log:'Auto-elevating binary launched a child process from a user context.'}),
+    ()=>({rule:{level:12,description:'Windows audit log was cleared.',id:'60137',groups:['windows','windows_security','audit_log_cleared'],mitre:{tactic:['Defense Evasion'],technique:['Clear Windows Event Logs'],id:['T1070.001']},pci_dss:['10.5.2'],gdpr:['IV_32.2'],hipaa:['164.312.b'],nist_800_53:['AU.9'],tsc:['CC7.2']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'1102',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users)}}},full_log:'The audit log was cleared.'}),
+    ()=>({rule:{level:5,description:'Registry Value Integrity Checksum Changed',id:'594',groups:['ossec','syscheck','syscheck_entry_modified','syscheck_registry'],mitre:{tactic:['Defense Evasion'],technique:['Modify Registry'],id:['T1112']},pci_dss:['11.5'],hipaa:['164.312.c.1'],nist_800_53:['SI.7'],tsc:['CC6.1','CC6.8']},decoder:{name:'syscheck_registry_value_modified'},syscheck:{path:'HKEY_LOCAL_MACHINE\\Software\\Sample\\StubPath',event:'modified',mode:'realtime'}}),
+
+    /* ── Discovery / Lateral Movement ── */
+    ()=>({rule:{level:6,description:'Domain account enumeration performed against the directory.',id:'61111',groups:['windows','windows_security'],mitre:{tactic:['Discovery'],technique:['Domain Account Discovery'],id:['T1087.002']},nist_800_53:['AC.6'],tsc:['CC6.1']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4798',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users),ipAddress:rnd(DEMO.ips)}}},full_log:"A user's local group membership was enumerated."}),
+    ()=>({rule:{level:10,description:'Administrative share accessed from a remote host.',id:'61129',groups:['windows','windows_security'],mitre:{tactic:['Lateral Movement'],technique:['SMB/Windows Admin Shares'],id:['T1021.002']},pci_dss:['10.2.5'],nist_800_53:['AC.17'],tsc:['CC6.6']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'5140',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users),ipAddress:rnd(DEMO.ips),shareName:'\\\\*\\ADMIN$'}}},full_log:'A network share object was accessed.'}),
+
+    /* ── Collection / C2 / Exfiltration ── */
+    ()=>({rule:{level:7,description:'Archive staged in a temporary directory.',id:'80790',groups:['ossec','syscheck','syscheck_entry_added'],mitre:{tactic:['Collection'],technique:['Local Data Staging'],id:['T1074.001']},nist_800_53:['SI.4'],tsc:['CC6.1']},decoder:{name:'syscheck_new_entry'},syscheck:{path:'/tmp/.cache/archive.tar.gz',event:'added',mode:'realtime',uname:rnd(DEMO.users)}}),
+    ()=>({rule:{level:11,description:'Repeated beaconing pattern to an unclassified external host.',id:'87901',groups:['ossec','audit'],mitre:{tactic:['Command and Control'],technique:['Web Protocols'],id:['T1071.001']},nist_800_53:['SI.4'],tsc:['CC7.2']},decoder:{name:'auditd'},full_log:'Periodic outbound HTTPS requests at a fixed interval from a non-browser process.'}),
+    ()=>({rule:{level:11,description:'Large outbound transfer over a non-standard protocol.',id:'87910',groups:['ossec','audit'],mitre:{tactic:['Exfiltration'],technique:['Exfiltration Over Alternative Protocol'],id:['T1048']},gdpr:['IV_35.7.d'],hipaa:['164.312.e.1'],nist_800_53:['SI.4'],tsc:['CC6.7']},decoder:{name:'auditd'},full_log:'Sustained outbound transfer well above this host’s baseline.'}),
+
+    /* ── Impact ── */
+    ()=>({rule:{level:12,description:'File deleted — high-value target path.',id:'553',groups:['ossec','syscheck','syscheck_entry_deleted'],mitre:{tactic:['Impact'],technique:['Data Destruction'],id:['T1485']},pci_dss:['11.5'],nist_800_53:['SI.7'],tsc:['CC6.1']},decoder:{name:'syscheck_deleted'},syscheck:{path:'/var/www/html/config.php',event:'deleted',mode:'realtime'}}),
+    ()=>({rule:{level:14,description:'Ransom note written alongside encrypted files.',id:'100210',groups:['ossec','syscheck','syscheck_entry_added'],mitre:{tactic:['Impact'],technique:['Data Encrypted for Impact'],id:['T1486']},pci_dss:['11.5'],hipaa:['164.312.c.1'],nist_800_53:['SI.7'],tsc:['CC7.2']},decoder:{name:'syscheck_new_entry'},syscheck:{path:'/srv/share/finance/READ_ME_TO_RESTORE.txt',event:'added',mode:'realtime'}}),
+
+    /* ── vulnerability detector: both payload shapes the normaliser handles ── */
+    ()=>({rule:{level:13,description:'CVE-2021-44228 affects log4j-core',id:'23508',groups:['vulnerability-detector']},decoder:{name:'vulnerability-detector'},data:{vulnerability:{cve:'CVE-2021-44228',title:'Log4Shell: Remote Code Execution in Apache Log4j2',severity:'Critical',cvss:{cvss3:{base_score:'10.0'}},package:{name:'log4j-core',version:'2.14.1',condition:'Package less than 2.15.0'},reference:'https://nvd.nist.gov/vuln/detail/CVE-2021-44228',published:'2021-12-10',status:'Active'}}}),
+    ()=>({rule:{level:7,description:'CVE-2023-38408 affects openssh-client',id:'23504',groups:['vulnerability']},decoder:{name:'json'},vulnerability:{id:'CVE-2023-38408',title:'PKCS#11 feature in ssh-agent may lead to RCE',severity:'Medium',score:{base:5.6},package:{name:'openssh-client',version:'1:8.9p1-3ubuntu0.4',condition:'Package less than 1:8.9p1-3ubuntu0.6'},reference:'https://nvd.nist.gov/vuln/detail/CVE-2023-38408',published:'2023-07-19',status:'Active'}}),
+    ()=>({rule:{level:9,description:'CVE-2024-6387 affects openssh-server',id:'23505',groups:['vulnerability-detector']},decoder:{name:'vulnerability-detector'},data:{vulnerability:{cve:'CVE-2024-6387',title:'RegreSSHion: Remote Code Execution in OpenSSH',severity:'High',cvss:{cvss3:{base_score:'8.1'}},package:{name:'openssh-server',version:'1:8.9p1-3ubuntu0.6',condition:'Package less than 1:8.9p1-3ubuntu0.10'},reference:'https://nvd.nist.gov/vuln/detail/CVE-2024-6387',published:'2024-07-01',status:'Active'}}}),
+
+    /* ── low bucket: routine, mapped, and deliberately unexciting ── */
+    ()=>({rule:{level:3,description:'Windows User Logoff',id:'60136',groups:['windows','windows_security'],pci_dss:['10.2.5'],gdpr:['IV_32.2'],hipaa:['164.312.b'],nist_800_53:['AU.14'],tsc:['CC6.8']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4634',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users)}}}}),
+    ()=>({rule:{level:3,description:'Windows Logon Success',id:'60106',groups:['windows','windows_security','authentication_success'],pci_dss:['10.2.5'],gdpr:['IV_32.2'],hipaa:['164.312.b'],nist_800_53:['AU.14'],tsc:['CC6.8']},decoder:{name:'windows_eventchannel'},data:{win:{system:{eventID:'4624',channel:'Security'},eventdata:{targetUserName:rnd(DEMO.users),ipAddress:rnd(DEMO.ips),logonType:'2'}}},full_log:'An account was successfully logged on.'}),
+    ()=>({rule:{level:3,description:'PAM: Login session opened.',id:'5501',groups:['syslog','pam','authentication_success'],pci_dss:['10.2.5'],gdpr:['IV_32.2'],nist_800_53:['AU.14'],tsc:['CC6.8']},decoder:{name:'pam'},data:{dstuser:rnd(DEMO.users)},full_log:'session opened for user by (uid=0)'})
+  ]
+};
+function demoEvent(){
+  const t = DEMO.templates[Math.floor(Math.random()*DEMO.templates.length)]();
+  t.agent = {name:DEMO.agents[Math.floor(Math.random()*DEMO.agents.length)], id:'0'+Math.floor(Math.random()*40)};
+  t['@timestamp'] = new Date().toISOString();
+  return t;
+}
+function seedDemoVulns(){
+  const A = DEMO.agents;
+  const raw = [
+    ['CVE-2021-44228','Critical',10.0,'log4j-core 2.14.1','Log4Shell: Remote Code Execution in Apache Log4j2'],
+    ['CVE-2024-3094','Critical',10.0,'xz-utils 5.6.0','Malicious upstream backdoor in xz/liblzma'],
+    ['CVE-2021-3711','Critical',9.8,'openssl 1.1.1k','SM2 decryption buffer overflow'],
+    ['CVE-2024-6387','High',8.1,'openssh-server 8.9p1','RegreSSHion: RCE in OpenSSH server'],
+    ['CVE-2023-4911','High',7.8,'glibc 2.35','Looney Tunables: local privilege escalation'],
+    ['CVE-2023-44487','High',7.5,'nginx 1.18.0','HTTP/2 Rapid Reset DoS'],
+    ['CVE-2022-37434','Medium',6.5,'zlib 1.2.11','Heap over-read in inflate()'],
+    ['CVE-2023-38408','Medium',5.6,'openssh-client 8.9p1','PKCS#11 ssh-agent may lead to RCE'],
+    ['CVE-2020-1971','Low',3.7,'openssl 1.1.1','EDIPARTYNAME NULL deref (DoS)'],
+    ['CVE-2016-2183','Low',3.7,'openssl 1.0.2','SWEET32 birthday attack on 3DES']
+  ];
+  S.vulns = raw.map((r,i)=>({
+    agent:A[i%A.length], cve:r[0], severity:r[1], score:r[2], package:r[3],
+    condition:'', status:'Active', title:r[4],
+    reference:'https://nvd.nist.gov/vuln/detail/'+r[0], published:''
+  }));
+}
+function startDemo(){
+  stopDemo();
+  seedDemoVulns();
+  /* 25 templates now, so the seed has to be deep enough for the ranked lists
+     and the ATT&CK matrix to show a shape rather than a scatter */
+  for(let i=0;i<80;i++){
+    const e = demoEvent();
+    e['@timestamp'] = new Date(Date.now()-Math.random()*CFG.windowMin*60000).toISOString();
+    ingest(e);
+  }
+  S.events.sort((a,b)=> new Date(a['@timestamp'])-new Date(b['@timestamp']));
+  for(const [name,mins] of DEMO.quiet) S.agentSeen.set(name, Date.now()-mins*60000);
+  S.demoTimer = setInterval(()=>{ if(!S.paused){ ingest(demoEvent()); renderAll(); } }, 900);
+  setConn('demo','DEMO');
+  $('last-poll').textContent = 'synthetic data';
+  renderAll();
+}
+function stopDemo(){ if(S.demoTimer){ clearInterval(S.demoTimer); S.demoTimer=null; } }
+
+function applyMode(){
+  S.events=[]; S.lastTs=null; S.criticals=[]; S.vulns=[]; S.uid=0;
+  S.agentSeen.clear(); S.cursor=0; S.topId=0;
+  S.filter.from=0; S.filter.to=0;
+  stopDemo(); stopLive(); stopVuln();
+  if(CFG.demo) startDemo();
+  else { setConn('off','CONNECTING'); startLive(); startVuln(); }
+  renderFooter();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   9 · RENDERING
+   ══════════════════════════════════════════════════════════════════════ */
+function renderAll(){
+  const evs = windowEvents();
+  renderKpis(evs);
+  renderTimeline(evs);
+  populateFilters(evs);
+  renderCrumbs();
+  renderFeed();
+  renderGroupsAndSigs(evs);
+  renderAgents(evs);
+  renderSignal();
+  renderFim(evs);
+  renderVuln();
+  renderAttack(evs);
+  renderSources(evs);
+  renderCompliance(evs);
+  renderBadges();
+}
+/* Full ranking, most-frequent first. The alphabetical tiebreak matters: Map
+   order shifts as events roll off the window, so equal-count rows would
+   otherwise swap places on every poll and make the lists shimmer. */
+function tallyAll(evs, keysOf){
+  const m = new Map();
+  for(const e of evs){
+    const n = e._n||1;
+    for(const k of new Set(keysOf(e)||[])){ if(k) m.set(k,(m.get(k)||0)+n); }
+  }
+  return [...m.entries()].sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0])));
+}
+const tally = (evs, keysOf, n=12) => tallyAll(evs, keysOf).slice(0, n);
+
+/* Every ranked row is a pivot: `dim` names the S.filter key it drives, so a
+   spike in a tactic or a signature is one click away from the evidence.
+   A row may carry an optional third element — the worst severity bucket it
+   produced — which tints its dot and bar. */
+function renderRank(id, pairs, dim){
+  const el = $(id); if(!el) return;
+  if(!pairs.length){ el.innerHTML = '<li style="display:block;border:none;padding:8px 0" class="muted">No data in window.</li>'; return; }
+  const max = pairs[0][1]||1;
+  const cur = dim ? S.filter[dim] : '';
+  el.innerHTML = pairs.map(([name,n,sev])=>
+    '<li'+(dim?' class="pv'+(cur===name?' on':'')+'" data-dim="'+dim+'" data-val="'+esc(name)+'" title="Filter feed by '+esc(name)+'"':'')+'>'+
+    '<span class="name"'+(dim?'':' title="'+esc(name)+'"')+'>'+
+      (sev?'<i class="dot-s" style="background:var(--'+sev+')"></i>':'')+esc(name)+'</span>'+
+    '<span class="n">'+n+'</span>'+
+    '<span class="track"><i style="width:'+Math.max(3,100*n/max)+'%'+(sev?';background:var(--'+sev+')':'')+'"></i></span></li>').join('');
+}
+/* The two left-rail lists are the rail's `.grow` cards, so they are shown deep
+   — the extra height the rail absorbs turns into rows the analyst can read. */
+function renderGroupsAndSigs(evs){
+  const g = tallyAll(evs, e=> (e.rule&&e.rule.groups)||[]);
+  const s = tallyAll(evs, e=> [(e.rule&&e.rule.description)||'(no description)']);
+  renderRank('list-groups', g.slice(0,20), 'group');
+  renderRank('list-sigs',   s.slice(0,20), 'sig');
+  $('grp-meta').textContent  = g.length ? g.length+' distinct' : '';
+  $('sig-count').textContent = s.length ? s.length+' distinct' : '';
+}
+function renderAgents(evs){
+  const scoped = S.agentsSev ? evs.filter(e=> sevOf(e.rule&&e.rule.level).key===S.agentsSev) : evs;
+  renderRank('list-agents', tally(scoped, e=> [(e.agent&&e.agent.name)||'unknown']), 'agent');
+}
+
+/* one delegated handler covers every ranked list */
+['list-groups','list-sigs','list-agents','list-fim','list-signal','list-srcip','list-user'].forEach(id=>{
+  const el = $(id); if(!el) return;
+  el.addEventListener('click', e=>{
+    const li = e.target.closest('li.pv'); if(!li) return;
+    setFilter(li.dataset.dim, S.filter[li.dataset.dim]===li.dataset.val ? '' : li.dataset.val);
+  });
+});
+/* single entry point so the selects, KPI tiles, crumbs and lists never drift */
+function setFilter(dim, val){
+  S.filter[dim] = val;
+  if(dim==='sev')   $('ff-sev').value = val;
+  if(dim==='group') $('ff-group').value = [...$('ff-group').options].some(o=>o.value===val) ? val : '';
+  if(dim==='agent') $('ff-agent').value = [...$('ff-agent').options].some(o=>o.value===val) ? val : '';
+  S.cursor = 0;
+  renderAll();
+}
+function clearFilters(){
+  S.filter = BLANK_FILTER(); S.search=''; S.cursor=0;
+  $('ff-sev').value=''; $('ff-group').value=''; $('ff-agent').value='';
+  $('ff-watched').classList.remove('on'); $('search').value='';
+  renderAll();
+}
+/* every string dimension in S.filter, in the order they read as a sentence */
+const DIMS = ['sev','group','agent','mitre','tech','sig','path','srcip','user','comp'];
+function filterCount(){
+  const f = S.filter;
+  return DIMS.filter(k=>f[k]).length + (f.watched?1:0) + (f.from?1:0) + (S.search.trim()?1:0);
+}
+
+/* ── active-filter breadcrumbs ── */
+const CRUMB_LBL = {sev:'Sev',group:'Group',agent:'Agent',mitre:'Tactic',tech:'Technique',
+                   sig:'Signature',path:'Path',srcip:'Source',user:'Account',comp:'Control'};
+/* a couple of dimensions store a machine value that must not be shown raw */
+const CRUMB_VAL = {comp: compLabel};
+function renderCrumbs(){
+  const el = $('crumbs'), f = S.filter, out = [];
+  const chip = (dim,lbl,val)=> '<span class="crumb"><span class="k">'+lbl+'</span><span class="v" title="'+esc(val)+'">'+esc(val)+'</span>'+
+    '<button data-drop="'+dim+'" aria-label="Remove '+esc(lbl)+' filter">✕</button></span>';
+  for(const k of DIMS) if(f[k]) out.push(chip(k, CRUMB_LBL[k], (CRUMB_VAL[k]||String)(f[k])));
+  if(f.watched) out.push(chip('watched','Scope','Watched agents only'));
+  if(f.from)    out.push(chip('time','Window', fmtHM(f.from)+' – '+fmtHM(f.to)));
+  if(S.search.trim()) out.push(chip('search','Search', S.search.trim()));
+  if(!out.length){ el.classList.remove('show'); el.innerHTML=''; return; }
+  el.classList.add('show');
+  el.innerHTML = '<span class="lead">Filtered</span>'+out.join('')+
+    '<button class="clear-all" id="crumb-clear">Clear all ✕</button>';
+}
+$('crumbs').addEventListener('click', e=>{
+  if(e.target.closest('#crumb-clear')){ clearFilters(); return; }
+  const b = e.target.closest('button[data-drop]'); if(!b) return;
+  const d = b.dataset.drop;
+  if(d==='time'){ S.filter.from=0; S.filter.to=0; renderAll(); }
+  else if(d==='search'){ S.search=''; $('search').value=''; renderAll(); }
+  else if(d==='watched'){ S.filter.watched=false; $('ff-watched').classList.remove('on'); renderAll(); }
+  else setFilter(d,'');
+});
+
+/* ── agent signal: who has gone quiet ── */
+function quietState(ms){
+  const q = CFG.quietMin*60000;
+  return ms >= q*3 ? 'gone' : ms >= q ? 'stale' : 'ok';
+}
+function renderSignal(){
+  const now = Date.now();
+  const rows = [...S.agentSeen.entries()]
+    .map(([name,t])=>({name, ago: now-t, st: quietState(now-t)}))
+    .sort((a,b)=> b.ago-a.ago);
+  const el = $('list-signal');
+  if(!rows.length){ el.innerHTML = '<li style="display:block;border:none;padding:8px 0" class="muted">No agents seen yet.</li>'; return; }
+  const quiet = rows.filter(r=>r.st!=='ok').length;
+  $('sig-meta').textContent = rows.length+' seen'+(quiet?' · '+quiet+' quiet':'');
+  const col = {ok:'var(--good)', stale:'var(--med)', gone:'var(--crit)'};
+  el.innerHTML = rows.map(r=>
+    '<li class="pv'+(S.filter.agent===r.name?' on':'')+'" data-dim="agent" data-val="'+esc(r.name)+'" '+
+    'title="'+esc(r.name)+' — last alert '+fmtAgo(r.ago)+' ago">'+
+    '<span class="name"><i class="dot-s" style="background:'+col[r.st]+'"></i>'+esc(r.name)+'</span>'+
+    '<span class="ago-s'+(r.st==='ok'?'':' '+r.st)+'">'+fmtAgo(r.ago)+'</span></li>').join('');
+}
+
+function renderKpis(evs){
+  const c = {crit:0,high:0,med:0,low:0};
+  for(const e of evs) c[sevOf(e.rule&&e.rule.level).key]+=(e._n||1);
+  const agents = new Set(evs.map(e=>e.agent&&e.agent.name).filter(Boolean));
+  const total = evs.reduce((a,e)=>a+(e._n||1),0);
+  const rate = (total/Math.max(1,CFG.windowMin)).toFixed(1);
+  const unack = S.criticals.filter(e=>!S.acks.has(e._fp)).length;
+
+  /* second-half vs first-half of the window — a cheap, honest trend that
+     needs no history buffer and reads the same on any window size */
+  const mid = Date.now() - CFG.windowMin*30000;
+  let recent=0, prior=0;
+  for(const e of evs){ (new Date(e['@timestamp']).getTime()>=mid ? (recent+=e._n||1) : (prior+=e._n||1)); }
+  let trend = '';
+  if(prior>=3 || recent>=3){
+    const d = prior ? Math.round((recent-prior)/prior*100) : 100;
+    if(Math.abs(d)>=15) trend = d>0 ? '<span class="up">▲ '+d+'%</span> vs prior half'
+                                    : '<span class="dn">▼ '+Math.abs(d)+'%</span> vs prior half';
+    else trend = 'steady vs prior half';
+  }
+
+  const now = Date.now();
+  let quiet=0, worst=0, worstName='';
+  for(const [name,t] of S.agentSeen){
+    const ago = now-t;
+    if(quietState(ago)!=='ok'){ quiet++; if(ago>worst){ worst=ago; worstName=name; } }
+  }
+
+  const tiles = [
+    {lbl:'Total · '+CFG.windowMin+'m', val:total},
+    {lbl:'Critical', val:c.crit, cls:'k-crit', pick:'crit', sub:unack?unack+' unacknowledged':'', warn:!!unack},
+    {lbl:'High', val:c.high, cls:'k-high', pick:'high'},
+    {lbl:'Medium', val:c.med, cls:'k-med', pick:'med'},
+    {lbl:'Low', val:c.low, cls:'k-low', pick:'low'},
+    {lbl:'Agents reporting', val:agents.size, sub:S.agentSeen.size>agents.size ? (S.agentSeen.size-agents.size)+' silent this window' : ''},
+    {lbl:'Quiet ≥'+CFG.quietMin+'m', val:quiet, cls:'k-quiet'+(quiet?' hot':''), sub:worstName?esc(worstName)+' · '+fmtAgo(worst):'', raw:true},
+    {lbl:'Alerts / min', val:rate, sub:trend, raw:true}
+  ];
+  $('kpis').innerHTML = tiles.map(t=>{
+    const sel = t.pick && S.filter.sev===t.pick;
+    return '<button class="kpi '+(t.cls||'')+(t.pick?' pick':'')+(sel?' sel':'')+'"'+
+      (t.pick?' data-sev="'+t.pick+'" title="Filter feed by '+t.pick+'"':' tabindex="-1"')+'>'+
+      '<span class="lbl">'+esc(t.lbl)+(t.warn?'<span class="blink"></span>':'')+'</span>'+
+      '<span class="val">'+t.val+'</span>'+
+      '<span class="sub'+(t.warn?' warn':'')+'">'+(t.raw ? (t.sub||'') : esc(t.sub||''))+'</span></button>';
+  }).join('');
+  $('rate-lbl').textContent = rate+' / min · window '+CFG.windowMin+'m';
+}
+$('kpis').addEventListener('click', e=>{
+  const b = e.target.closest('.kpi.pick'); if(!b) return;
+  setFilter('sev', S.filter.sev===b.dataset.sev ? '' : b.dataset.sev);
+});
+
+/* ── timeline: stacked severity bars, gridlines, hover tooltip ── */
+const TL = {buckets:48, arr:null, start:0, bucketMs:0};
+function renderTimeline(evs){
+  const cv = $('cv-tl');
+  const w = cv.clientWidth||600, h = 150;
+  const dpr = devicePixelRatio||1;
+  if(cv.width!==Math.round(w*dpr) || cv.height!==Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  const ctx = cv.getContext('2d'); if(!ctx) return;
+  if(typeof ctx.isContextLost==='function' && ctx.isContextLost()) return;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+
+  const span = CFG.windowMin*60000, bMs = span/TL.buckets;
+  const now = Date.now(), start = now-span;
+  const arr = Array.from({length:TL.buckets}, ()=>({crit:0,high:0,med:0,low:0}));
+  for(const e of evs){
+    let i = Math.floor((new Date(e['@timestamp']).getTime()-start)/bMs);
+    if(i<0) i=0; if(i>=TL.buckets) i=TL.buckets-1;
+    arr[i][sevOf(e.rule&&e.rule.level).key]+=(e._n||1);
+  }
+  TL.arr=arr; TL.start=start; TL.bucketMs=bMs;
+
+  const C = themeColors();
+  const top=8, bot=h-20, plotH=bot-top;
+  const max = Math.max(1, ...arr.map(b=>b.crit+b.high+b.med+b.low));
+
+  ctx.strokeStyle=C.grid; ctx.lineWidth=1;
+  [0,.5,1].forEach(f=>{
+    const y = Math.round(bot-f*plotH)+.5;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  });
+
+  const bw = w/TL.buckets;
+  arr.forEach((b,i)=>{
+    let y = bot;
+    for(const k of ['low','med','high','crit']){
+      if(!b[k]) continue;
+      const bh = (b[k]/max)*plotH;
+      ctx.fillStyle = C[k];
+      ctx.fillRect(i*bw+1, y-bh, Math.max(1,bw-2), Math.max(1,bh-1));
+      y -= bh;
+    }
+  });
+
+  /* surge markers: a bucket that dwarfs the window's own median is worth a
+     glance even when the absolute count is small on a quiet estate */
+  const totals = arr.map(b=>b.crit+b.high+b.med+b.low);
+  const sorted = totals.slice().sort((a,b)=>a-b);
+  const median = sorted[Math.floor(sorted.length/2)]||0;
+  if(median>0){
+    ctx.fillStyle = C.gold;
+    totals.forEach((t,i)=>{
+      if(t < Math.max(3*median, median+4)) return;
+      const cx = i*bw + bw/2;
+      ctx.beginPath();
+      ctx.moveTo(cx, top+1); ctx.lineTo(cx-3.5, top-4.5); ctx.lineTo(cx+3.5, top-4.5);
+      ctx.closePath(); ctx.fill();
+    });
+  }
+
+  /* brush / time selection overlay */
+  let sel = null;
+  if(S.brush) sel = [Math.min(S.brush.a,S.brush.b), Math.max(S.brush.a,S.brush.b)];
+  else if(S.filter.from){
+    const a = Math.round((S.filter.from-start)/bMs), b = Math.round((S.filter.to-start)/bMs)-1;
+    if(b>=0 && a<TL.buckets) sel = [Math.max(0,a), Math.min(TL.buckets-1,b)];
+  }
+  if(sel){
+    const x0 = sel[0]*bw, x1 = (sel[1]+1)*bw;
+    /* veil the unselected span with the panel colour rather than black: on
+       dark it reads as dimming, on light as washing out — a flat black scrim
+       turns the light theme into a grey slab. */
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = C.panel;
+    ctx.fillRect(0, 0, x0, bot);
+    ctx.fillRect(x1, 0, w-x1, bot);
+    ctx.restore();
+    ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5;
+    ctx.strokeRect(Math.round(x0)+.5, top-6.5, Math.round(x1-x0)-1, bot-top+7);
+  }
+
+  ctx.font='10px "Segoe UI",system-ui,sans-serif';
+  const peak='peak '+max, pw=ctx.measureText(peak).width;
+  ctx.fillStyle=C.panel; ctx.fillRect(w-pw-8, top-2, pw+8, 13);
+  ctx.fillStyle=C.ink3;
+  ctx.textAlign='right'; ctx.fillText(peak, w-4, top+8);
+  ctx.textAlign='left';  ctx.fillText(fmtHM(start), 2, h-6);
+  ctx.textAlign='center';ctx.fillText(fmtHM(start+span/2), w/2, h-6);
+  ctx.textAlign='right'; ctx.fillText('now', w-2, h-6);
+}
+(function tlHover(){
+  const cv=$('cv-tl'), tip=$('tl-tip'), C_LBL={crit:'Critical',high:'High',med:'Medium',low:'Low'};
+  const bucketAt = e =>{
+    const r = cv.getBoundingClientRect();
+    return Math.min(TL.buckets-1, Math.max(0, Math.floor((e.clientX-r.left)/r.width*TL.buckets)));
+  };
+  /* click = scope the feed to one bucket, drag = scope to a range */
+  cv.addEventListener('pointerdown', e=>{
+    if(!TL.arr || e.button) return;
+    const i = bucketAt(e);
+    S.brush = {a:i, b:i};
+    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+    renderTimeline(windowEvents());
+  });
+  cv.addEventListener('pointermove', e=>{
+    if(!S.brush) return;
+    const i = bucketAt(e);
+    if(i!==S.brush.b){ S.brush.b = i; renderTimeline(windowEvents()); }
+  });
+  const commit = ()=>{
+    if(!S.brush) return;
+    const a = Math.min(S.brush.a,S.brush.b), b = Math.max(S.brush.a,S.brush.b);
+    S.brush = null;
+    const from = TL.start + a*TL.bucketMs, to = TL.start + (b+1)*TL.bucketMs;
+    /* re-selecting the identical span clears it, so the chart toggles */
+    if(S.filter.from===from && S.filter.to===to){ S.filter.from=0; S.filter.to=0; }
+    else { S.filter.from=from; S.filter.to=to; }
+    S.cursor = 0;
+    renderAll();
+  };
+  cv.addEventListener('pointerup', commit);
+  /* releasing outside the canvas must still commit — commit() is idempotent */
+  window.addEventListener('pointerup', commit);
+  cv.addEventListener('pointercancel', ()=>{ S.brush=null; renderTimeline(windowEvents()); });
+  cv.addEventListener('mousemove', e=>{
+    if(!TL.arr) return;
+    const i = bucketAt(e);
+    const b = TL.arr[i], total = b.crit+b.high+b.med+b.low;
+    const C = themeColors();
+    tip.innerHTML = '<div class="t">'+fmtHM(TL.start+i*TL.bucketMs)+' – '+fmtHM(TL.start+(i+1)*TL.bucketMs)+'</div>'+
+      ['crit','high','med','low'].map(k=>'<div class="r"><i style="background:'+C[k]+'"></i>'+C_LBL[k]+'<b>'+b[k]+'</b></div>').join('')+
+      '<div class="r" style="border-top:1px solid var(--line);margin-top:3px;padding-top:3px">Total<b>'+total+'</b></div>';
+    const wrap = cv.parentElement.getBoundingClientRect();
+    let x = e.clientX-wrap.left+14, y = e.clientY-wrap.top+10;
+    if(x+150>wrap.width) x -= 170;
+    tip.style.left=x+'px'; tip.style.top=y+'px'; tip.style.opacity=1;
+  });
+  cv.addEventListener('mouseleave', ()=> tip.style.opacity=0);
+})();
+
+/* ── feed ── */
+function populateFilters(evs){
+  /* Rebuilding a <select> closes it mid-click and is pure churn when the
+     option set has not moved — poll cadence would otherwise fight the user. */
+  const fill = (sel, values, lead)=>{
+    const el = $(sel), cur = el.value, sig = values.join(' ');
+    if(el._sig === sig) return;
+    el._sig = sig;
+    el.innerHTML = '<option value="">'+lead+'</option>'+
+      values.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
+    if(values.includes(cur)) el.value = cur;
+  };
+  const groups = [...new Set(evs.flatMap(e=>(e.rule&&e.rule.groups)||[]))].sort();
+  const agents = [...new Set(evs.map(e=>e.agent&&e.agent.name).filter(Boolean))].sort();
+  fill('ff-group', groups, 'All rule groups');
+  fill('ff-agent', agents, 'All agents');
+}
+function feedRows(){
+  const q = S.search.trim().toLowerCase();
+  const f = S.filter;
+  return windowEvents().filter(e=>{
+    const agent = (e.agent&&e.agent.name)||'';
+    if(S.muted.has(agent)) return false;
+    if(f.watched && !S.watch.has(agent)) return false;
+    if(f.sev && sevOf(e.rule&&e.rule.level).key!==f.sev) return false;
+    if(f.group && !((e.rule&&e.rule.groups)||[]).includes(f.group)) return false;
+    if(f.agent && agent!==f.agent) return false;
+    if(f.mitre && !((e.rule&&e.rule.mitre&&e.rule.mitre.tactic)||[]).map(canonTactic).includes(f.mitre)) return false;
+    if(f.tech){
+      const m = (e.rule&&e.rule.mitre)||{};
+      if(!((m.id||[]).includes(f.tech) || (m.technique||[]).includes(f.tech))) return false;
+    }
+    if(f.sig && ((e.rule&&e.rule.description)||'(no description)')!==f.sig) return false;
+    if(f.path && !(e.syscheck && e.syscheck.path===f.path)) return false;
+    if(f.srcip && srcIpOf(e)!==f.srcip) return false;
+    if(f.user && targetUserOf(e)!==f.user) return false;
+    if(f.comp && !compHas(e, f.comp)) return false;
+    if(f.from){
+      const t = new Date(e['@timestamp']).getTime();
+      if(t<f.from || t>=f.to) return false;
+    }
+    if(q){
+      const hay = ((e.rule&&e.rule.description)||'')+' '+agent+' '+
+        (((e.rule&&e.rule.groups)||[]).join(' '))+' '+((e.decoder&&e.decoder.name)||'')+' '+
+        (((e.rule&&e.rule.mitre&&e.rule.mitre.id)||[]).join(' '));
+      if(!hay.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  }).reverse();
+}
+function highlight(text){
+  const q = S.search.trim();
+  if(!q) return esc(text);
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0) return esc(text);
+  return esc(text.slice(0,i))+'<mark style="background:color-mix(in srgb,var(--gold) 35%,transparent);color:var(--ink);border-radius:2px">'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length));
+}
+let feedShown = [];
+function renderFeed(){
+  const rows = feedRows();
+  const shown = rows.slice(0, CFG.maxFeedRows);
+  feedShown = shown;
+  $('feed-count').textContent = shown.length+(rows.length>shown.length?' of '+rows.length:'')+' shown';
+  const tb = $('feed-body'), wrap = $('feed-wrap');
+  /* Reading older rows must not be interrupted by arrivals at the top: when
+     scrolled away we hold the viewport steady and offer a "new" pill instead. */
+  const atTop = wrap.scrollTop <= 2;
+  const prevH = wrap.scrollHeight, prevTop = wrap.scrollTop;
+
+  if(!shown.length){
+    feedShown = [];
+    tb.innerHTML = '<tr class="none"><td colspan="6"><div class="empty"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>No alerts match the current filters.</div></td></tr>';
+    S.topId = 0; updateFeedNew();
+    renderMutedRow(); return;
+  }
+  if(S.cursor >= shown.length) S.cursor = shown.length-1;
+  if(S.cursor < 0) S.cursor = 0;
+  tb.innerHTML = shown.map((e,idx)=>{
+    const sev = sevOf(e.rule&&e.rule.level);
+    const agent = (e.agent&&e.agent.name)||'—';
+    const groups = ((e.rule&&e.rule.groups)||[]).slice(0,3);
+    const mitre = ((e.rule&&e.rule.mitre&&e.rule.mitre.id)||[]).slice(0,2);
+    const cls = [S.watch.has(agent)?'watched':'', (S.kbd && idx===S.cursor)?'cur':''].filter(Boolean).join(' ');
+    return '<tr data-id="'+e._id+'"'+(cls?' class="'+cls+'"':'')+'>'+
+      '<td class="t">'+fmtHMS(e['@timestamp'])+(e._n>1?' <span class="nbadge">×'+e._n+'</span>':'')+'</td>'+
+      '<td><span class="lvl '+sev.key+'">'+sev.label+' '+((e.rule&&e.rule.level)||0)+'</span></td>'+
+      '<td><span class="agent">'+highlight(agent)+'</span></td>'+
+      '<td><span class="desc">'+highlight((e.rule&&e.rule.description)||'')+'</span></td>'+
+      '<td>'+groups.map(g=>'<span class="chip">'+esc(g)+'</span>').join('')+'</td>'+
+      '<td>'+mitre.map(m=>'<span class="chip mitre">'+esc(m)+'</span>').join('')+'</td></tr>';
+  }).join('');
+
+  if(atTop){ wrap.scrollTop = 0; S.topId = shown[0]._id; }
+  else wrap.scrollTop = prevTop + (wrap.scrollHeight - prevH);
+  updateFeedNew();
+  renderMutedRow();
+}
+/* how many rows arrived above the analyst's last-seen position */
+function updateFeedNew(){
+  const btn = $('feed-new');
+  const n = S.topId ? feedShown.findIndex(e=>e._id===S.topId) : 0;
+  const count = n>0 ? n : 0;
+  btn.classList.toggle('show', count>0 && $('feed-wrap').scrollTop>2);
+  $('feed-new-n').textContent = count+' new';
+}
+$('feed-new').addEventListener('click', ()=>{
+  const wrap = $('feed-wrap');
+  wrap.scrollTop = 0;
+  if(feedShown.length) S.topId = feedShown[0]._id;
+  S.cursor = 0;
+  updateFeedNew();
+});
+$('feed-wrap').addEventListener('scroll', ()=>{
+  const wrap = $('feed-wrap');
+  if(wrap.scrollTop<=2 && feedShown.length) S.topId = feedShown[0]._id;
+  updateFeedNew();
+}, {passive:true});
+function renderMutedRow(){
+  const el = $('muted-row');
+  if(!S.muted.size){ el.classList.remove('show'); el.innerHTML=''; return; }
+  el.classList.add('show');
+  el.innerHTML = '<span class="lead">Muted</span>'+[...S.muted].map(a=>
+    '<span class="mute-chip">'+esc(a)+'<button data-agent="'+esc(a)+'" title="Unmute" aria-label="Unmute '+esc(a)+'">✕</button></span>').join('');
+}
+$('muted-row').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-agent]'); if(!b) return;
+  S.muted.delete(b.dataset.agent); saveMuted(); renderFeed();
+  toast('Unmuted '+b.dataset.agent);
+});
+/* cheap cursor move — repaint two rows, not the whole table */
+function moveCursor(){
+  const tb = $('feed-body');
+  tb.querySelectorAll('tr.cur').forEach(tr=>tr.classList.remove('cur'));
+  const tr = tb.children[S.cursor];
+  if(!tr) return;
+  tr.classList.add('cur');
+  const wrap = $('feed-wrap');
+  const rTop = tr.offsetTop, rBot = rTop + tr.offsetHeight;
+  const head = 30;   // sticky header height
+  if(rTop - head < wrap.scrollTop) wrap.scrollTop = Math.max(0, rTop - head);
+  else if(rBot > wrap.scrollTop + wrap.clientHeight) wrap.scrollTop = rBot - wrap.clientHeight;
+}
+$('feed-body').addEventListener('click', e=>{
+  const tr = e.target.closest('tr[data-id]'); if(!tr) return;
+  const ev = S.events.find(x=>x._id===+tr.dataset.id);
+  const idx = feedShown.findIndex(x=>x._id===+tr.dataset.id);
+  if(idx>=0){ S.cursor = idx; S.kbd = true; moveCursor(); }
+  if(ev) openDrawer(ev);
+});
+
+/* ── FIM ── */
+function renderFim(evs){
+  const c = {added:0,modified:0,deleted:0};
+  const paths = new Map();
+  for(const e of evs){
+    const g = (e.rule&&e.rule.groups)||[];
+    if(!g.includes('syscheck') && !(e.syscheck)) continue;
+    const n = e._n||1;
+    const evt = (e.syscheck&&e.syscheck.event) ||
+      (g.includes('syscheck_entry_added')?'added': g.includes('syscheck_entry_deleted')?'deleted':
+       g.includes('syscheck_entry_modified')?'modified':'');
+    if(evt==='added') c.added+=n; else if(evt==='deleted') c.deleted+=n; else if(evt) c.modified+=n;
+    const p = e.syscheck && e.syscheck.path;
+    if(p) paths.set(p,(paths.get(p)||0)+n);
+  }
+  $('fim-add').textContent=c.added; $('fim-mod').textContent=c.modified; $('fim-del').textContent=c.deleted;
+  renderRank('list-fim', [...paths.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10), 'path');
+}
+
+/* ── vulnerabilities: states inventory first, window-mined fallback ── */
+function renderVuln(){
+  let rows = S.vulns;
+  if(!rows.length){
+    const seen = new Map();
+    for(const e of windowEvents()){
+      const v = vulnOf(e); if(!v) continue;
+      const k = ((e.agent&&e.agent.name)||'')+'|'+v.cve;
+      if(!seen.has(k)) seen.set(k, Object.assign({agent:(e.agent&&e.agent.name)||''}, v));
+    }
+    rows = [...seen.values()];
+  }
+  /* tally the full inventory, not the filtered slice — the header is meant
+     to tell you what you are not currently looking at */
+  const t = {crit:0,high:0,med:0,low:0};
+  for(const r of rows) t[vulnSev(r).cls]++;
+  const total = rows.length;
+  $('vuln-tally').innerHTML = total
+    ? '<b style="color:var(--crit)">'+t.crit+'</b> crit · <b style="color:var(--high)">'+t.high+'</b> high · '+
+      '<b style="color:var(--med)">'+t.med+'</b> med · <b>'+t.low+'</b> low <span style="color:var(--ink-3)">· '+total+' unresolved</span>'
+    : '';
+  if(S.vulnSev) rows = rows.filter(r=> vulnSev(r).cls===S.vulnSev);
+  rows = rows.slice().sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,40);
+  const el = $('vuln-body');
+  if(!rows.length){
+    el.innerHTML = '<div class="empty"><svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>No vulnerability data.</div>';
+    return;
+  }
+  el.innerHTML = rows.map(r=>{
+    const s = vulnSev(r);
+    const cve = r.reference
+      ? '<a class="cve" href="'+esc(r.reference)+'" target="_blank" rel="noopener" title="'+esc(r.title||r.cve)+'">'+esc(r.cve)+'</a>'
+      : '<span class="cve" title="'+esc(r.title||r.cve)+'">'+esc(r.cve)+'</span>';
+    return '<div class="vuln-row"><div class="p">'+
+      '<div class="nm">'+cve+'<span class="vsev '+s.cls+'">'+esc(s.label)+'</span></div>'+
+      '<div class="meta">'+esc([r.package, r.agent].filter(Boolean).join(' · '))+'</div></div>'+
+      (r.score?'<span class="score">'+r.score.toFixed(1)+'</span>':'')+'</div>';
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   9b · ANALYSIS DECK — technique coverage, actors, control exposure.
+   All three read the same windowed event set the rails do; none of them
+   holds state of its own, so they cannot drift out of step with the feed.
+   ══════════════════════════════════════════════════════════════════════ */
+const SEV_RANK = {crit:3, high:2, med:1, low:0};
+const worse = (a,b) => SEV_RANK[b] > SEV_RANK[a] ? b : a;
+const ATK_CELLS = 5;                 // techniques shown per tactic before "+N more"
+
+function renderAttack(evs){
+  const cols = new Map(TACTICS.map(t=>[t, {n:0, cells:new Map()}]));
+  let mapped = 0;
+  for(const e of evs){
+    const pairs = mitrePairs(e);
+    if(!pairs.length) continue;
+    const n = e._n||1, sk = sevOf(e.rule&&e.rule.level).key;
+    mapped += n;
+    /* one alert must not count twice against the same tactic or cell just
+       because the rule listed the pairing twice */
+    const hitTac = new Set(), hitCell = new Set();
+    for(const p of pairs){
+      const col = cols.get(p.tactic); if(!col) continue;
+      if(!hitTac.has(p.tactic)){ hitTac.add(p.tactic); col.n += n; }
+      const key = p.id || p.tech; if(!key) continue;
+      const ck = p.tactic+' '+key;
+      if(hitCell.has(ck)) continue;
+      hitCell.add(ck);
+      const c = col.cells.get(key) || {id:p.id||'', name:p.tech||'', n:0, sev:'low'};
+      c.n += n;
+      if(!c.name && p.tech) c.name = p.tech;
+      c.sev = worse(c.sev, sk);
+      col.cells.set(key, c);
+    }
+  }
+  const lit = [...cols.values()].filter(c=>c.n>0).length;
+  $('atk-meta').textContent = mapped
+    ? lit+' of '+TACTICS.length+' tactics · '+mapped+' mapped alerts'
+    : 'no ATT&CK-mapped alerts in window';
+
+  $('atk-grid').innerHTML = TACTICS.map(t=>{
+    const col = cols.get(t);
+    const cells = [...col.cells.values()]
+      .sort((a,b)=> b.n-a.n || SEV_RANK[b.sev]-SEV_RANK[a.sev] || (a.id||a.name).localeCompare(b.id||b.name));
+    const shown = cells.slice(0, ATK_CELLS), rest = cells.length - shown.length;
+    const body = shown.length
+      ? shown.map(x=>{
+          const val = x.id || x.name;
+          return '<button class="atk-cell s-'+x.sev+(S.filter.tech===val?' on':'')+'" data-tech="'+esc(val)+'" '+
+            'title="'+esc((x.id?x.id+' · ':'')+(x.name||'technique')+' — '+x.n+' alert'+(x.n===1?'':'s'))+'">'+
+            '<span class="id"><span class="tid">'+esc(val)+'</span><b>'+x.n+'</b></span>'+
+            (x.id && x.name ? '<span class="nm">'+esc(x.name)+'</span>' : '')+'</button>';
+        }).join('') + (rest>0 ? '<div class="atk-more">+'+rest+' more</div>' : '')
+      : '<div class="atk-void"></div>';
+    return '<div class="atk-col'+(col.n?' hit':'')+(S.filter.mitre===t?' on':'')+'">'+
+      '<button class="atk-h" data-tactic="'+esc(t)+'"'+
+        (col.n ? ' title="Scope the feed to '+esc(t)+'"' : ' tabindex="-1" aria-disabled="true"')+'>'+
+        '<span class="tn">'+esc(t)+'</span><span class="tc">'+(col.n||'·')+'</span></button>'+
+      '<div class="atk-cells">'+body+'</div></div>';
+  }).join('');
+  atkFade();
+}
+/* fade whichever edge still hides a tactic column */
+function atkFade(){
+  const s = $('atk-scroll'); if(!s) return;
+  s.classList.toggle('fade-l', s.scrollLeft > 4);
+  s.classList.toggle('fade-r', s.scrollWidth - s.clientWidth - s.scrollLeft > 4);
+}
+$('atk-scroll').addEventListener('scroll', atkFade, {passive:true});
+$('atk-grid').addEventListener('click', e=>{
+  const h = e.target.closest('.atk-h');
+  if(h){
+    if(!h.closest('.atk-col').classList.contains('hit')) return;   // empty column, nothing to scope to
+    setFilter('mitre', S.filter.mitre===h.dataset.tactic ? '' : h.dataset.tactic);
+    return;
+  }
+  const c = e.target.closest('.atk-cell'); if(!c) return;
+  setFilter('tech', S.filter.tech===c.dataset.tech ? '' : c.dataset.tech);
+});
+
+function renderSources(evs){
+  const ips = new Map(), users = new Map();
+  const bump = (m,k,n,sk)=>{
+    const r = m.get(k) || {n:0, sev:'low'};
+    r.n += n; r.sev = worse(r.sev, sk); m.set(k, r);
+  };
+  let carrying = 0;
+  for(const e of evs){
+    const n = e._n||1, sk = sevOf(e.rule&&e.rule.level).key;
+    const ip = srcIpOf(e), u = targetUserOf(e);
+    if(ip || u) carrying += n;
+    if(ip) bump(ips, ip, n, sk);
+    if(u)  bump(users, u, n, sk);
+  }
+  const rows = m => [...m.entries()].map(([k,v])=>[k, v.n, v.sev])
+    .sort((a,b)=> b[1]-a[1] || SEV_RANK[b[2]]-SEV_RANK[a[2]] || a[0].localeCompare(b[0]));
+  const ri = rows(ips), ru = rows(users);
+  renderRank('list-srcip', ri.slice(0,12), 'srcip');
+  renderRank('list-user',  ru.slice(0,12), 'user');
+  $('src-ip-n').textContent  = ri.length ? ri.length+' seen' : '';
+  $('src-usr-n').textContent = ru.length ? ru.length+' seen' : '';
+  $('src-meta').textContent  = carrying
+    ? carrying+' alert'+(carrying===1?'':'s')+' name a source or account'
+    : 'no source or account fields in window';
+}
+
+function renderCompliance(evs){
+  const per = FRAMEWORKS.map(f=>({key:f.key, name:f.name, total:0, ctl:new Map()}));
+  let mapped = 0;
+  for(const e of evs){
+    const n = e._n||1, r = e.rule||{};
+    let any = false;
+    for(const f of per){
+      const arr = r[f.key];
+      if(!Array.isArray(arr) || !arr.length) continue;
+      any = true; f.total += n;
+      for(const c of new Set(arr)) f.ctl.set(c, (f.ctl.get(c)||0)+n);
+    }
+    if(any) mapped += n;
+  }
+  const max = Math.max(1, ...per.map(f=>f.total));
+  const lit = per.filter(f=>f.total>0).length;
+  $('comp-meta').textContent = mapped
+    ? lit+' of '+FRAMEWORKS.length+' frameworks lit · '+mapped+' mapped alerts'
+    : 'no control-mapped alerts in window';
+
+  $('comp-body').innerHTML = per.map(f=>{
+    const top = [...f.ctl.entries()].sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0])).slice(0,5);
+    return '<div class="comp-fw'+(f.total?'':' none')+'">'+
+      '<span class="fw-n">'+esc(f.name)+'</span>'+
+      '<span class="fw-v">'+f.total+'</span>'+
+      '<div class="fw-bar"><i style="width:'+(f.total?Math.max(4,100*f.total/max):0)+'%"></i></div>'+
+      '<div class="comp-ctl">'+(top.length
+        ? top.map(([c,n])=>{
+            const v = compKey(f.key, c);
+            return '<button class="chip'+(S.filter.comp===v?' on':'')+'" data-comp="'+esc(v)+'" '+
+              'title="Scope the feed to '+esc(f.name+' '+c)+' — '+n+' alert'+(n===1?'':'s')+'">'+esc(c)+'</button>';
+          }).join('')
+        : '<span class="muted" style="font-size:10.5px">no mapped alerts</span>')+
+      '</div></div>';
+  }).join('');
+}
+$('comp-body').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-comp]'); if(!b) return;
+  setFilter('comp', S.filter.comp===b.dataset.comp ? '' : b.dataset.comp);
+});
+
+/* ── badges / footer ── */
+function renderBadges(){
+  const unack = S.criticals.filter(e=>!S.acks.has(e._fp)).length;
+  const bn = $('badge-notif');
+  bn.style.display = unack?'':'none'; bn.textContent = unack>99?'99+':unack;
+  const bw = $('badge-watch');
+  bw.style.display = S.watch.size?'':'none'; bw.textContent = S.watch.size;
+}
+function renderFooter(){
+  $('foot-conn').textContent = CFG.demo ? 'DEMO MODE — SYNTHETIC DATA'
+    : (CFG.proxyBase+' → '+CFG.index);
+  $('foot-meta').textContent = 'WINDOW '+CFG.windowMin+'M · POLL '+(CFG.pollMs/1000)+'S · MIN LEVEL '+CFG.minLevel;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   10 · DETAIL DRAWER
+   ══════════════════════════════════════════════════════════════════════ */
+let drawerEv = null;
+function kvRows(pairs){
+  const out = pairs.filter(p=>p && p[1]!==undefined && p[1]!==null && p[1]!=='');
+  if(!out.length) return '';
+  return '<dl class="kv">'+out.map(([k,v])=>{
+    const val = (typeof v==='object' && v.html!==undefined) ? v.html : esc(v);
+    return '<dt>'+esc(k)+'</dt><dd>'+val+'</dd>';
+  }).join('')+'</dl>';
+}
+function openDrawer(ev){
+  drawerEv = ev;
+  const sev = sevOf(ev.rule&&ev.rule.level);
+  const agent = (ev.agent&&ev.agent.name)||'—';
+  const r = ev.rule||{};
+  let html = '<div class="sevband" style="border-left:3px solid var(--'+sev.key+')">'+
+    '<span class="lvl '+sev.key+'">'+sev.label+' '+(r.level||0)+'</span>'+
+    '<span class="desc2">'+esc(r.description||'(no description)')+'</span></div>';
+
+  html += kvRows([
+    ['Timestamp', new Date(ev['@timestamp']).toLocaleString()],
+    ['Agent', agent + (ev.agent&&ev.agent.id?'  ·  id '+ev.agent.id:'')],
+    ['Rule ID', r.id],
+    ['Decoder', ev.decoder&&ev.decoder.name],
+    ['Location', ev.location],
+    ['Repeats', ev._n>1 ? '×'+ev._n+' (merged within 90s)' : null]
+  ]);
+
+  const groups = (r.groups||[]);
+  if(groups.length) html += '<div class="tagline">'+groups.map(g=>'<span class="chip">'+esc(g)+'</span>').join('')+'</div>';
+
+  const mitre = r.mitre||{};
+  if((mitre.id||[]).length || (mitre.tactic||[]).length){
+    html += '<div class="dsec">MITRE ATT&amp;CK</div>'+kvRows([
+      ['Tactic', (mitre.tactic||[]).join(', ')],
+      ['Technique', (mitre.technique||[]).join(', ')],
+      ['ID', {html:(mitre.id||[]).map(id=>'<a href="https://attack.mitre.org/techniques/'+esc(String(id).replace('.','/'))+'/" target="_blank" rel="noopener">'+esc(id)+'</a>').join(', ')}]
+    ]);
+  }
+
+  const comp = [];
+  [['PCI DSS','pci_dss'],['GDPR','gdpr'],['HIPAA','hipaa'],['NIST 800-53','nist_800_53'],['TSC','tsc']].forEach(([lbl,k])=>{
+    if((r[k]||[]).length) comp.push([lbl, r[k].join(', ')]);
+  });
+  if(comp.length) html += '<div class="dsec">Compliance</div>'+kvRows(comp);
+
+  const sc = ev.syscheck;
+  if(sc){
+    html += '<div class="dsec">File Integrity</div>'+kvRows([
+      ['Path', sc.path], ['Event', sc.event], ['Mode', sc.mode],
+      ['Owner', sc.uname], ['Size after', sc.size_after],
+      ['SHA-256 before', sc.sha256_before], ['SHA-256 after', sc.sha256_after],
+      ['Changed by', sc.audit && sc.audit.effective_user && sc.audit.effective_user.name],
+      ['Process', sc.audit && sc.audit.process && sc.audit.process.name]
+    ]);
+  }
+
+  const v = vulnOf(ev);
+  if(v){
+    const s = vulnSev(v);
+    html += '<div class="dsec">Vulnerability</div>'+kvRows([
+      ['CVE', v.reference ? {html:'<a href="'+esc(v.reference)+'" target="_blank" rel="noopener">'+esc(v.cve)+'</a>'} : v.cve],
+      ['Title', v.title],
+      ['Severity', {html:'<span class="vsev '+s.cls+'">'+esc(s.label)+'</span>'+(v.score?'  <b style="font-family:var(--mono)">'+v.score.toFixed(1)+'</b>':'')}],
+      ['Package', v.package], ['Condition', v.condition],
+      ['Status', v.status], ['Published', v.published]
+    ]);
+  }
+
+  const win = ev.data && ev.data.win;
+  if(win){
+    const sys = win.system||{}, ed = win.eventdata||{};
+    html += '<div class="dsec">Windows Event</div>'+kvRows(
+      [['Event ID',sys.eventID],['Channel',sys.channel],['Computer',sys.computer]]
+        .concat(Object.entries(ed).map(([k,val])=>[k, typeof val==='object'?JSON.stringify(val):val]))
+    );
+  } else if(ev.data && !v){
+    const flat = Object.entries(ev.data).filter(([,val])=>typeof val!=='object');
+    if(flat.length) html += '<div class="dsec">Event Data</div>'+kvRows(flat);
+  }
+
+  if(ev.full_log) html += '<div class="dsec">Full Log</div><pre>'+esc(ev.full_log)+'</pre>';
+  html += '<div class="dsec">Raw</div><details class="raw"><summary>Show raw JSON</summary><pre>'+esc(JSON.stringify(ev, (k,val)=>k.startsWith('_')?undefined:val, 2))+'</pre></details>';
+
+  $('drawer-b').innerHTML = html;
+  renderDrawerActions();
+  openPanel('drawer');
+}
+function renderDrawerActions(){
+  const ev = drawerEv; if(!ev) return;
+  const agent = (ev.agent&&ev.agent.name)||'';
+  const sev = sevOf(ev.rule&&ev.rule.level);
+  const acked = S.acks.has(ev._fp);
+  const watched = S.watch.has(agent);
+  $('drawer-f').innerHTML =
+    (sev.key==='crit' ? '<button class="btn'+(acked?'':' gold')+'" id="da-ack">'+(acked?'Acknowledged ✓':'Acknowledge')+'</button>' : '')+
+    (agent ? '<button class="btn'+(watched?' on':'')+'" id="da-watch">'+(watched?'Unwatch agent':'Watch agent')+'</button>' : '')+
+    (agent ? '<button class="btn" id="da-mute">Mute agent</button>' : '')+
+    (agent ? '<button class="btn" id="da-pivot-a">Only this agent</button>' : '')+
+    ((ev.rule&&ev.rule.description) ? '<button class="btn" id="da-pivot-s">Only this signature</button>' : '')+
+    '<button class="btn" id="da-copy">Copy JSON</button>';
+  const on = (id,fn)=>{ const b=$(id); if(b) b.addEventListener('click',fn); };
+  on('da-pivot-a', ()=>{ setFilter('agent', agent); closePanels(); toast('Feed scoped to '+agent); });
+  on('da-pivot-s', ()=>{ setFilter('sig', ev.rule.description); closePanels(); toast('Feed scoped to this signature'); });
+  on('da-ack', ()=>{
+    if(S.acks.has(ev._fp)) S.acks.delete(ev._fp); else S.acks.add(ev._fp);
+    saveAcks(); renderBadges(); renderKpis(windowEvents()); renderNotifs(); renderDrawerActions();
+  });
+  on('da-watch', ()=>{
+    if(S.watch.has(agent)) S.watch.delete(agent); else S.watch.add(agent);
+    saveWatch(); renderBadges(); renderFeed(); renderWatchlist(); renderDrawerActions();
+    toast(S.watch.has(agent)?'Watching '+agent:'Stopped watching '+agent);
+  });
+  on('da-mute', ()=>{
+    S.muted.add(agent); saveMuted(); renderFeed(); closePanels();
+    toast('Muted '+agent+' — unmute above the feed');
+  });
+  on('da-copy', ()=>{
+    navigator.clipboard.writeText(JSON.stringify(ev,(k,val)=>k.startsWith('_')?undefined:val,2))
+      .then(()=>toast('Alert JSON copied'), ()=>toast('Copy failed'));
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   11 · POPOVERS — notifications & watchlist
+   ══════════════════════════════════════════════════════════════════════ */
+function renderNotifs(){
+  const list = S.criticals.filter(e=>!S.acks.has(e._fp));
+  const el = $('notif-list');
+  if(!list.length){
+    el.innerHTML = '<div class="pop-empty"><svg class="icon" style="width:20px;height:20px" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>All criticals acknowledged.</div>';
+    return;
+  }
+  el.innerHTML = list.slice(0,40).map(e=>
+    '<div class="pop-item" data-id="'+e._id+'"><div class="body">'+
+    '<div class="t">'+esc((e.rule&&e.rule.description)||'')+'</div>'+
+    '<div class="m"><span>'+esc((e.agent&&e.agent.name)||'')+'</span><span>'+fmtHMS(e['@timestamp'])+'</span></div></div>'+
+    '<button class="act" data-ack="'+e._id+'">Ack</button></div>').join('');
+}
+$('notif-list').addEventListener('click', e=>{
+  const ack = e.target.closest('[data-ack]');
+  if(ack){
+    const ev = S.criticals.find(x=>x._id===+ack.dataset.ack);
+    if(ev){ S.acks.add(ev._fp); saveAcks(); renderBadges(); renderNotifs(); renderKpis(windowEvents()); }
+    e.stopPropagation(); return;
+  }
+  const it = e.target.closest('.pop-item[data-id]'); if(!it) return;
+  const ev = S.criticals.find(x=>x._id===+it.dataset.id);
+  if(ev){ hidePops(); openDrawer(ev); }
+});
+$('notif-ackall').addEventListener('click', ()=>{
+  S.criticals.forEach(e=>S.acks.add(e._fp));
+  saveAcks(); renderBadges(); renderNotifs(); renderKpis(windowEvents());
+  toast('All criticals acknowledged');
+});
+function renderWatchlist(){
+  const el = $('watch-list');
+  if(!S.watch.size){
+    el.innerHTML = '<div class="pop-empty"><svg class="icon" style="width:20px;height:20px" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>No watched agents.<br>Open an alert and choose “Watch agent”.</div>';
+    return;
+  }
+  const evs = windowEvents();
+  el.innerHTML = [...S.watch].map(a=>{
+    const n = evs.filter(e=>(e.agent&&e.agent.name)===a).reduce((s,e)=>s+(e._n||1),0);
+    return '<div class="pop-item" data-agent="'+esc(a)+'"><div class="body">'+
+      '<div class="t">'+esc(a)+'</div><div class="m"><span>'+n+' alerts in window</span></div></div>'+
+      '<button class="act" data-rm="'+esc(a)+'">Remove</button></div>';
+  }).join('');
+}
+$('watch-list').addEventListener('click', e=>{
+  const rm = e.target.closest('[data-rm]');
+  if(rm){
+    S.watch.delete(rm.dataset.rm); saveWatch();
+    renderBadges(); renderWatchlist(); renderFeed();
+    e.stopPropagation(); return;
+  }
+  const it = e.target.closest('.pop-item[data-agent]'); if(!it) return;
+  S.filter.agent = it.dataset.agent; $('ff-agent').value = it.dataset.agent;
+  hidePops(); renderFeed();
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   12 · PANEL / POPOVER PLUMBING
+   ══════════════════════════════════════════════════════════════════════ */
+function openPanel(id){
+  ['drawer','settings'].forEach(p=> $(p).classList.toggle('show', p===id));
+  $('scrim').classList.add('show');
+  hidePops();
+}
+function closePanels(){
+  ['drawer','settings'].forEach(p=> $(p).classList.remove('show'));
+  $('scrim').classList.remove('show');
+}
+function hidePops(){ ['pop-notif','pop-watch','pop-appear'].forEach(p=> $(p).classList.remove('show')); }
+function togglePop(id, render){
+  const el = $(id), was = el.classList.contains('show');
+  hidePops();
+  if(!was){ render(); el.classList.add('show'); }
+}
+$('scrim').addEventListener('click', closePanels);
+$('drawer-x').addEventListener('click', closePanels);
+$('settings-x').addEventListener('click', closePanels);
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.pop') && !e.target.closest('#btn-notif') &&
+     !e.target.closest('#btn-watch') && !e.target.closest('#btn-theme')) hidePops();
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   13 · TOOLBAR ACTIONS
+   ══════════════════════════════════════════════════════════════════════ */
+function setPaused(p){
+  S.paused = p;
+  $('btn-pause').classList.toggle('on', p);
+  if(CFG.demo) setConn('demo', p?'PAUSED':'DEMO');
+  else setConn(p?'paused':'live', p?'PAUSED':'LIVE');
+  if(!p && !CFG.demo) pollLive();
+}
+$('btn-pause').addEventListener('click', ()=> setPaused(!S.paused));
+$('pill-conn').addEventListener('click', ()=>{ if(!CFG.demo){ toast('Polling now…'); pollLive(); } });
+$('btn-notif').addEventListener('click', ()=> togglePop('pop-notif', renderNotifs));
+$('btn-watch').addEventListener('click', ()=> togglePop('pop-watch', renderWatchlist));
+$('btn-theme').addEventListener('click', ()=> togglePop('pop-appear', renderAppearance));
+$('btn-compact').addEventListener('click', ()=>{
+  CFG.compact = !CFG.compact; saveCfg();
+  document.body.classList.toggle('compact', CFG.compact);
+  $('btn-compact').classList.toggle('on', CFG.compact);
+  renderTimeline(windowEvents());
+});
+$('btn-full').addEventListener('click', ()=>{
+  if(document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
+});
+$('btn-settings').addEventListener('click', ()=>{ fillSettings(); openPanel('settings'); });
+
+function exportCsv(){
+  const rows = feedRows();
+  if(!rows.length){ toast('Nothing to export'); return; }
+  const q = s => '"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+  const lines = ['time,level,severity,agent,rule_id,description,groups,mitre,count'];
+  for(const e of rows){
+    const r = e.rule||{};
+    lines.push([ e['@timestamp'], r.level||0, sevOf(r.level).key,
+      (e.agent&&e.agent.name)||'', r.id||'', q(r.description||''),
+      q((r.groups||[]).join(' ')), q(((r.mitre&&r.mitre.id)||[]).join(' ')), e._n||1 ].join(','));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], {type:'text/csv'}));
+  a.download = 'soc-alerts-'+new Date().toISOString().slice(0,16).replace(/[T:]/g,'-')+'.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast('Exported '+rows.length+' alerts');
+}
+$('btn-export').addEventListener('click', exportCsv);
+
+/* feed filter controls */
+$('ff-sev').addEventListener('change', e=>{ S.filter.sev=e.target.value; S.cursor=0; renderAll(); });
+$('ff-group').addEventListener('change', e=>{ S.filter.group=e.target.value; S.cursor=0; renderAll(); });
+$('ff-agent').addEventListener('change', e=>{ S.filter.agent=e.target.value; S.cursor=0; renderAll(); });
+$('ff-watched').addEventListener('click', ()=>{
+  S.filter.watched = !S.filter.watched;
+  $('ff-watched').classList.toggle('on', S.filter.watched);
+  S.cursor=0; renderAll();
+});
+$('ff-clear').addEventListener('click', clearFilters);
+$('ff-agents-sev').addEventListener('change', e=>{ S.agentsSev=e.target.value; renderAgents(windowEvents()); });
+$('ff-vuln').addEventListener('change', e=>{ S.vulnSev=e.target.value; renderVuln(); });
+let _st=null;
+$('search').addEventListener('input', e=>{
+  clearTimeout(_st);
+  _st = setTimeout(()=>{ S.search=e.target.value; S.cursor=0; renderCrumbs(); renderFeed(); }, 120);
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   14 · SETTINGS
+   ══════════════════════════════════════════════════════════════════════ */
+function fillSettings(){
+  $('set-proxy').value = CFG.proxyBase;
+  $('set-index').value = CFG.index;
+  $('set-vindex').value = CFG.vulnIndex;
+  $('set-minlvl').value = CFG.minLevel;
+  $('set-poll').value = Math.round(CFG.pollMs/1000);
+  $('set-excl').value = CFG.excludeDecoderPrefixes.join(', ');
+  $('set-window').value = CFG.windowMin;
+  $('set-rows').value = CFG.maxFeedRows;
+  $('set-quiet').value = CFG.quietMin;
+  $('set-sound').checked = CFG.sound;
+  $('set-motion').checked = CFG.noMotion;
+  $('set-demo').checked = CFG.demo;
+  renderAppearance();
+}
+$('btn-apply').addEventListener('click', ()=>{
+  CFG.proxyBase = $('set-proxy').value.trim() || '/opensearch/';
+  CFG.index = $('set-index').value.trim() || 'wazuh-alerts-*';
+  CFG.vulnIndex = $('set-vindex').value.trim() || 'wazuh-states-vulnerabilities-*';
+  CFG.minLevel = Math.max(0, +$('set-minlvl').value||3);
+  CFG.pollMs = Math.max(5, +$('set-poll').value||20)*1000;
+  CFG.excludeDecoderPrefixes = $('set-excl').value.split(',').map(s=>s.trim()).filter(Boolean);
+  CFG.windowMin = Math.max(5, +$('set-window').value||60);
+  CFG.maxFeedRows = Math.max(50, +$('set-rows').value||400);
+  CFG.quietMin = Math.max(1, +$('set-quiet').value||20);
+  saveCfg();
+  applyMode();
+  closePanels();
+  toast('Settings applied — reconnecting');
+});
+$('btn-test').addEventListener('click', async ()=>{
+  const base = $('set-proxy').value.trim()||'/opensearch/', idx = $('set-index').value.trim()||'wazuh-alerts-*';
+  try{
+    const r = await fetch(base.replace(/\/$/,'')+'/'+idx+'/_search',
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({size:0,query:{match_all:{}}})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    const total = j.hits && j.hits.total && (j.hits.total.value ?? j.hits.total);
+    toast('Connected — '+(total??'?')+' documents in index');
+  }catch(err){ toast('Connection failed: '+err.message); }
+});
+$('set-sound').addEventListener('change', e=>{ CFG.sound=e.target.checked; saveCfg(); if(CFG.sound) chime(); });
+$('set-motion').addEventListener('change', e=>{
+  CFG.noMotion=e.target.checked; saveCfg();
+  document.body.classList.toggle('no-motion', CFG.noMotion);
+});
+$('set-demo').addEventListener('change', e=>{
+  CFG.demo=e.target.checked; saveCfg(); applyMode();
+  toast(CFG.demo?'Demo mode on — synthetic data':'Demo mode off — reconnecting');
+});
+$('btn-sim').addEventListener('click', ()=>{
+  const e = demoEvent();
+  e.rule.level = 14; e.rule.description = 'Simulated critical: '+(e.rule.description||'event');
+  e['@timestamp'] = new Date().toISOString();
+  ingest(e); renderAll(); toast('Simulated critical injected');
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   15 · KEYBOARD SHORTCUTS
+   ══════════════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e=>{
+  const tag = (e.target.tagName||'').toLowerCase();
+  const typing = tag==='input'||tag==='textarea'||tag==='select'||e.target.isContentEditable;
+  if(e.key==='Escape'){ closePanels(); hidePops(); if(typing) e.target.blur(); return; }
+  if(typing) return;
+  if(e.key==='/'){ e.preventDefault(); $('search').focus(); return; }
+  if(e.key===' '){ e.preventDefault(); setPaused(!S.paused); return; }
+  const k = e.key.toLowerCase();
+
+  /* feed navigation — j/k walk rows, Enter opens, A acknowledges */
+  if(k==='j'||k==='k'||e.key==='ArrowDown'||e.key==='ArrowUp'){
+    if(!feedShown.length) return;
+    e.preventDefault();
+    const down = (k==='j'||e.key==='ArrowDown');
+    S.kbd = true;
+    S.cursor = Math.min(feedShown.length-1, Math.max(0, S.cursor + (down?1:-1)));
+    moveCursor();
+    return;
+  }
+  if(e.key==='Enter'){
+    const ev = feedShown[S.cursor];
+    if(ev){ e.preventDefault(); S.kbd=true; openDrawer(ev); }
+    return;
+  }
+  if(k==='a'){
+    const ev = feedShown[S.cursor];
+    if(ev && sevOf(ev.rule&&ev.rule.level).key==='crit'){
+      if(S.acks.has(ev._fp)) S.acks.delete(ev._fp); else S.acks.add(ev._fp);
+      saveAcks(); renderBadges(); renderNotifs(); renderKpis(windowEvents());
+      toast(S.acks.has(ev._fp)?'Acknowledged':'Acknowledgement withdrawn');
+    } else if(ev) toast('Only criticals need acknowledgement');
+    return;
+  }
+  if(k==='x'){ clearFilters(); toast('Filters cleared'); return; }
+
+  if(k==='n') $('btn-notif').click();
+  else if(k==='w') $('btn-watch').click();
+  else if(k==='t') cycleTheme(e.shiftKey);   // Shift+T walks back
+  else if(k==='p') cycleSev(e.shiftKey);
+  else if(k==='c') $('btn-compact').click();
+  else if(k==='f') $('btn-full').click();
+  else if(k==='e') exportCsv();
+  else if(k==='s') $('btn-settings').click();
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   16 · INIT — clock, resize, URL hooks (?demo=1, ?debug=1)
+   ══════════════════════════════════════════════════════════════════════ */
+setInterval(()=>{ $('clock').textContent = fmtHMS(Date.now()); }, 1000);
+$('clock').textContent = fmtHMS(Date.now());
+
+let _rt=null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(_rt);
+  _rt = setTimeout(()=>{ renderTimeline(windowEvents()); atkFade(); }, 120);
+});
+
+const qs = new URLSearchParams(location.search);
+if(qs.get('demo')==='1') CFG.demo = true;
+if(qs.get('demo')==='0') CFG.demo = false;   /* ?demo=0 -> poll a real backend */
+if(qs.get('debug')==='1') window.addEventListener('error', e=> toast('JS error: '+e.message));
+
+const _t0 = themeById(CFG.theme), _p0 = sevById(CFG.sevPalette);
+CFG.theme = _t0.id; CFG.sevPalette = _p0.id;   // drop unknown ids from old storage
+document.documentElement.dataset.theme = _t0.id;
+document.documentElement.dataset.polarity = _t0.polarity;
+document.documentElement.dataset.sevpal = _p0.id;
+document.querySelector('meta[name=color-scheme]').setAttribute('content', _t0.polarity);
+renderAppearance();
+document.body.classList.toggle('compact', CFG.compact);
+document.body.classList.toggle('no-motion', CFG.noMotion);
+$('btn-compact').classList.toggle('on', CFG.compact);
+
+renderFooter();
+renderAll();
+applyMode();
+</script>
+</body>
+</html>
