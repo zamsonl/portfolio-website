@@ -354,7 +354,67 @@ a { color: inherit; }
 }
 .hero-lede { max-width: 60ch; }
 .hero-aside { display: grid; gap: 14px; align-content: center; }
+
+/* Live-demo card: the strongest artefact on the site, above the fold. */
+.demos h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: .01em;
+  font: 600 13px/1 var(--sans);
+  margin-bottom: 9px;
+}
+.demos h3 .dot { background: var(--accent); }
+.demos h3 .dot::after { border-color: var(--accent); }
+.demos > p { font-size: .8375rem; color: var(--ink-3); margin-bottom: 14px; }
+.demos a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px;
+  margin-top: 7px;
+  border: 1px solid var(--line-solid);
+  border-radius: 10px;
+  background: var(--plane-2);
+  color: var(--ink);
+  font: 500 13.5px/1.2 var(--body);
+  text-decoration: none;
+  transition: border-color .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+}
+.demos a:hover { border-color: var(--accent); color: var(--accent); transform: translateX(2px); }
+.demos a svg { flex: none; color: var(--accent); }
 .hero-in .stats { grid-column: 1 / -1; }
+
+/* Identity row: the portrait leads, top-left, above the name. */
+.ident {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.ident-img {
+  width: 84px;
+  height: 84px;
+  flex: none;
+  border-radius: 18px;
+  object-fit: cover;
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow);
+}
+.ident-txt { min-width: 0; display: grid; gap: 9px; }
+.ident-loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 400 13px/1.4 var(--body);
+  color: var(--ink-3);
+}
+.ident-loc svg { flex: none; color: var(--accent); }
+.narrow-only { display: none; }
+.wide-only, .narrow-only { min-width: 0; }
 
 .avail {
   display: inline-flex;
@@ -364,9 +424,10 @@ a { color: inherit; }
   border: 1px solid var(--line-solid);
   border-radius: 100px;
   background: var(--plane);
-  font: 500 12.5px/1 var(--body);
+  font: 500 12.5px/1.35 var(--body);
   color: var(--ink-2);
-  margin-bottom: 26px;
+  margin: 0;
+  width: fit-content;
 }
 .dot {
   position: relative;
@@ -533,6 +594,47 @@ h1.hero-h em {
   border-radius: 50%;
   background: var(--accent);
 }
+
+/* ---- 7b. Principles band ------------------------------------------------ */
+.creed {
+  border-block: 1px solid var(--line-solid);
+  background: linear-gradient(180deg, var(--bg-2), transparent 70%), var(--bg);
+  padding: clamp(3rem, 7vw, 5rem) 0;
+}
+.creed-head { margin-bottom: clamp(1.75rem, 4vw, 2.75rem); }
+.creed-head h2 {
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  letter-spacing: -.03em;
+  margin-top: 14px;
+}
+.creed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line-solid);
+}
+.creed-grid li {
+  padding: 26px clamp(1.1rem, 2.2vw, 1.9rem) 6px;
+  border-left: 1px solid var(--line-solid);
+}
+.creed-grid li:first-child { border-left: 0; padding-left: 0; }
+.creed-n {
+  display: block;
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .18em;
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+.creed-grid h3 {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  letter-spacing: -.015em;
+  margin-bottom: 11px;
+}
+.creed-grid p { font-size: .9125rem; color: var(--ink-2); }
 
 /* ---- 8. Case studies ---------------------------------------------------- */
 .cases { display: grid; gap: clamp(1.25rem, 2.5vw, 2rem); }
@@ -834,6 +936,86 @@ button.shot-open:focus-visible::after { opacity: 1; }
 .item .alink { margin-top: 14px; }
 .item.soon { border-style: dashed; }
 .item[hidden] { display: none; }
+
+/* ---- 9b. Disclosure ------------------------------------------------------
+   Native <details> so it works with no JS and stays keyboard-accessible.
+   The index cards ship closed (thirteen cards of bullets is what made the
+   page feel like a wall); the three case studies ship open. */
+.more { margin-top: 16px; }
+.more > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 13px 8px 10px;
+  border: 1px solid var(--line-solid);
+  border-radius: 100px;
+  background: var(--plane-2);
+  color: var(--ink-2);
+  font: 500 12px/1 var(--body);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color .18s var(--ease), border-color .18s var(--ease);
+}
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary::marker { content: ''; }
+.more > summary:hover { color: var(--ink); border-color: var(--accent); }
+.more > summary::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-right: 1.6px solid var(--accent);
+  border-bottom: 1.6px solid var(--accent);
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform .2s var(--ease);
+  flex: none;
+}
+.more[open] > summary::before { transform: rotate(-135deg) translate(-2px, -2px); }
+.more > summary i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-4);
+}
+.more[open] > summary { margin-bottom: 14px; }
+.more > ul { margin-top: 0 !important; }
+
+/* The case-study fact table spans the whole card, so its toggle sits apart. */
+.more.wide { margin-top: 0; }
+.more.wide > summary { margin-bottom: 18px; }
+
+/* Reveal is a fade, not a height animation -- animating height on a <details>
+   fights the browser's own open/close and janks on long lists. */
+.more[open] > ul, .more[open] > .facts { animation: fade .28s var(--ease) both; }
+@keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .more[open] > ul, .more[open] > .facts { animation: none; }
+}
+
+.index-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.toggle-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-solid);
+  border-radius: 100px;
+  background: var(--plane);
+  color: var(--ink-2);
+  font: 500 12.5px/1 var(--body);
+  cursor: pointer;
+  transition: color .18s var(--ease), border-color .18s var(--ease);
+}
+.toggle-all:hover { color: var(--ink); border-color: var(--accent); }
+.toggle-all svg { transition: transform .22s var(--ease); }
+.toggle-all[aria-expanded='true'] svg { transform: rotate(180deg); }
 
 /* ---- 10. Skills --------------------------------------------------------- */
 .skills {
@@ -1156,6 +1338,12 @@ button.shot-open:focus-visible::after { opacity: 1; }
   .origin-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
+@media (max-width: 980px) {
+  .creed-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  .creed-grid li { border-left: 0; padding-inline: 0; }
+  .creed-grid li + li { border-top: 1px solid var(--line-solid); }
+}
+
 @media (max-width: 860px) {
   .nav {
     position: fixed;
@@ -1188,6 +1376,60 @@ button.shot-open:focus-visible::after { opacity: 1; }
   .facts li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .spec > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
   .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- 17. Mobile readability --------------------------------------------
+   Everything below is about making long-form copy comfortable on a phone:
+   larger body text, looser leading, roomier tap targets, and a display size
+   for the headline that does not swallow the screen. */
+@media (max-width: 700px) {
+  body { font-size: 16.5px; line-height: 1.72; }
+
+  h1.hero-h { font-size: clamp(2.15rem, 9.5vw, 3rem); letter-spacing: -.03em; }
+  .hero-p { font-size: 1.0125rem; line-height: 1.75; }
+  .sec-head h2, .cta h2 { font-size: clamp(1.55rem, 6.4vw, 2rem); }
+  .sec-head p { font-size: 1rem; line-height: 1.7; }
+
+  /* Body copy inside cards was tuned for a wide column; it reads small here. */
+  .item p, .case-head p, .prose p { font-size: 1rem; line-height: 1.72; }
+  .item li, .skill li { font-size: .95rem; line-height: 1.62; }
+  .facts li, .tl-body li { font-size: .96rem; line-height: 1.68; }
+  .creed-grid p { font-size: .975rem; line-height: 1.68; }
+  .origin-body p { font-size: 1rem; line-height: 1.72; }
+  .shot-cap, .lb figcaption { font-size: .875rem; line-height: 1.65; }
+
+  /* Tap targets. */
+  .btn { padding: 14px 22px; font-size: 15px; }
+  .filter { padding: 11px 17px; font-size: 13.5px; }
+  .alink { font-size: 14.5px; min-height: 44px; align-items: center; }
+  .filter { padding: 12px 18px; min-height: 44px; }
+  .more > summary, .toggle-all { min-height: 44px; padding-inline: 16px; font-size: 13.5px; }
+  .demos a { padding: 14px; font-size: 14.5px; }
+  .hero-social { gap: 22px; }
+  .hero-social a { font-size: 14px; padding-block: 6px; }
+  .link { padding: 18px; }
+
+  /* Breathing room -- cramped padding is half of why phone copy reads badly. */
+  .item, .skill, .card, .prose { padding: 20px 18px; }
+  .case { padding: 20px 18px; }
+  .sec { padding: 3rem 0; }
+
+  /* The full pill and location wrap to two ragged lines beside a 68px
+     portrait; drop the least load-bearing words instead. */
+  .wide-only { display: none; }
+  .narrow-only { display: inline; }
+
+  .ident { gap: 14px; margin-bottom: 22px; }
+  .ident-img { width: 68px; height: 68px; border-radius: 15px; }
+  .avail { font-size: 12px; padding: 6px 11px 6px 10px; }
+  .ident-loc { font-size: 12.5px; }
+}
+
+@media (max-width: 420px) {
+  /* At this width the pill wraps to three lines and looks broken; shorten it
+     by letting the row stack instead. */
+  .ident { align-items: flex-start; }
+  .stats li { padding-block: 18px; }
 }
 
 @media print {

@@ -73,7 +73,16 @@
 <section class="hero">
   <div class="shell hero-in">
     <div class="hero-lede rv">
-      <p class="avail"><span class="dot" aria-hidden="true"></span> Wrapping up my internship — open to graduate &amp; junior analyst roles</p>
+      <div class="ident">
+        <img class="ident-img" src="Zamson.jpeg" alt="Portrait of Zamson Lim" width="84" height="84" decoding="async" fetchpriority="high" />
+        <div class="ident-txt">
+          <p class="avail"><span class="dot" aria-hidden="true"></span><span class="wide-only">Wrapping up my internship — open to graduate &amp; junior analyst roles</span><span class="narrow-only">Open to graduate &amp; junior analyst roles</span></p>
+          <p class="ident-loc">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="wide-only">Kuala Lumpur, Malaysia · Asia Pacific University</span><span class="narrow-only">Kuala Lumpur, Malaysia</span>
+          </p>
+        </div>
+      </div>
       <h1 class="hero-h">
         Zamson Lim
         <span class="l2">I built a company&rsquo;s <em>SOC</em>.</span>
@@ -99,13 +108,18 @@
       </ul>
     </div>
 
-    <aside class="hero-aside rv" aria-label="Profile summary">
-      <div class="card who">
-        <img src="Zamson.jpeg" alt="Portrait of Zamson Lim" width="72" height="72" decoding="async" />
-        <div>
-          <h3>Zamson Lim</h3>
-          <p>Kuala Lumpur, Malaysia</p>
-        </div>
+    <aside class="hero-aside rv" aria-label="At a glance">
+      <div class="card demos">
+        <h3><span class="dot" aria-hidden="true"></span> Running right now</h3>
+        <p>Two consoles from the SOC, de-identified and live on synthetic data.</p>
+        <a href="./soc-traffic-map.html" target="_blank" rel="noreferrer">
+          <span>SOC Traffic Map</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
+        <a href="./soc-alert-console.html" target="_blank" rel="noreferrer">
+          <span>SOC Alert Console</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+        </a>
       </div>
       <div class="card">
         <h3>At a glance</h3>
@@ -115,6 +129,8 @@
           <div><dt>Network</dt><dd>Zeek, Suricata, FortiGate, Aruba</dd></div>
           <div><dt>Code</dt><dd>Python, JavaScript, Bash, Rust, C++, Java</dd></div>
           <div><dt>Study</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
+          <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
+          <div><dt>Status</dt><dd>Open to graduate &amp; junior analyst roles</dd></div>
         </dl>
       </div>
     </aside>
@@ -216,13 +232,16 @@
         </figure>
       </div>
 
-      <ul class="facts">
+<details class="more wide" open>
+        <summary>What it involved <i>5</i></summary>
+        <ul class="facts">
           <li><b>Platform</b><span>Wazuh manager with co-located OpenSearch, on a Proxmox host, tuned at the systemd level to stay stable under sustained ingest.</span></li>
           <li><b>Collection</b><span>Six sources normalised through custom ingest pipelines that resolve field-mapping conflicts between them.</span></li>
           <li><b>Sensor</b><span>Port mirroring from the core and access switches into a multi-node Zeek cluster through a Python decapsulation stage.</span></li>
           <li><b>Detection</b><span>Custom decoders and correlation rules written for the hardware actually in use, deliberately without an endpoint-agent dependency I have no authority to deploy.</span></li>
           <li><b>Reliability</b><span>Retention policies after archive logging filled the disk and silently flipped every index read-only; SQLite recovery across dozens of corrupt agent databases; NIC-level fixes for link flapping and transmit-engine hangs.</span></li>
         </ul>
+      </details>
     </article>
 
     <!-- Case 2 — purple team -->
@@ -300,13 +319,16 @@
         </div>
       </div>
 
-      <ul class="facts">
+<details class="more wide" open>
+        <summary>What it involved <i>5</i></summary>
+        <ul class="facts">
           <li><b>Red</b><span>A C2 listener on Kali Purple, exposed through a tunnel, with implants polling on a fixed interval.</span></li>
           <li><b>Blue</b><span>Watched the same activity land in Wazuh, then wrote the detection rules for that signature.</span></li>
           <li><b>Proved from data</b><span>The tunnel launders the destination, so the firewall, the tunnel edge and the C2 side all point at shared or NAT&rsquo;d addresses. Only the DNS-resolution rules identified the actual internal victims.</span></li>
           <li><b>The real finding</b><span>An egress path the sensor could not see at all. A rule cannot help on traffic you never collect &mdash; that gap mattered more than the catch.</span></li>
           <li><b>Tested honestly</b><span>A plain implant to a clean host on 443 was <strong>missed</strong>. The tunnel was itself the signature; a bare beacon has none, so detection falls back to behaviour.</span></li>
         </ul>
+      </details>
     </article>
 
     <!-- Case 3 — the consoles, with a live embed -->
@@ -359,15 +381,66 @@
         </div>
       </div>
 
-      <ul class="facts">
+<details class="more wide" open>
+        <summary>What it involved <i>5</i></summary>
+        <ul class="facts">
           <li><b>Posture</b><span>The threat score decays over time instead of ratcheting up, so a wall display that had one bad morning does not still read SEVERE at midnight on an idle network.</span></li>
           <li><b>Timing</b><span>Rate buckets key off the event timestamp, not arrival time — one batched poll returns events spanning minutes, and charging them all to the arrival minute invents spikes that never happened.</span></li>
           <li><b>Triage</b><span>Every filter routes through one dispatcher, so the counters, the ranked lists and the feed cannot drift apart.</span></li>
           <li><b>Theming</b><span>Seven surface themes crossed with six severity palettes on two independent axes, every combination checked for contrast.</span></li>
           <li><b>Shipping</b><span>One HTML file each. No build step, no dependencies, and zero external requests.</span></li>
         </ul>
+      </details>
     </article>
 
+  </div>
+</section>
+
+<!-- ========================== PRINCIPLES ========================== -->
+<section class="creed">
+  <div class="shell">
+    <header class="creed-head rv">
+      <p class="tag">What the year taught me</p>
+      <h2>Four things I now check by default</h2>
+    </header>
+    <ol class="creed-grid rv">
+      <li>
+        <span class="creed-n">01</span>
+        <h3>A rule that loads is not a rule that works</h3>
+        <p>
+          Six bugs in one ruleset; only the first showed up in the log. The other five loaded
+          cleanly and silently detected nothing. Now I prove a rule fires against real data
+          before I believe it.
+        </p>
+      </li>
+      <li>
+        <span class="creed-n">02</span>
+        <h3>Check the artefact, not the message about it</h3>
+        <p>
+          A clean service start does not mean your rules loaded. A bulk request reporting
+          success does not mean the documents were indexed. I hash the deploy and read the
+          numbers out of the running system.
+        </p>
+      </li>
+      <li>
+        <span class="creed-n">03</span>
+        <h3>No rule helps on traffic you never collect</h3>
+        <p>
+          The most valuable thing a purple-team exercise gave me was not a catch — it was
+          finding a network segment the sensor could not see at all. Coverage gaps outrank
+          detection gaps.
+        </p>
+      </li>
+      <li>
+        <span class="creed-n">04</span>
+        <h3>Build the tool you have to work in</h3>
+        <p>
+          Writing the console I stare at all day taught me more about what an operator needs
+          on screen than any amount of reading about it. Then I published it so someone else
+          does not have to start over.
+        </p>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -452,7 +525,13 @@
     <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>3</i></button>
   </div>
 
-  <p class="tag" id="fcount" aria-live="polite" style="margin-bottom:18px">Showing all 13</p>
+  <div class="index-bar rv">
+    <p class="tag" id="fcount" aria-live="polite">Showing all 13</p>
+    <button class="toggle-all" id="toggleAll" type="button" aria-expanded="false">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span>Expand all</span>
+    </button>
+  </div>
 
   <div class="grid" id="pgrid">
 
@@ -460,12 +539,15 @@
       <div class="item-top"><span class="item-n">01 / DETECTION</span></div>
       <h3>Malicious code analysis for detection validation</h3>
       <p>In isolated lab VMs I built and analysed samples purely to test signatures.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
         <li>Ransomware behaviour in Rust, a browser credential stealer in Python, a C2 client in C++</li>
         <li>Macro abuse and DLL injection, analysed for the artefacts they leave behind</li>
         <li>Encryption testing stayed hard-guarded to a canary folder — benign by construction</li>
         <li>Every one became Wazuh rules, Zeek scripts and OpenSearch queries</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Rust</span><span class="chip">Python</span><span class="chip">C++</span><span class="chip">FIM</span></div>
     </article>
 
@@ -473,12 +555,15 @@
       <div class="item-top"><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
       <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
         <li>A Python stage strips encapsulation headers and replays traffic onto a virtual interface</li>
         <li>Decoders classify each log stream by fields unique to it, not by guessing from field presence</li>
         <li>Detections for domain-generation bursts, DNS tunnelling, exfiltration and inbound scans</li>
         <li>Re-characterised an alarming reported capture loss as an MTU artefact of the mirror tunnel, not real loss — which decides which detections you may trust</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Zeek</span><span class="chip">Python</span><span class="chip">NSM</span></div>
     </article>
 
@@ -486,11 +571,14 @@
       <div class="item-top"><span class="item-n">03 / DETECTION</span></div>
       <h3>Active Directory security monitoring</h3>
       <p>I had to learn AD properly — domain structure, Group Policy, event log semantics — before I could monitor it.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>Domain controller channels forwarded and ranked by volume, so an unusual lockout spike surfaces before anyone reports it</li>
         <li>Written against native process-creation events rather than an agent I have no authority to push fleet-wide</li>
         <li>Saved searches for authentication failure, log clearing and account enumeration</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Active Directory</span><span class="chip">Windows Event Log</span><span class="chip">OpenSearch</span></div>
     </article>
 
@@ -498,12 +586,15 @@
       <div class="item-top"><span class="item-n">04 / COLLECTION</span></div>
       <h3>Agent rollout to 80+ endpoints via GPO</h3>
       <p>Agents deployed across the Windows estate through Group Policy, without visiting each desk.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
         <li>Idempotent installer with three-state logic — running, stopped or absent — safe to re-run</li>
         <li>MSI distribution over a network share with per-machine install logging</li>
         <li>Guards so hand-tuned servers keep their custom log channel configuration</li>
         <li>Recovered every agent&rsquo;s group membership from backup after an upgrade silently reset them</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Group Policy</span><span class="chip">Batch</span><span class="chip">Windows Server</span></div>
     </article>
 
@@ -511,11 +602,14 @@
       <div class="item-top"><span class="item-n">05 / COLLECTION</span></div>
       <h3>Wireless &amp; access point monitoring</h3>
       <p>Wireless syslog brought into the SIEM, with enrichment that turns a hardware address into a name a human recognises.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>Custom decoders for association, authentication and roaming events</li>
         <li>A scheduled enrichment pipeline resolving hardware addresses to hostnames</li>
         <li>Auth-failure bursts and cross-AP hopping raised as alerts rather than buried in syslog</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Syslog</span><span class="chip">Custom decoders</span><span class="chip">Python</span></div>
     </article>
 
@@ -523,12 +617,15 @@
       <div class="item-top"><span class="item-n">06 / OFFENSIVE</span></div>
       <h3>Authorized internal vulnerability assessment</h3>
       <p>With written authorization from my senior, an internal assessment run from Kali Purple — written up three times for three readers.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
         <li>OpenVAS for the full scan, plus Nmap, Nikto and command-line work to verify by hand what the scanner claimed</li>
         <li>Findings included unauthenticated printer administration, exposed print services and a reverse-proxy bypass on an office device</li>
         <li>Delivered as three reports: technical, non-technical, and plain language</li>
         <li>Re-scanned and honestly downgraded one finding to &ldquo;unconfirmed&rdquo; when it could not be reproduced</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">OpenVAS</span><span class="chip">Nmap</span><span class="chip">Nikto</span><span class="chip">Reporting</span></div>
     </article>
 
@@ -536,11 +633,14 @@
       <div class="item-top"><span class="item-n">07 / TOOLING</span></div>
       <h3>Packet-Highway — 3D traffic visualizer</h3>
       <p>Firewall traffic rendered as vehicles on a night highway, to make network activity legible to people who do not read log lines.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>Three.js with instanced meshes and object pooling, to hold frame rate on a live feed</li>
         <li>Vehicle size tracks bytes, colour tracks protocol, blocked traffic moves to the emergency lane</li>
         <li>Self-contained: no CDN, no external assets</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Three.js</span><span class="chip">WebGL</span></div>
     </article>
 
@@ -548,12 +648,15 @@
       <div class="item-top"><span class="item-n">08 / TOOLING</span></div>
       <h3>Building with AI tooling</h3>
       <p>Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
         <li>Built and debugged much of the tooling here with Claude Code, and used Claude Cowork for longer multi-step work</li>
         <li>Put an assistant in the analyst seat during a purple-team exercise, watching the SIEM alongside me</li>
         <li>Ran local models through Ollama to learn what genuinely needs a hosted one</li>
         <li>The judgement is the point: what to delegate, what to verify, and never trusting a &ldquo;done&rdquo; message over the artefact</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Claude Code</span><span class="chip">Ollama</span><span class="chip">Automation</span></div>
     </article>
 
@@ -561,11 +664,14 @@
       <div class="item-top"><span class="item-n">09 / TOOLING</span><span class="badge">In progress</span></div>
       <h3>Physical floor-plan agent map</h3>
       <p>A live map that resolves an alerting machine to a desk on the office plan, instead of to a hostname nobody can place.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>An OCR pipeline lifts every network port code off the building floor plan</li>
         <li>A binder ties each monitored machine to its port code</li>
         <li>The map joins agent status, bindings and positions so an alert lands on a location</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Python</span><span class="chip">OCR</span></div>
     </article>
 
@@ -573,11 +679,14 @@
       <div class="item-top"><span class="item-n">10 / FORENSICS</span><span class="badge">In progress</span></div>
       <h3>DFIR memory analysis</h3>
       <p>Reconstructing what ran on a machine from a memory image — the skill the August 2025 incident showed we did not have.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>Volatility process trees, with injected and unparented processes flagged</li>
         <li>Windows artefact analysis and timeline reconstruction</li>
         <li>Practising against samples I build myself, so I know the ground truth</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Volatility</span><span class="chip">Windows forensics</span></div>
     </article>
 
@@ -585,11 +694,14 @@
       <div class="item-top"><span class="item-n">11 / COURSEWORK</span></div>
       <h3>Community library management system</h3>
       <p>A command-line library system with role-based access, built for a programming module.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>Separate member, librarian and administrator roles</li>
         <li>Attempt limiting, so a guest account locks out before brute force gets anywhere</li>
         <li>File-backed persistence with input validation throughout</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Python</span><span class="chip">RBAC</span></div>
       <a class="alink" href="https://github.com/zamsonl/Library-Management-System" target="_blank" rel="noreferrer">
         Repository
@@ -601,11 +713,14 @@
       <div class="item-top"><span class="item-n">12 / COURSEWORK</span></div>
       <h3>Switching &amp; routing labs</h3>
       <p>Packet Tracer labs covering the groundwork the SOC work later depended on.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>VLANs segmented across two switches, trunked and routed</li>
         <li>Static and dynamic routing, verified end to end with ping and the routing table</li>
         <li>Port security and basic device hardening</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Cisco</span><span class="chip">VLANs</span><span class="chip">Routing</span></div>
       <a class="alink" href="https://github.com/zamsonl/Switching-And-Routing-Essentials" target="_blank" rel="noreferrer">
         Repository
@@ -617,11 +732,14 @@
       <div class="item-top"><span class="item-n">13 / COURSEWORK</span></div>
       <h3>Object-oriented Java system</h3>
       <p>A team project built around inheritance and interfaces rather than one long branch statement.</p>
-      <ul>
+<details class="more">
+        <summary>Details <i>3</i></summary>
+        <ul>
         <li>An abstract base with three concrete roles</li>
         <li>Encapsulation and polymorphism applied where they earn their keep</li>
         <li>Delivered as a team, with shared version control</li>
       </ul>
+      </details>
       <div class="chips"><span class="chip">Java</span><span class="chip">OOP</span></div>
       <a class="alink" href="https://github.com/zamsonl/Java-assignment" target="_blank" rel="noreferrer">
         Repository
@@ -788,13 +906,6 @@
         isolation through firewall and switch APIs, and interval-regularity analysis for beaconing
         that a rule engine cannot express. I am also looking for a team where I can learn from
         people who have run this at a larger scale.
-      </p>
-      <p class="thanks">
-        Thanks are owed to
-        <a href="https://www.linkedin.com/in/hong-yaw-lim-0517235b/" target="_blank" rel="noreferrer">Hong Yaw Lim</a>,
-        my senior in the IT department, who taught me an enormous amount of general IT knowledge.
-        The colleagues here are genuinely some of the nicest people I have worked with, and that
-        matters more than any stack.
       </p>
     </div>
 

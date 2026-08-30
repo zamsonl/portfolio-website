@@ -162,6 +162,37 @@
     run('all');
   })();
 
+  /* ---- 6b. Expand / collapse all ---------------------------------------- */
+  (function expandAll() {
+    var btn = $('#toggleAll');
+    var grid = $('#pgrid');
+    if (!btn || !grid) return;
+    var label = btn.querySelector('span');
+
+    function sync() {
+      // Only count what the filter is currently showing, so the label matches
+      // what the reader can actually see.
+      var vis = $$('.item:not([hidden]) > details.more', grid);
+      var open = vis.filter(function (d) { return d.open; }).length;
+      var all = vis.length && open === vis.length;
+      btn.setAttribute('aria-expanded', all ? 'true' : 'false');
+      if (label) label.textContent = all ? 'Collapse all' : 'Expand all';
+      btn.hidden = vis.length === 0;
+    }
+
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      $$('.item:not([hidden]) > details.more', grid).forEach(function (d) { d.open = open; });
+      sync();
+    });
+
+    grid.addEventListener('toggle', sync, true);
+    // The filter changes which cards are visible, so re-sync after it runs.
+    var bar = $('#filters');
+    if (bar) bar.addEventListener('click', function () { setTimeout(sync, 0); });
+    sync();
+  })();
+
   /* ---- 7. Lightbox ----------------------------------------------------- */
   (function lightbox() {
     var lb = $('#lb'), img = $('#lbimg'), cap = $('#lbcap'), x = $('#lbx');
