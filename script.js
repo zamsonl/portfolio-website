@@ -138,28 +138,81 @@
       if (!n && f !== 'all') b.hidden = true;
     });
 
-    function run(f) {
+    // Search text is taken once per card, so keystrokes do not walk the DOM.
+    var haystack = items.map(function (el) {
+      return (el.textContent || '').toLowerCase().replace(/\s+/g, ' ');
+    });
+
+    var search = $('#psearch');
+    var clear = $('#pclear');
+    var empty = null;
+    var cat = 'all';
+    var q = '';
+
+    function run() {
       var shown = 0;
-      items.forEach(function (el) {
-        var hit = f === 'all' || el.dataset.cat === f;
+      items.forEach(function (el, i) {
+        var hit = (cat === 'all' || el.dataset.cat === cat) &&
+                  (!q || haystack[i].indexOf(q) !== -1);
         el.hidden = !hit;
         if (hit) shown++;
       });
+
       $$('.filter', bar).forEach(function (b) {
-        b.setAttribute('aria-pressed', b.dataset.f === f ? 'true' : 'false');
+        b.setAttribute('aria-pressed', b.dataset.f === cat ? 'true' : 'false');
       });
+      if (clear) clear.hidden = !q;
+
       if (count) {
-        count.textContent = f === 'all'
-          ? 'Showing all ' + shown
-          : 'Showing ' + shown + ' of ' + items.length;
+        if (shown === items.length) count.textContent = 'Showing all ' + shown;
+        else count.textContent = 'Showing ' + shown + ' of ' + items.length;
+      }
+
+      // An empty grid with no explanation reads as a broken page.
+      if (!shown) {
+        if (!empty) {
+          empty = document.createElement('p');
+          empty.className = 'no-hits';
+          grid.appendChild(empty);
+        }
+        empty.innerHTML = 'No projects match <b>' +
+          (q ? '&ldquo;' + q.replace(/[&<>]/g, '') + '&rdquo;' : 'that filter') + '</b>.';
+        empty.hidden = false;
+      } else if (empty) {
+        empty.hidden = true;
       }
     }
 
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('.filter');
-      if (b) run(b.dataset.f);
+      if (!b) return;
+      cat = b.dataset.f;
+      run();
     });
-    run('all');
+
+    if (search) {
+      var t = null;
+      search.addEventListener('input', function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+          q = search.value.trim().toLowerCase();
+          run();
+        }, 120);
+      });
+      search.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && search.value) {
+          search.value = ''; q = ''; run();
+        }
+      });
+    }
+    if (clear) {
+      clear.addEventListener('click', function () {
+        if (search) { search.value = ''; search.focus(); }
+        q = ''; run();
+      });
+    }
+
+    run();
   })();
 
   /* ---- 6b. Expand / collapse all ---------------------------------------- */
