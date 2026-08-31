@@ -1,0 +1,2459 @@
+<!doctype html>
+<html lang="en" data-appearance="dark" data-court="hardwood" data-render="flat">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Set Play Trainer — learn basketball plays by running them</title>
+<meta name="description" content="A basketball set-play trainer. Run a play beat by beat and get graded on position, spacing, ball location and action — or play as the point guard and direct your team-mates with calls. Includes a whiteboard designer for building and sharing your own plays.">
+<meta name="theme-color" content="#12100e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e0702a'/%3E%3Cg fill='none' stroke='%23231a12' stroke-width='1.6'%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3Cpath d='M3 16h26M16 3v26M6.5 6.5c6 4 13 4 19 0M6.5 25.5c6-4 13-4 19 0'/%3E%3C/g%3E%3C/svg%3E">
+
+<style>
+/* ============================================================================
+   TOKENS — three orthogonal axes, deliberately independent:
+     data-appearance = dark | light                            (app chrome)
+     data-court      = hardwood | blueprint | chalkboard | neon (the floor)
+     data-render     = flat | tilt                             (the renderer)
+   Changing one axis must never disturb another.
+   ========================================================================== */
+:root{
+  --bg:#12100e; --bg-2:#1a1714; --bg-3:#221d19;
+  --line:#332c26; --line-2:#453b33;
+  --ink:#f2ece6; --ink-2:#b7aa9d; --ink-3:#7d7168;
+  --accent:#ff8a3d; --accent-ink:#1a1005;
+  --good:#4ec97f; --warn:#ffc247; --bad:#ff6b5e;
+  --radius:10px; --radius-sm:7px;
+  --shadow:0 8px 28px rgba(0,0,0,.42);
+  --mono:'SFMono-Regular',ui-monospace,Menlo,Consolas,'Liberation Mono',monospace;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --rail-l:262px; --rail-r:336px;
+}
+html[data-appearance="light"]{
+  --bg:#f4f1ec; --bg-2:#ffffff; --bg-3:#eae4db;
+  --line:#dcd3c7; --line-2:#c6b9a8;
+  --ink:#1d1815; --ink-2:#5d5248; --ink-3:#877a6d;
+  --accent:#c85a12; --accent-ink:#fff6ee;
+  --good:#1f8a4c; --warn:#96680a; --bad:#c0392b;
+  --shadow:0 8px 24px rgba(60,40,20,.13);
+}
+html[data-court="hardwood"]{
+  --c-floor:#c07f43; --c-floor-2:#a96a33; --c-line:#f6ead9; --c-paint:#9b5c2a;
+  --c-arc:#f6ead9; --c-glow:rgba(255,236,208,.16);
+}
+html[data-court="blueprint"]{
+  --c-floor:#0e2140; --c-floor-2:#0a1a33; --c-line:#7fd4ff; --c-paint:#123058;
+  --c-arc:#7fd4ff; --c-glow:rgba(127,212,255,.14);
+}
+html[data-court="chalkboard"]{
+  --c-floor:#22312b; --c-floor-2:#1a2721; --c-line:#e8f0e4; --c-paint:#2b4038;
+  --c-arc:#e8f0e4; --c-glow:rgba(232,240,228,.10);
+}
+html[data-court="neon"]{
+  --c-floor:#0a0710; --c-floor-2:#0f0a1a; --c-line:#ff3ea5; --c-paint:#170d26;
+  --c-arc:#34e7ff; --c-glow:rgba(255,62,165,.18);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.5 var(--sans); -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+button,select,input,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{margin:0;font-weight:640;letter-spacing:-.011em}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------------------------------------------------------------- shell -- */
+.app{
+  display:grid; height:100dvh; min-height:0;
+  grid-template-columns:var(--rail-l) minmax(0,1fr) var(--rail-r);
+  grid-template-rows:auto minmax(0,1fr);
+  grid-template-areas:"hd hd hd" "lf ct rt";
+}
+.hd{
+  grid-area:hd; display:flex; align-items:center; gap:13px;
+  padding-block:9px; padding-inline:14px;
+  border-bottom:1px solid var(--line); background:var(--bg-2); min-height:52px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.brand svg{width:22px;height:22px;flex:none}
+.brand em{font-style:normal;color:var(--ink-3);font-weight:500}
+.modes{display:flex;gap:3px;background:var(--bg-3);padding:3px;border-radius:var(--radius);border:1px solid var(--line);flex-wrap:wrap}
+.modes button{
+  border:0;background:transparent;color:var(--ink-2);cursor:pointer;
+  padding:6px 12px;border-radius:var(--radius-sm);font-weight:600;font-size:13.5px;white-space:nowrap;
+}
+.modes button:hover{color:var(--ink)}
+.modes button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.hd-sp{flex:1 1 auto;min-width:0}
+
+/* ---------------------------------------------------------------- rails -- */
+.rail{
+  display:flex; flex-direction:column; gap:11px; min-height:0;
+  overflow:auto; overscroll-behavior:contain;
+  padding-block:12px; padding-inline:12px; background:var(--bg-2);
+}
+.rail-l{grid-area:lf;border-right:1px solid var(--line)}
+.rail-r{grid-area:rt;border-left:1px solid var(--line)}
+.card{
+  background:var(--bg-3);border:1px solid var(--line);border-radius:var(--radius);
+  padding-block:11px; padding-inline:11px; min-height:0;
+}
+/* flex-basis 0 is load-bearing: with `auto` a tall panel drags its siblings. */
+.card.grow{flex:1 1 0;display:flex;flex-direction:column;overflow:hidden}
+.card.grow > .scroll{flex:1 1 0;overflow:auto;min-height:0;margin-inline:-4px;padding-inline:4px}
+.card > .scroll.capped{max-height:32vh;overflow:auto;margin-inline:-4px;padding-inline:4px}
+.spotgrid{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:11.5px;color:var(--ink-2);margin-top:8px}
+.spotgrid b{font-family:var(--mono);color:var(--accent);font-weight:700;font-size:11px}
+.livechk{display:flex;flex-direction:column;gap:5px;margin-top:11px}
+.livechk .lrow{
+  display:flex;gap:7px;align-items:center;font-size:12px;line-height:1.35;
+  background:var(--bg);border:1px solid var(--line);border-left:2px solid var(--good);
+  border-radius:var(--radius-sm);padding-block:6px;padding-inline:9px;color:var(--ink-2);
+}
+.livechk .lrow.warn{border-left-color:var(--warn)}
+.livechk .lrow b{color:var(--ink);font-family:var(--mono);font-weight:700}
+.roster{display:flex;flex-direction:column;gap:4px;margin-top:7px}
+.rrow{
+  display:flex;gap:8px;align-items:center;font-size:12px;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding-block:5px;padding-inline:9px;color:var(--ink-3);
+}
+.rrow .pill{
+  flex:none;width:17px;height:17px;border-radius:99px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:10px;font-weight:700;color:#1a1005;
+}
+.rrow .st{margin-left:auto;font-size:11px;font-weight:650}
+.rrow.moved{color:var(--ink-2)}
+.rrow.moved .st{color:var(--good)}
+.rrow.still .st{color:var(--warn)}
+.card > h3{
+  font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
+  margin-bottom:9px;display:flex;align-items:center;gap:7px;font-weight:700;
+}
+.card > h3 .tag{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-2);font-weight:600;font-size:11px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:58%}
+
+/* --------------------------------------------------------------- court --- */
+.ct{grid-area:ct;display:flex;flex-direction:column;min-width:0;min-height:0;padding:12px;gap:10px}
+.stage{
+  flex:1 1 0;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--radius);overflow:hidden;background:var(--bg-3);border:1px solid var(--line);
+}
+#court{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage-note{position:absolute;inset-inline:0;top:0;display:flex;justify-content:center;pointer-events:none;padding-block:9px}
+.stage-note b{
+  background:color-mix(in srgb,var(--bg) 82%,transparent);border:1px solid var(--line-2);color:var(--ink);
+  padding-block:4px;padding-inline:12px;border-radius:99px;font-size:12.5px;font-weight:600;
+  backdrop-filter:blur(6px);text-align:center;
+}
+/* the bar under the court keeps the centre column full-height: no dead space */
+.bar{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding-block:9px;padding-inline:10px;
+}
+.bar .sp{flex:1 1 auto;min-width:0}
+.bar-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700}
+
+/* -------------------------------------------------------------- widgets -- */
+.btn{
+  border:1px solid var(--line-2);background:var(--bg-3);color:var(--ink);
+  border-radius:var(--radius-sm);padding-block:7px;padding-inline:13px;
+  cursor:pointer;font-weight:600;font-size:13.5px;white-space:nowrap;
+  transition:background .13s ease,border-color .13s ease,color .13s ease;
+}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover:not(:disabled){filter:brightness(1.08);color:var(--accent-ink)}
+.btn.sm{padding-block:4px;padding-inline:9px;font-size:12.5px}
+.btn.ico{padding-inline:8px}
+.btn.wide{width:100%}
+select,input[type=text],textarea{
+  background:var(--bg);border:1px solid var(--line-2);color:var(--ink);
+  border-radius:var(--radius-sm);padding-block:6px;padding-inline:8px;font-size:13.5px;width:100%;
+}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:58px;line-height:1.45;font-size:13px}
+label.fld{display:block;margin-bottom:8px}
+label.fld > span{
+  display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--ink-3);font-weight:700;margin-bottom:4px;
+}
+.row{display:flex;gap:7px;align-items:center}
+.row > *{min-width:0}
+
+/* play list */
+.plist{display:flex;flex-direction:column;gap:5px}
+.pitem{
+  display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding-block:8px;padding-inline:9px;cursor:pointer;color:inherit;
+  transition:border-color .13s ease,background .13s ease;
+}
+.pitem:hover{border-color:var(--line-2)}
+.pitem[aria-current="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,var(--bg))}
+.pitem .nm{font-weight:640;font-size:13.5px;line-height:1.25}
+.pitem .mt{font-size:11px;color:var(--ink-3);margin-top:2px}
+.pitem .col{flex:1 1 auto;min-width:0}
+.pitem .best{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);flex:none}
+.dots{display:flex;gap:2px;flex:none}
+.dots i{width:5px;height:5px;border-radius:99px;background:var(--line-2);display:block}
+.dots i.on{background:var(--accent)}
+
+/* beat list */
+.beats{display:flex;flex-direction:column;gap:4px}
+.beat{
+  display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;color:inherit;
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding-block:7px;padding-inline:8px;cursor:pointer;font-size:13px;
+}
+.beat[aria-current="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--bg))}
+.beat .n{
+  flex:none;width:19px;height:19px;border-radius:5px;background:var(--bg-3);
+  display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-2);border:1px solid var(--line);
+}
+.beat[aria-current="true"] .n{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.beat .t{flex:1 1 auto;min-width:0;line-height:1.35;font-weight:600}
+.beat .sc{flex:none;font-family:var(--mono);font-size:11.5px;font-weight:700}
+
+/* score readouts */
+.score-big{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.score-big b{font-size:34px;font-weight:750;letter-spacing:-.03em;line-height:1}
+.score-big .gr{font-size:14px;font-weight:750;padding-block:3px;padding-inline:9px;border-radius:99px;
+  background:var(--bg);border:1px solid var(--line-2)}
+.meters{display:flex;flex-direction:column;gap:7px}
+.meter .lb{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-2);margin-bottom:3px}
+.meter .lb b{font-family:var(--mono);color:var(--ink);font-weight:700}
+.meter .tr{height:5px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.meter .fl{height:100%;border-radius:99px;transition:width .35s cubic-bezier(.3,.9,.35,1)}
+
+.notes{display:flex;flex-direction:column;gap:7px;margin-top:2px}
+.note{
+  display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--ink-2);
+  background:var(--bg);border:1px solid var(--line);border-left:2px solid var(--line-2);
+  border-radius:var(--radius-sm);padding-block:7px;padding-inline:9px;
+}
+.note.bad{border-left-color:var(--bad)}
+.note.warn{border-left-color:var(--warn)}
+.note.good{border-left-color:var(--good)}
+.note .who{
+  flex:none;width:18px;height:18px;border-radius:99px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:10.5px;font-weight:700;
+  background:var(--bg-3);border:1px solid var(--line-2);color:var(--ink);
+}
+.coach{font-size:13px;line-height:1.55;color:var(--ink-2);border-left:2px solid var(--accent);padding-inline-start:10px}
+.coach b{color:var(--ink);font-weight:640}
+.mistake{margin-top:8px;font-size:12px;line-height:1.5;color:var(--ink-3);border-top:1px dashed var(--line-2);padding-top:8px}
+.mistake b{color:var(--warn);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.08em}
+
+.hist{display:flex;flex-direction:column;gap:3px}
+.hrow{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ink-2)}
+.hrow .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .sc{font-family:var(--mono);font-weight:700;flex:none}
+.hrow .dt{font-size:10.5px;color:var(--ink-3);flex:none;font-variant-numeric:tabular-nums}
+.empty{color:var(--ink-3);font-size:12.5px;line-height:1.5;text-align:center;padding-block:14px}
+
+/* action tagger / call composer */
+.act{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.act select{flex:1 1 auto;min-width:104px}
+.act select.who{flex:0 0 68px;min-width:0}
+.calls{display:flex;flex-direction:column;gap:5px;margin-block:9px}
+.call{
+  display:flex;gap:8px;align-items:center;font-size:12.5px;line-height:1.4;
+  background:var(--bg);border:1px solid var(--line);border-left:2px solid var(--accent);
+  border-radius:var(--radius-sm);padding-block:6px;padding-inline:9px;
+}
+.call.ok{border-left-color:var(--good)}
+.call.no{border-left-color:var(--bad)}
+.call .tx{flex:1 1 auto;min-width:0}
+.call .x{
+  flex:none;background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:15px;
+  line-height:1;padding:2px 4px;border-radius:4px;
+}
+.call .x:hover{color:var(--bad);background:var(--bg-3)}
+.pcalls{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+
+/* designer beat chips */
+.bchips{display:flex;flex-wrap:wrap;gap:5px}
+.bchip{
+  display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);
+  border-radius:99px;padding-block:4px;padding-inline:9px;font-size:12px;cursor:pointer;color:inherit;
+}
+.bchip[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:60;display:flex;
+  align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(3px)}
+.modal .box{
+  background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow);
+  max-width:600px;width:100%;max-height:86dvh;overflow:auto;padding-block:18px;padding-inline:18px;
+}
+.modal h2{font-size:19px;margin-bottom:5px}
+.modal .sub{color:var(--ink-2);font-size:13.5px;margin-bottom:15px;line-height:1.55}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.codebox{
+  width:100%;font-family:var(--mono);font-size:11.5px;line-height:1.45;background:var(--bg);
+  border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px;min-height:86px;word-break:break-all;
+}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px;margin-block:14px}
+.sumcell{background:var(--bg-3);border:1px solid var(--line);border-radius:var(--radius);padding-block:10px;padding-inline:11px}
+.sumcell .k{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700}
+.sumcell .v{font-size:21px;font-weight:720;margin-top:3px;letter-spacing:-.02em}
+
+.choices{display:flex;flex-direction:column;gap:7px}
+.choice{
+  width:100%;text-align:left;background:var(--bg);border:1px solid var(--line-2);
+  border-radius:var(--radius-sm);padding-block:10px;padding-inline:12px;cursor:pointer;color:inherit;
+  font-weight:600;font-size:13.5px;
+}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 15%,var(--bg))}
+.choice.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--bg))}
+.choice:disabled{cursor:default}
+.hint{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+
+/* --------------------------------------------------------- responsive --- */
+@media (max-width:1240px){ :root{--rail-l:224px;--rail-r:302px} }
+@media (max-width:1040px){
+  body{overflow:auto}
+  .app{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto minmax(420px,60dvh) auto;
+    grid-template-areas:"hd" "lf" "ct" "rt";
+    height:auto;min-height:100dvh;
+  }
+  .rail{overflow:visible;max-height:none}
+  .rail-l{border-right:0;border-bottom:1px solid var(--line)}
+  .rail-r{border-left:0;border-top:1px solid var(--line)}
+  .card.grow{flex:0 0 auto}
+  /* `.grow` is off here, so the scroll child has no free space to claim from
+     flex:1 1 0 and would collapse the card to a bare header. */
+  .card.grow > .scroll{flex:0 0 auto;height:auto;max-height:300px}
+  .card > .scroll.capped{max-height:none}
+  .hd{flex-wrap:wrap}
+  .stage{min-height:380px}
+}
+@media (max-width:560px){
+  .modes button{padding-inline:9px;font-size:12.5px}
+  .brand em{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="hd">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="13" fill="var(--accent)"/>
+        <g fill="none" stroke="var(--bg)" stroke-width="1.7">
+          <circle cx="16" cy="16" r="13"/>
+          <path d="M3 16h26M16 3v26M6.5 6.5c6 4 13 4 19 0M6.5 25.5c6-4 13-4 19 0"/>
+        </g>
+      </svg>
+      <span>Set Play Trainer <em>· v1</em></span>
+    </div>
+    <nav class="modes" id="modes" role="tablist" aria-label="Mode">
+      <button role="tab" data-mode="learn"   aria-selected="false">Learn</button>
+      <button role="tab" data-mode="run"     aria-selected="true">Run It</button>
+      <button role="tab" data-mode="general" aria-selected="false">Floor General</button>
+      <button role="tab" data-mode="recall"  aria-selected="false">Recall</button>
+      <button role="tab" data-mode="name"    aria-selected="false">Name It</button>
+      <button role="tab" data-mode="design"  aria-selected="false">Design</button>
+    </nav>
+    <div class="hd-sp"></div>
+    <button class="btn sm" id="btnHelp">Help</button>
+    <button class="btn sm" id="btnSettings">Settings</button>
+  </header>
+
+  <aside class="rail rail-l">
+    <div class="card">
+      <h3>Playbook <span class="tag" id="playCount"></span></h3>
+      <div class="scroll capped"><div class="plist" id="plist"></div></div>
+    </div>
+    <div class="card">
+      <h3>My plays</h3>
+      <div class="plist" id="mylist"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn sm" id="btnNewPlay" style="flex:1">New play</button>
+        <button class="btn sm" id="btnImport" style="flex:1">Import</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Recent attempts</h3>
+      <div class="hist" id="hist"></div>
+    </div>
+    <div class="card grow">
+      <h3>Court spots <span class="tag">call vocabulary</span></h3>
+      <div class="scroll" id="spotmap"></div>
+    </div>
+  </aside>
+
+  <main class="ct">
+    <div class="stage">
+      <svg id="court" role="img" aria-label="Basketball half court"></svg>
+      <div class="stage-note" id="stageNote" hidden><b></b></div>
+    </div>
+    <div class="bar" id="bar"></div>
+  </main>
+
+  <aside class="rail rail-r" id="railR"></aside>
+</div>
+
+<script>
+"use strict";
+/* ============================================================================
+   Set Play Trainer
+   ---------------------------------------------------------------------------
+   The one rule that keeps this honest:
+
+       THE GRADING ENGINE NEVER SEES A PIXEL.
+
+   Everything upstream of the renderer is in real court feet. gradeBeat() is
+   pure, DOM-free and view-independent, which is what lets a second renderer
+   (the tilted 2.5D view) drop in with no engine changes — and what lets Floor
+   General mode feed the very same grader from a completely different input
+   method. Pointer input is converted to feet by asking the *rendered group*
+   for its screen CTM, so whatever affine transform a renderer applies is
+   inverted for free.
+   ========================================================================== */
+
+/* -------------------------------------------------------------- geometry -- */
+/* Feet. Origin at the centre of the baseline, y grows away from the basket.
+   The basket is drawn at the top, which is what every coaching diagram does. */
+const COURTS = {
+  nba:  { key:'nba',  name:'NBA',         width:50,   len:47,   hoopY:5.25, rimR:.75,
+          bbY:4,    bbHalf:3,    paintHalf:8,    ftY:19,    ftR:6,   raR:4,
+          arc3:23.75, corner3X:22,    straightCorner:true },
+  fiba: { key:'fiba', name:'FIBA',        width:49.2, len:47.2, hoopY:5.25, rimR:.74,
+          bbY:3.94, bbHalf:2.95, paintHalf:8.04, ftY:19.03, ftR:5.9, raR:4.1,
+          arc3:22.15, corner3X:21.65, straightCorner:true },
+  hs:   { key:'hs',   name:'High school', width:50,   len:42,   hoopY:5.25, rimR:.75,
+          bbY:4,    bbHalf:3,    paintHalf:6,    ftY:19,    ftR:6,   raR:0,
+          arc3:19.75, corner3X:0,    straightCorner:false }
+};
+/* Derived, never hand-typed: where the arc meets the baseline when there is no
+   straight corner segment, and where the straight segment ends when there is. */
+function cornerX(c){
+  return c.straightCorner ? c.corner3X : Math.sqrt(Math.max(0, c.arc3*c.arc3 - c.hoopY*c.hoopY));
+}
+function breakY(c){
+  if (!c.straightCorner) return 0;
+  return c.hoopY + Math.sqrt(Math.max(0, c.arc3*c.arc3 - c.corner3X*c.corner3X));
+}
+
+const SLOTS = [1,2,3,4,5];
+const SLOT_NAME = {1:'Point guard',2:'Shooting guard',3:'Small forward',4:'Power forward',5:'Centre'};
+
+const ACTION_TYPES = [
+  { id:'none',    label:'No action this beat' },
+  { id:'screen',  label:'Screen',           needsFor:true },
+  { id:'handoff', label:'Dribble handoff',  needsFor:true },
+  { id:'pass',    label:'Pass',             needsFor:true },
+  { id:'cut',     label:'Cut' },
+  { id:'roll',    label:'Roll' },
+  { id:'pop',     label:'Pop' },
+  { id:'dribble', label:'Dribble' },
+  { id:'flare',   label:'Flare' },
+  { id:'curl',    label:'Curl' },
+  { id:'seal',    label:'Seal' }
+];
+const ACTION_LABEL = Object.fromEntries(ACTION_TYPES.map(a=>[a.id,a.label]));
+const ACTION_NEEDS_FOR = new Set(ACTION_TYPES.filter(a=>a.needsFor).map(a=>a.id));
+/* Contact is the entire point of these actions, so the pair involved is exempt
+   from the minimum-spacing rule. Without this, every screen beat would be
+   flagged as bad spacing, which would be nonsense. */
+const CONTACT_ACTIONS = new Set(['screen','handoff','seal']);
+
+/* ---------------------------------------------------------- built-in plays */
+const BUILTIN = [
+{
+  id:'five-out-drag', name:'5-Out Drag', formation:'5-Out', difficulty:1,
+  tags:['transition','ball screen','spacing'],
+  blurb:'Transition ball screen out of a five-out look. Really a spacing lesson: if the corners are not filled early, the drag screen has nowhere to go.',
+  beats:[
+    { label:'Push ahead', ball:1,
+      spots:{1:[-10,31], 2:[-22,5], 3:[22,5], 4:[20,24], 5:[2,37]},
+      actions:[{type:'dribble',by:1}], keyPlayers:[2,3],
+      coaching:'1 pushes to the left slot. <b>2 and 3 sprint the corners</b> — not the wings, the corners. 4 fills the right wing, 5 trails the play.',
+      mistake:'Filling the wings instead of the corners. A filled corner drags the low defender out of the paint; a filled wing does not.' },
+    { label:'Drag screen', ball:1,
+      spots:{1:[-13,29], 2:[-22,5], 3:[22,5], 4:[20,24], 5:[-8,30]},
+      actions:[{type:'screen',by:5,for:1}], keyPlayers:[1,5],
+      coaching:'5 trails into a drag screen on 1’s <b>inside shoulder</b>, before the defence is set. 1 uses it to attack the <b>middle</b> of the floor.',
+      mistake:'Setting the screen too high, above the arc. There is nothing to attack from out there — the drag has to happen inside 30 ft.' },
+    { label:'Roll and space', ball:1,
+      spots:{1:[-4,24], 2:[-22,5], 3:[22,5], 4:[12,30], 5:[-1,11]},
+      actions:[{type:'roll',by:5}], keyPlayers:[5,4],
+      coaching:'5 rolls hard to the rim. <b>4 lifts from the wing to the top</b> to become the spray-out. That lift is what forces the help defender to choose.',
+      mistake:'4 standing still on the wing. If nobody lifts, the weak-side defender helps for free and the roll dies on arrival.' }
+  ]
+},
+{
+  id:'horns-flare', name:'Horns Flare', formation:'Horns', difficulty:2,
+  tags:['half court','ball screen','flare'],
+  blurb:'The most common modern half-court entry. Two bigs at the elbows, corners filled, then a ball screen one way and a flare screen the other.',
+  beats:[
+    { label:'Horns set', ball:1,
+      spots:{1:[0,30], 2:[-22,5], 3:[22,5], 4:[-8,19], 5:[8,19]},
+      actions:[], keyPlayers:[4,5],
+      coaching:'Both bigs sit <b>on the elbows</b> — the corners of the free-throw line. 1 is centred above the arc, both corners filled.',
+      mistake:'Bigs drifting down to the blocks. From the blocks there is no ball-screen angle and the set collapses into a post-up.' },
+    { label:'Ball screen right', ball:1,
+      spots:{1:[5,27], 2:[-22,5], 3:[22,5], 4:[-8,19], 5:[9,25]},
+      actions:[{type:'screen',by:5,for:1}], keyPlayers:[1,5],
+      coaching:'5 steps up off the elbow to screen. 1 takes it and drives <b>right</b> — the flare on the far side only works if the ball actually moves that way.',
+      mistake:'1 going away from the screen out of habit. Reject it and you have run a completely different play.' },
+    { label:'Flare screen', ball:1,
+      spots:{1:[12,26], 2:[-18,12], 3:[22,5], 4:[-13,18], 5:[4,14]},
+      actions:[{type:'screen',by:4,for:2},{type:'roll',by:5}], keyPlayers:[4,2],
+      coaching:'As the ball turns the corner, <b>4 slides down and flare-screens for 2</b>, who lifts out of the corner. 5 rolls through the middle.',
+      mistake:'2 lifting before the screen is set. Early movement lets his defender go under it and the skip pass is dead on arrival.' },
+    { label:'Skip and shoot', ball:2,
+      spots:{1:[14,26], 2:[-21,21], 3:[22,5], 4:[-12,11], 5:[2,8]},
+      actions:[{type:'pass',by:1,for:2}], keyPlayers:[2],
+      coaching:'The skip across the top finds 2 at the left wing with his feet already set. 4 slips to the short corner, 5 occupies the rim.',
+      mistake:'Throwing it late. The window is open for about a second, while the low man is still tagging the roller.' }
+  ]
+},
+{
+  id:'empty-side-pnr', name:'Empty Side PnR', formation:'Empty side', difficulty:2,
+  tags:['two-man game','ball screen','clear out'],
+  blurb:'A pure two-man game. Send everybody to the weak side, then play 1 and 5 on an island with no help defender within twenty feet. The whole play is the clear-out.',
+  beats:[
+    { label:'Clear the side', ball:1,
+      spots:{1:[13,30], 2:[-22,5], 3:[-21,22], 4:[-10,9], 5:[16,22]},
+      actions:[], keyPlayers:[2,3,4],
+      spacingExempt:[[1,5]],
+      coaching:'Ball and big on the right. <b>Everyone else goes left</b> — corner, slot and weak-side dunker. The right side of the floor must be genuinely empty.',
+      mistake:'Leaving one team-mate on the strong side. His defender is the help defender, and the entire point of the play was to remove him.' },
+    { label:'Screen into space', ball:1,
+      spots:{1:[13,29], 2:[-22,5], 3:[-21,22], 4:[-10,9], 5:[18,27]},
+      actions:[{type:'screen',by:5,for:1}], keyPlayers:[1,5],
+      coaching:'5 screens on 1’s <b>outside shoulder</b>, sending him at the empty right side. Nobody can rotate over in time from where the other three are standing.',
+      mistake:'Screening him back toward the middle. That drives straight into the three defenders you just spent a beat moving away.' },
+    { label:'Downhill', ball:1,
+      spots:{1:[17,20], 2:[-22,5], 3:[-21,22], 4:[-10,9], 5:[7,11]},
+      actions:[{type:'roll',by:5}], keyPlayers:[1,5],
+      coaching:'1 turns the corner with a clear lane. 5 rolls in behind him. Two defenders, two attackers, and no third defender close enough to matter.',
+      mistake:'Picking up the dribble early. On an empty side the advantage lasts as long as the dribble does.' },
+    { label:'The one pass out', ball:1,
+      spots:{1:[16,15], 2:[-22,5], 3:[-21,22], 4:[-10,9], 5:[3,7]},
+      actions:[{type:'pass',by:1,for:2}], keyPlayers:[1],
+      coaching:'If the weak-side low man finally steps in to tag the roll, he has left <b>2 in the corner</b>. That is the only pass this play ever needs.',
+      mistake:'Two passes. The second one lets the defence recover — the whole structure was built so one pass beats it.' }
+  ]
+},
+{
+  id:'spain-pnr', name:'Spain Pick-and-Roll', formation:'Empty side', difficulty:3,
+  tags:['ball screen','back screen','advanced'],
+  blurb:'A ball screen with a back screen laid on the roller’s defender. Three defenders end up wrong at once. Timing is everything, which is exactly what a beat-by-beat trainer can teach.',
+  beats:[
+    { label:'Spain setup', ball:1,
+      spots:{1:[0,31], 2:[-22,5], 3:[22,5], 4:[-1,20], 5:[2,25]},
+      actions:[], keyPlayers:[4],
+      spacingExempt:[[1,5],[4,5],[1,4]],
+      coaching:'5 climbs to screen. <b>4 must start below the screen</b>, around the nail — if he is level with it there is no back screen available to set.',
+      mistake:'4 starting above the ball screen. From up there he can only set a second ball screen, which is a different play entirely.' },
+    { label:'Ball screen', ball:1,
+      spots:{1:[-2,29], 2:[-22,5], 3:[22,5], 4:[-1,20], 5:[-7,27]},
+      actions:[{type:'screen',by:5,for:1}], keyPlayers:[1,5],
+      spacingExempt:[[4,5],[1,4]],
+      coaching:'An ordinary ball screen, 1 comes off it going <b>left</b>. Everything so far should look exactly like a normal pick-and-roll — that is the disguise.',
+      mistake:'Rushing. The back screen is only lethal after the defence has fully committed to the ball screen.' },
+    { label:'The Spain action', ball:1,
+      spots:{1:[-12,25], 2:[-22,5], 3:[22,5], 4:[0,21], 5:[-1,16]},
+      actions:[{type:'screen',by:4,for:5},{type:'roll',by:5}], keyPlayers:[4,5],
+      coaching:'This is the play. <b>4 back-screens the roller’s defender</b> — not the ball handler’s. 5 rolls through it to the rim.',
+      mistake:'Screening the on-ball defender instead. That is just a double drag; the entire point is to free the roller.' },
+    { label:'Screener pops', ball:1,
+      spots:{1:[-15,22], 2:[-22,5], 3:[22,5], 4:[3,29], 5:[-2,8]},
+      actions:[{type:'pop',by:4}], keyPlayers:[4],
+      coaching:'Having screened, <b>4 pops straight out above the arc</b>. His own defender is behind the play and the big who tagged the roll cannot recover that far.',
+      mistake:'Popping to the wing. The top of the key is the spot — it is the furthest point from both defenders who are now below the ball.' },
+    { label:'Three reads', ball:1,
+      spots:{1:[-17,21], 2:[-22,5], 3:[22,5], 4:[2,30], 5:[-1,7]},
+      actions:[{type:'pass',by:1,for:4}], keyPlayers:[1],
+      coaching:'Read the low man. <b>If he tags 5, hit 4 at the top.</b> If he stays home, throw the lob. If both help, the weak-side corner is open.',
+      mistake:'Pre-deciding. Every defender is wrong somewhere — the read tells you which one, not the plan you had before the catch.' }
+  ]
+}
+];
+
+/* --------------------------------------------------------------- helpers -- */
+const $  = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const dist = (a,b)=> Math.hypot(a[0]-b[0], a[1]-b[1]);
+const lerp = (a,b,t)=> a + (b-a)*t;
+const round3 = v => Math.round(v*1000)/1000;
+function el(tag, attrs, kids){
+  const n = document.createElement(tag);
+  for (const k in (attrs||{})){
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k === 'value' && (tag === 'input' || tag === 'textarea')) n.value = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of (kids||[])) if (c) n.appendChild(c);
+  return n;
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function uid(prefix){
+  const r = new Uint8Array(6);
+  if (self.crypto && self.crypto.getRandomValues) crypto.getRandomValues(r);
+  else for (let i=0;i<r.length;i++) r[i] = Math.floor(Math.random()*256);
+  return prefix + '-' + Array.from(r, b=>b.toString(16).padStart(2,'0')).join('');
+}
+function cloneSpots(s){ const o = {}; for (const k of SLOTS) o[k] = [s[k][0], s[k][1]]; return o; }
+
+/* ================================================================= STORE ==
+   Every storage access is wrapped: a private window throws on read as well as
+   write, and the app has to keep working when it does.
+   ======================================================================== */
+const K_PLAYS = 'hoops.plays.v1', K_HIST = 'hoops.history.v1', K_SET = 'hoops.settings.v1';
+const HIST_CAP = 200;
+const Store = {
+  _get(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if (raw === null) return fallback;
+      const v = JSON.parse(raw);
+      return (v === null || v === undefined) ? fallback : v;
+    }catch(e){ return fallback; }
+  },
+  _set(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); return true; }catch(e){ return false; }
+  },
+  plays(){ const v = this._get(K_PLAYS, []); return Array.isArray(v) ? v : []; },
+  savePlay(play){
+    const all = this.plays();
+    const i = all.findIndex(p => p.id === play.id);
+    if (i >= 0) all[i] = play; else all.push(play);
+    return this._set(K_PLAYS, all);
+  },
+  deletePlay(id){ return this._set(K_PLAYS, this.plays().filter(p => p.id !== id)); },
+  history(){ const v = this._get(K_HIST, []); return Array.isArray(v) ? v : []; },
+  addHistory(rec){ const all = this.history(); all.unshift(rec); return this._set(K_HIST, all.slice(0, HIST_CAP)); },
+  bestFor(playId){
+    let best = null;
+    for (const h of this.history()) if (h.playId === playId && (best === null || h.score > best)) best = h.score;
+    return best;
+  },
+  settings(){
+    const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard' };
+    const v = this._get(K_SET, {});
+    return Object.assign(d, (v && typeof v === 'object') ? v : {});
+  },
+  saveSettings(s){ return this._set(K_SET, s); }
+};
+
+/* --------------------------------------------------------- share codes --- */
+function b64urlEncode(bytes){
+  let s = ''; const CH = 0x8000;
+  for (let i = 0; i < bytes.length; i += CH) s += String.fromCharCode.apply(null, bytes.subarray(i, i+CH));
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlDecode(str){
+  const s = str.replace(/-/g,'+').replace(/_/g,'/');
+  const bin = atob(s + '='.repeat((4 - s.length % 4) % 4));
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function encodePlay(play){
+  const bytes = new TextEncoder().encode(JSON.stringify(play));
+  if (typeof CompressionStream === 'function'){
+    try{
+      const cs = new CompressionStream('deflate-raw');
+      const w = cs.writable.getWriter(); w.write(bytes); w.close();
+      const buf = await new Response(cs.readable).arrayBuffer();
+      return 'z' + b64urlEncode(new Uint8Array(buf));
+    }catch(e){ /* fall through to raw */ }
+  }
+  return 'r' + b64urlEncode(bytes);
+}
+async function decodePlay(code){
+  if (!code || code.length < 2) throw new Error('empty share code');
+  const tag = code[0];
+  let bytes = b64urlDecode(code.slice(1));
+  if (tag === 'z'){
+    if (typeof DecompressionStream !== 'function') throw new Error('this browser cannot read compressed share codes');
+    const ds = new DecompressionStream('deflate-raw');
+    const w = ds.writable.getWriter(); w.write(bytes); w.close();
+    bytes = new Uint8Array(await new Response(ds.readable).arrayBuffer());
+  } else if (tag !== 'r'){
+    throw new Error('unrecognised share code');
+  }
+  return validatePlay(JSON.parse(new TextDecoder().decode(bytes)));
+}
+
+/* Anything arriving from a URL, a file or another person is untrusted input.
+   Normalise it into the shape the engine expects, or refuse it outright. */
+function validatePlay(raw){
+  if (!raw || typeof raw !== 'object') throw new Error('not a play object');
+  const num = (v, d) => (typeof v === 'number' && isFinite(v)) ? v : d;
+  const play = {
+    id: (typeof raw.id === 'string' && raw.id) ? raw.id.slice(0,64) : uid('play'),
+    name: String(raw.name || 'Untitled play').slice(0,80),
+    formation: String(raw.formation || 'Custom').slice(0,40),
+    difficulty: Math.min(3, Math.max(1, Math.round(num(raw.difficulty, 1)))),
+    tags: Array.isArray(raw.tags) ? raw.tags.slice(0,6).map(t=>String(t).slice(0,24)) : [],
+    blurb: String(raw.blurb || '').slice(0,700),
+    custom: true, beats: []
+  };
+  const beats = Array.isArray(raw.beats) ? raw.beats.slice(0,12) : [];
+  if (!beats.length) throw new Error('a play needs at least one beat');
+  for (const b of beats){
+    const spots = {};
+    for (const s of SLOTS){
+      const p = (b && b.spots) ? b.spots[s] : null;
+      spots[s] = (Array.isArray(p) && p.length === 2)
+        ? [ Math.max(-30, Math.min(30, num(p[0], 0))), Math.max(-2, Math.min(52, num(p[1], 20))) ]
+        : [ (s-3)*8, 24 ];
+    }
+    const actions = (Array.isArray(b.actions) ? b.actions.slice(0,3) : []).map(a => {
+      if (!a || !ACTION_LABEL[a.type] || a.type === 'none') return null;
+      if (!SLOTS.includes(a.by)) return null;
+      const out = { type:a.type, by:a.by };
+      if (ACTION_NEEDS_FOR.has(a.type) && SLOTS.includes(a.for)) out.for = a.for;
+      return out;
+    }).filter(Boolean);
+    play.beats.push({
+      label: String((b && b.label) || 'Beat').slice(0,48),
+      ball: SLOTS.includes(b && b.ball) ? b.ball : 1,
+      spots, actions,
+      keyPlayers: Array.isArray(b && b.keyPlayers) ? b.keyPlayers.filter(s=>SLOTS.includes(s)) : [],
+      spacingExempt: Array.isArray(b && b.spacingExempt)
+        ? b.spacingExempt.filter(p => Array.isArray(p) && p.length===2 && SLOTS.includes(p[0]) && SLOTS.includes(p[1]))
+        : [],
+      coaching: String((b && b.coaching) || '').slice(0,700),
+      mistake:  String((b && b.mistake)  || '').slice(0,500)
+    });
+  }
+  return play;
+}
+
+/* ================================================================= GRADE ==
+   Pure. No DOM, no globals beyond the constant tables, no knowledge that a
+   renderer or a UI exists. Same input, same output, forever.
+   ======================================================================== */
+const TOL = {
+  screener: { ok:2.5, fail:7  },   // a screen 5 ft off the mark is not a screen
+  cutter:   { ok:3.5, fail:9  },
+  spot:     { ok:4.5, fail:11 }    // a corner shooter has room to breathe
+};
+const WEIGHTS = { pos:.55, ball:.15, act:.20, space:.10 };
+const MIN_SPACING = 12;   // feet between non-contact team-mates
+const PAINT_MAX   = 2;    // offensive players allowed in the paint at once
+
+function roleForSlot(beat, slot){
+  for (const a of beat.actions || []){
+    if (a.by === slot && CONTACT_ACTIONS.has(a.type)) return 'screener';
+    if (a.by === slot) return 'cutter';
+    if (a.for === slot) return 'cutter';
+  }
+  if (beat.ball === slot) return 'cutter';
+  return 'spot';
+}
+function positionScore(user, ref, role){
+  const t = TOL[role] || TOL.spot;
+  const d = dist(user, ref);
+  if (d <= t.ok) return 1;
+  return clamp01((t.fail - d) / (t.fail - t.ok));
+}
+function exemptPairs(beat){
+  const set = new Set();
+  const add = (a,b) => set.add(a < b ? a+'-'+b : b+'-'+a);
+  for (const a of beat.actions || []) if (CONTACT_ACTIONS.has(a.type) && a.by && a.for) add(a.by, a.for);
+  for (const p of beat.spacingExempt || []) add(p[0], p[1]);
+  return set;
+}
+function spacingReport(spots, beat, court){
+  const ex = exemptPairs(beat);
+  const violations = [];
+  for (let i = 0; i < SLOTS.length; i++){
+    for (let j = i+1; j < SLOTS.length; j++){
+      const a = SLOTS[i], b = SLOTS[j];
+      if (ex.has(a+'-'+b)) continue;
+      const d = dist(spots[a], spots[b]);
+      if (d < MIN_SPACING) violations.push({ kind:'tight', a, b, d });
+    }
+  }
+  const inPaint = SLOTS.filter(s => Math.abs(spots[s][0]) <= court.paintHalf && spots[s][1] <= court.ftY);
+  if (inPaint.length > PAINT_MAX) violations.push({ kind:'paint', who:inPaint });
+  return { violations, score: clamp01(1 - .34 * violations.length) };
+}
+function scoreActions(userActs, refActs){
+  const u = (userActs || []).filter(a => a && a.type && a.type !== 'none');
+  const r = (refActs  || []).filter(a => a && a.type && a.type !== 'none');
+  if (!r.length && !u.length) return 1;         // correctly identified a quiet beat
+  if (!r.length || !u.length) return 0;
+  const used = new Set();
+  let total = 0;
+  for (const ua of u){
+    let best = 0, bestI = -1;
+    r.forEach((ra, i) => {
+      if (used.has(i)) return;
+      let s = 0;
+      if (ra.type === ua.type){
+        s = .25;
+        if (ra.by === ua.by){
+          s = .6;
+          if (!ACTION_NEEDS_FOR.has(ra.type) || ra.for === ua.for) s = 1;
+        }
+      }
+      if (s > best){ best = s; bestI = i; }
+    });
+    if (bestI >= 0) used.add(bestI);
+    total += best;
+  }
+  return clamp01(total / Math.max(r.length, u.length));
+}
+function describeMiss(user, ref){
+  const d = dist(user, ref), dx = user[0]-ref[0], dy = user[1]-ref[1], ft = d.toFixed(1);
+  if (Math.abs(dy) >= Math.abs(dx)) return dy > 0 ? `${ft} ft too far from the basket` : `${ft} ft too deep toward the basket`;
+  const outward = (ref[0] === 0) ? (dx > 0) : (Math.sign(dx) === Math.sign(ref[0]));
+  return outward ? `${ft} ft too wide` : `${ft} ft too far inside`;
+}
+/**
+ * Grade one beat.
+ * @param {{spots:Object, ball:number, actions:Array}} attempt   court feet
+ * @param {Object} beat   reference beat
+ * @param {Object} court  court spec (only the paint test uses it)
+ */
+function gradeBeat(attempt, beat, court){
+  const parts = {}, per = {};
+  let weighted = 0, weightSum = 0;
+  for (const s of SLOTS){
+    const role = roleForSlot(beat, s);
+    const sc = positionScore(attempt.spots[s], beat.spots[s], role);
+    const w = (beat.keyPlayers || []).includes(s) ? 1.5 : 1;
+    per[s] = { score:sc, role, weight:w, dist:Math.round(dist(attempt.spots[s], beat.spots[s])*100)/100 };
+    weighted += sc*w; weightSum += w;
+  }
+  parts.pos   = weightSum ? weighted/weightSum : 0;
+  parts.ball  = attempt.ball === beat.ball ? 1 : 0;
+  parts.act   = scoreActions(attempt.actions, beat.actions);
+  const sp    = spacingReport(attempt.spots, beat, court);
+  parts.space = sp.score;
+
+  const total = parts.pos*WEIGHTS.pos + parts.ball*WEIGHTS.ball + parts.act*WEIGHTS.act + parts.space*WEIGHTS.space;
+
+  /* Diagnostics: geometry first, coaching cue second. */
+  const notes = [];
+  for (const s of SLOTS){
+    if (per[s].score >= .85) continue;
+    notes.push({ slot:s, level: per[s].score < .4 ? 'bad' : 'warn',
+      text:`${SLOT_NAME[s]} was ${describeMiss(attempt.spots[s], beat.spots[s])}.` });
+  }
+  if (!parts.ball) notes.push({ slot:beat.ball, level:'bad',
+    text:`The ball belongs with ${beat.ball} on this beat, not ${attempt.ball}.` });
+  if (parts.act < 1){
+    const want = (beat.actions || []).length
+      ? beat.actions.map(a => ACTION_LABEL[a.type].toLowerCase() + ' by ' + a.by + (a.for ? ' for ' + a.for : '')).join(', ')
+      : 'no action at all';
+    notes.push({ slot:'!', level: parts.act === 0 ? 'bad' : 'warn', text:`The action here is ${want}.` });
+  }
+  for (const v of sp.violations){
+    notes.push(v.kind === 'paint'
+      ? { slot:'!', level:'warn', text:`${v.who.join(', ')} are all in the paint. Two at most, or there is nowhere to drive.` }
+      : { slot:'!', level:'warn', text:`${v.a} and ${v.b} are only ${v.d.toFixed(1)} ft apart. One defender guards both.` });
+  }
+  if (!notes.length) notes.push({ slot:'✓', level:'good',
+    text:'Every spot inside tolerance, spacing legal, right action. Clean beat.' });
+
+  return { total, parts, per, spacing:sp, notes };
+}
+function letterFor(score){
+  const p = score*100;
+  if (p >= 93) return 'A';
+  if (p >= 87) return 'A-';
+  if (p >= 80) return 'B+';
+  if (p >= 73) return 'B';
+  if (p >= 66) return 'B-';
+  if (p >= 58) return 'C+';
+  if (p >= 50) return 'C';
+  if (p >= 40) return 'D';
+  return 'F';
+}
+/* Later beats are harder and matter more, so they carry slightly more weight. */
+function gradePlay(beatScores){
+  if (!beatScores.length) return 0;
+  let num = 0, den = 0;
+  beatScores.forEach((s,i)=>{ const w = 1 + i*0.12; num += s*w; den += w; });
+  return num/den;
+}
+
+/* ========================================================= FLOOR GENERAL ==
+   You are the 1. You place only yourself; everyone else moves because you told
+   them to. A call is resolved against the beat's intent:
+
+     - a call that MATCHES the intent sends that team-mate to the play's spot.
+       Your team-mates know the play; a correct call means they execute it.
+     - a call that does NOT match sends them literally where you said, which
+       will grade exactly as badly as it deserves.
+     - anyone you never called stays where they were, so forgetting to move
+       someone costs you. That is the lesson.
+
+   The output is an ordinary {spots, ball, actions} attempt, so it goes through
+   gradeBeat() untouched. The engine has no idea this mode exists.
+   ======================================================================== */
+const SPOT_MAP = {
+  'corner':       s => [22*s, 5],
+  'wing':         s => [21*s, 22],
+  'slot':         s => [11*s, 29],
+  'top':          _ => [0, 30],
+  'trail':        _ => [0, 36],
+  'elbow':        s => [8*s, 19],
+  'block':        s => [8*s, 6],
+  'short corner': s => [14*s, 6],
+  'dunker':       s => [9*s, 9],
+  'nail':         _ => [0, 19],
+  'rim':          _ => [0, 8]
+};
+const SPOT_KEYS = Object.keys(SPOT_MAP);
+const SIDED = new Set(['corner','wing','slot','elbow','block','short corner','dunker']);
+const SNAP_FT = 6.5;   // how close a called destination must be to count as right
+
+function sideSign(side){ return side === 'left' ? -1 : 1; }
+function spotFor(where, side){ return SPOT_MAP[where](sideSign(side)); }
+function callText(c){
+  if (c.v === 'send')       return `${c.who} → ${SIDED.has(c.where) ? c.side + ' ' : ''}${c.where}`;
+  if (c.v === 'ballscreen') return `${c.who} ball screen, my ${c.side}`;
+  if (c.v === 'offball')    return `${c.who} ${ACTION_LABEL[c.type].toLowerCase()} for ${c.for}`;
+  if (c.v === 'clear')      return `clear the ${c.side} side`;
+  return '?';
+}
+/**
+ * @param {Object} baseSpots  where everyone currently stands
+ * @param {Array}  pgPos      where the user put the 1
+ * @param {Array}  calls
+ * @param {Object} beat       the reference beat, used only to judge intent
+ * @returns {{spots, actions, log}}
+ */
+function resolveCalls(baseSpots, pgPos, calls, beat){
+  const spots = cloneSpots(baseSpots);
+  spots[1] = [pgPos[0], pgPos[1]];
+  const actions = [];
+  const log = [];
+  const refActs = beat.actions || [];
+
+  for (const c of (calls || [])){
+    let ok = false, note = '', action = null, who = c.who;
+
+    if (c.v === 'send'){
+      const target = spotFor(c.where, c.side);
+      const ref = beat.spots[who];
+      ok = dist(target, ref) <= SNAP_FT;
+      spots[who] = ok ? [ref[0], ref[1]] : target;
+      note = ok ? 'right spot for this beat' : 'the play does not want him there';
+    }
+    else if (c.v === 'ballscreen'){
+      const want = refActs.find(a => a.type === 'screen' && a.by === who && a.for === 1);
+      if (want){
+        const ref = beat.spots[who];
+        const refSide = (ref[0] - beat.spots[1][0]) >= 0 ? 'right' : 'left';
+        ok = refSide === c.side;
+      }
+      if (ok){
+        spots[who] = [beat.spots[who][0], beat.spots[who][1]];
+        note = 'right screener, right side';
+      } else {
+        spots[who] = [pgPos[0] + 5*sideSign(c.side), pgPos[1] - 1.5];
+        note = want ? 'right screener, wrong side' : 'not the screener on this beat';
+      }
+      action = { type:'screen', by:who, for:1 };
+    }
+    else if (c.v === 'offball'){
+      const want = refActs.find(a => a.type === c.type && a.by === who && a.for === c.for);
+      if (want){
+        ok = true;
+        spots[who] = [beat.spots[who][0], beat.spots[who][1]];
+        spots[c.for] = [beat.spots[c.for][0], beat.spots[c.for][1]];
+        note = 'exactly the off-ball action this beat needs';
+      } else {
+        /* Put the screener between the target and the rim: a plausible but, on
+           this beat, wrong place to be. */
+        const t = spots[c.for];
+        spots[who] = [ (t[0] + beat.spots[1][0])/2, (t[1] + beat.spots[1][1])/2 ];
+        note = 'no such action on this beat';
+      }
+      action = { type:c.type, by:who, for:c.for };
+    }
+    else if (c.v === 'clear'){
+      const sgn = sideSign(c.side);
+      /* "Everybody out" never means the big who is screening for you. Real
+         point guards do not wave off their own ball screen. */
+      const keep = new Set([1]);
+      for (const a of refActs) if (CONTACT_ACTIONS.has(a.type) && a.for === 1) keep.add(a.by);
+      let moved = 0, right = 0;
+      for (const s of SLOTS){
+        if (keep.has(s)) continue;
+        if (Math.sign(spots[s][0]) !== sgn || Math.abs(spots[s][0]) < 4) continue;
+        moved++;
+        const ref = beat.spots[s];
+        /* Clearing is correct for this player if the play really does want him
+           off that side. */
+        if (Math.sign(ref[0]) !== sgn || Math.abs(ref[0]) < 4){ spots[s] = [ref[0], ref[1]]; right++; }
+        else spots[s] = [-spots[s][0], spots[s][1]];
+      }
+      ok = moved > 0 && right === moved;
+      note = moved === 0 ? 'nobody needed to move off that side'
+           : ok ? 'everyone who had to move, moved'
+           : `${moved-right} of them belonged on that side`;
+    }
+    log.push({ call:c, ok, note, text:callText(c) });
+    if (action) actions.push(action);
+  }
+  return { spots, actions, log };
+}
+
+/* ============================================================== RENDERERS ==
+   Both renderers implement the same interface:
+     mount(svgEl, court) · draw(state) · toCourt(cx,cy) · fromCourt(x,y)
+     hitTest(cx,cy) · destroy()
+   toCourt() is implemented once, against the CTM of the transformed group, so
+   the tilted renderer inherits an exact inverse for free. That is the whole
+   trick that keeps dragging correct across views.
+   ======================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svg(tag, attrs){
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in (attrs||{})) if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
+  return n;
+}
+function courtPath3pt(c){
+  const x = cornerX(c), by = breakY(c), r = c.arc3;
+  if (!c.straightCorner) return `M ${-x} 0 A ${r} ${r} 0 0 0 ${x} 0`;
+  return `M ${-x} 0 L ${-x} ${by} A ${r} ${r} 0 0 0 ${x} ${by} L ${x} 0`;
+}
+function buildCourtGroup(c){
+  const g = svg('g'), L = 'var(--c-line)', hw = c.width/2;
+  const add = (t,a)=>{ g.appendChild(svg(t,a)); };
+  add('rect', { x:-hw, y:0, width:c.width, height:c.len, fill:'var(--c-floor)' });
+  add('rect', { x:-hw, y:0, width:c.width, height:c.len, fill:'url(#floorGlow)' });
+  add('rect', { x:-hw, y:0, width:c.width, height:c.len, fill:'none', stroke:L, 'stroke-width':.35 });
+  add('rect', { x:-c.paintHalf, y:0, width:c.paintHalf*2, height:c.ftY, fill:'var(--c-paint)', stroke:L, 'stroke-width':.28 });
+  // free-throw circle: solid away from the basket, dashed through the paint
+  add('path', { d:`M ${-c.ftR} ${c.ftY} A ${c.ftR} ${c.ftR} 0 0 0 ${c.ftR} ${c.ftY}`, fill:'none', stroke:L, 'stroke-width':.28 });
+  add('path', { d:`M ${-c.ftR} ${c.ftY} A ${c.ftR} ${c.ftR} 0 0 1 ${c.ftR} ${c.ftY}`, fill:'none', stroke:L, 'stroke-width':.24, 'stroke-dasharray':'1.1 .9' });
+  if (c.raR > 0) add('path', { d:`M ${-c.raR} ${c.hoopY} A ${c.raR} ${c.raR} 0 0 0 ${c.raR} ${c.hoopY}`, fill:'none', stroke:L, 'stroke-width':.22, opacity:.75 });
+  add('path', { d:courtPath3pt(c), fill:'none', stroke:'var(--c-arc)', 'stroke-width':.34 });
+  add('path', { d:`M -6 ${c.len} A 6 6 0 0 1 6 ${c.len}`, fill:'none', stroke:L, 'stroke-width':.28 });
+  add('line', { x1:-c.bbHalf, y1:c.bbY, x2:c.bbHalf, y2:c.bbY, stroke:L, 'stroke-width':.42, 'stroke-linecap':'round' });
+  add('circle', { cx:0, cy:c.hoopY, r:c.rimR, fill:'none', stroke:'var(--c-arc)', 'stroke-width':.3 });
+  return g;
+}
+
+function makeRenderer(kind){
+  const LIFT = 2.8, PAD = 1.8, TOK_R = 1.55;
+  let root, scene, world, layers, court, tokens = [], sy = .62;
+
+  function mount(svgEl, courtSpec){
+    root = svgEl; court = courtSpec; tokens = [];
+    root.textContent = '';
+    const hw = court.width/2;
+
+    /* A tilted court is inherently wide, so a fixed squash letterboxes badly in
+       a tall stage. Choose the squash from the actual container aspect instead:
+       the viewBox then matches the stage and the court fills it, while the tilt
+       stays within a range that still reads as depth. */
+    if (kind === 'tilt'){
+      sy = .62;
+      const box = root.getBoundingClientRect();
+      if (box.width > 40 && box.height > 40){
+        const wantH = (court.width + PAD*2) * box.height / box.width;
+        sy = (wantH - LIFT - PAD*2) / court.len;
+        sy = Math.max(.5, Math.min(.86, sy));
+      }
+    } else sy = 1;
+
+    const h = kind === 'tilt' ? court.len*sy + LIFT + PAD*2 : court.len + PAD*2;
+    const y0 = kind === 'tilt' ? 0 : -PAD;
+    root.setAttribute('viewBox', `${-hw-PAD} ${y0} ${court.width+PAD*2} ${h}`);
+    root.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    const defs = svg('defs');
+    const rg = svg('radialGradient', { id:'floorGlow', cx:'50%', cy:'22%', r:'78%' });
+    rg.appendChild(svg('stop', { offset:'0%',   'stop-color':'var(--c-glow)' }));
+    rg.appendChild(svg('stop', { offset:'100%', 'stop-color':'transparent' }));
+    defs.appendChild(rg);
+    const f = svg('filter', { id:'tokShadow', x:'-60%', y:'-60%', width:'220%', height:'220%' });
+    f.appendChild(svg('feDropShadow', { dx:0, dy:.35, stdDeviation:.32, 'flood-color':'#000', 'flood-opacity':'.45' }));
+    defs.appendChild(f);
+    root.appendChild(defs);
+
+    scene = svg('g'); root.appendChild(scene);
+    /* `world` carries the view transform. getScreenCTM() on this node inverts
+       it exactly, whatever it happens to be. */
+    world = svg('g');
+    if (kind === 'tilt') world.setAttribute('transform', `translate(0 ${LIFT}) scale(1 ${sy})`);
+    scene.appendChild(world);
+    world.appendChild(buildCourtGroup(court));
+
+    layers = {};
+    layers.shadow = svg('g'); world.appendChild(layers.shadow);
+    layers.ghost  = svg('g'); world.appendChild(layers.ghost);
+    layers.trails = svg('g'); world.appendChild(layers.trails);
+    /* Tokens live outside the squashed group in tilt mode so the discs stay
+       round; each one positions itself through fromCourt(). */
+    layers.tokens = svg('g'); (kind === 'tilt' ? scene : world).appendChild(layers.tokens);
+  }
+
+  /* Court feet -> whatever space the tokens layer lives in. */
+  function fromCourt(x, y){ return kind === 'tilt' ? [x, y*sy + LIFT] : [x, y]; }
+  /* Screen pixels -> court feet, correct under any affine view transform. */
+  function toCourt(cx, cy){
+    if (!world) return [0,0];
+    const m = world.getScreenCTM();
+    if (!m) return [0,0];
+    const p = new DOMPoint(cx, cy).matrixTransform(m.inverse());
+    return [p.x, p.y];
+  }
+  function hitTest(cx, cy){
+    const [fx, fy] = toCourt(cx, cy);
+    let best = null, bestD = Infinity;
+    for (const t of tokens){
+      const d = Math.hypot(t.pos[0]-fx, t.pos[1]-fy);
+      const r = (t.id === 'ball' ? 1.15 : TOK_R) * 1.6;
+      if (d < r && d < bestD){ best = t.id; bestD = d; }
+    }
+    return best;
+  }
+  function draw(st){
+    if (!layers) return;
+    for (const k in layers) layers[k].textContent = '';
+    tokens = [];
+
+    if (st.ghost){
+      for (const s of SLOTS){
+        const g = st.ghost[s]; if (!g) continue;
+        const [gx, gy] = fromCourt(g[0], g[1]);
+        layers.ghost.appendChild(svg('circle', { cx:gx, cy:gy, r:TOK_R, fill:'none',
+          stroke:'var(--c-line)', 'stroke-width':.24, 'stroke-dasharray':'.9 .7', opacity:.62 }));
+        const t = svg('text', { x:gx, y:gy+.52, 'text-anchor':'middle', 'font-size':1.5,
+          fill:'var(--c-line)', opacity:.55, 'font-family':'system-ui, sans-serif', 'font-weight':600 });
+        t.textContent = s;
+        layers.ghost.appendChild(t);
+      }
+    }
+    for (const tr of (st.trails || [])){
+      const [ax, ay] = fromCourt(tr.from[0], tr.from[1]);
+      const [bx, by] = fromCourt(tr.to[0], tr.to[1]);
+      layers.trails.appendChild(svg('line', { x1:ax, y1:ay, x2:bx, y2:by,
+        stroke: tr.color || 'var(--c-line)', 'stroke-width': tr.width || .26,
+        'stroke-linecap':'round', 'stroke-dasharray': tr.dash || null, opacity: tr.opacity == null ? .9 : tr.opacity }));
+    }
+    if (kind === 'tilt'){
+      for (const s of SLOTS){
+        const p = st.spots[s]; if (!p) continue;
+        layers.shadow.appendChild(svg('ellipse', { cx:p[0], cy:p[1], rx:TOK_R*.95, ry:TOK_R*.95, fill:'#000', opacity:.3 }));
+      }
+    }
+    for (const s of SLOTS){
+      const p = st.spots[s]; if (!p) continue;
+      const [px, py] = fromCourt(p[0], p[1]);
+      const g = svg('g', { filter:'url(#tokShadow)' });
+      const isKey = (st.highlight || []).includes(s);
+      const locked = (st.locked || []).includes(s);
+      g.appendChild(svg('circle', { cx:px, cy:py, r:TOK_R,
+        fill: (st.colors && st.colors[s]) || 'var(--c-line)',
+        stroke: isKey ? 'var(--c-arc)' : 'rgba(0,0,0,.4)',
+        'stroke-width': isKey ? .34 : .16,
+        opacity: locked ? .55 : 1 }));
+      const t = svg('text', { x:px, y:py+.58, 'text-anchor':'middle', 'font-size':1.85,
+        'font-family':'system-ui, -apple-system, sans-serif', 'font-weight':750,
+        fill:'var(--c-floor-2)', 'pointer-events':'none' });
+      t.textContent = s;
+      g.appendChild(t);
+      layers.tokens.appendChild(g);
+      tokens.push({ id:s, pos:p });
+    }
+    if (st.ballPos){
+      const [bx, by] = fromCourt(st.ballPos[0], st.ballPos[1]);
+      const g = svg('g', { filter:'url(#tokShadow)' });
+      g.appendChild(svg('circle', { cx:bx, cy:by, r:1.05, fill:'#e0702a', stroke:'#2a1608', 'stroke-width':.16 }));
+      g.appendChild(svg('path', { d:`M ${bx-1.05} ${by} h2.1 M ${bx} ${by-1.05} v2.1`, stroke:'#2a1608', 'stroke-width':.13, fill:'none' }));
+      layers.tokens.appendChild(g);
+      tokens.push({ id:'ball', pos:st.ballPos });
+    }
+  }
+  function destroy(){ if (root) root.textContent = ''; layers = null; world = null; tokens = []; }
+  return { mount, draw, toCourt, fromCourt, hitTest, destroy, get kind(){ return kind; } };
+}
+
+/* ============================================================ APPLICATION ==*/
+const App = {
+  mode:'run', settings:Store.settings(), play:null, beatIndex:0,
+  attempt:null, results:[], reviewing:false, renderer:null, court:COURTS.nba,
+  anim:null, designer:null, quiz:null, general:null
+};
+const TOKEN_COLORS = { 1:'#f2c14e', 2:'#e0702a', 3:'#4ec97f', 4:'#5aa9e6', 5:'#c780e8' };
+
+function neutralSpots(){
+  /* An off-court rack along the half-court line, so every placement in beat 1
+     is deliberate rather than inherited. */
+  const y = App.court.len - 3.5;
+  return { 1:[-16,y], 2:[-8,y], 3:[0,y], 4:[8,y], 5:[16,y] };
+}
+function ballOffsetFor(spots, slot){ return [spots[slot][0] + 2.2, spots[slot][1] - 1.1]; }
+function nearestSlot(spots, pos, maxFt){
+  let best = null, bd = Infinity;
+  for (const s of SLOTS){ const d = dist(spots[s], pos); if (d < bd){ bd = d; best = s; } }
+  return (maxFt === undefined || bd <= maxFt) ? best : null;
+}
+function allPlays(){ return BUILTIN.concat(Store.plays()); }
+function findPlay(id){ return allPlays().find(p => p.id === id) || null; }
+function isPlacementMode(){ return App.mode === 'run' || App.mode === 'recall'; }
+function isGradedMode(){ return isPlacementMode() || App.mode === 'general'; }
+
+/* --------------------------------------------------------------- theming -- */
+function applySettings(){
+  const s = App.settings;
+  document.documentElement.dataset.appearance = s.appearance;
+  document.documentElement.dataset.court = s.court;
+  document.documentElement.dataset.render = s.render;
+  App.court = COURTS[s.spec] || COURTS.nba;
+  buildRenderer();
+  renderSpotMap();
+}
+function buildRenderer(){
+  if (App.renderer) App.renderer.destroy();
+  App.renderer = makeRenderer(App.settings.render === 'tilt' ? 'tilt' : 'flat');
+  App.renderer.mount($('#court'), App.court);
+  paint();
+}
+
+/* ================================================================ PAINTING */
+function paint(){
+  if (!App.renderer) return;
+  const st = { spots:neutralSpots(), ballPos:null, ghost:null, trails:[],
+               colors:TOKEN_COLORS, highlight:[], locked:[] };
+
+  if (App.mode === 'design' && App.designer){
+    const d = App.designer, b = d.play.beats[d.beat];
+    st.spots = b.spots;
+    st.ballPos = ballOffsetFor(b.spots, b.ball);
+    st.highlight = b.keyPlayers || [];
+    if (d.beat > 0){
+      const prev = d.play.beats[d.beat-1];
+      st.ghost = prev.spots;
+      st.trails = SLOTS.map(s => ({ from:prev.spots[s], to:b.spots[s], color:TOKEN_COLORS[s],
+        width:.2, dash:'.8 .6', opacity:.5 }));
+    }
+  }
+  else if (App.mode === 'learn' && App.play){
+    const beat = App.play.beats[App.beatIndex];
+    const f = App.anim ? App.anim.frame : { spots:beat.spots, ball:beat.ball };
+    st.spots = f.spots;
+    st.ballPos = ballOffsetFor(f.spots, f.ball);
+    st.highlight = beat.keyPlayers || [];
+  }
+  else if (App.mode === 'name' && App.quiz){
+    const b0 = App.quiz.play.beats[0];
+    const f = App.anim ? App.anim.frame : { spots:b0.spots, ball:b0.ball };
+    st.spots = f.spots;
+    st.ballPos = ballOffsetFor(f.spots, f.ball);
+  }
+  else if (App.mode === 'general' && App.play && App.general){
+    const g = App.general, beat = App.play.beats[App.beatIndex];
+    st.spots = g.preview ? g.preview.spots : g.spots;
+    st.ballPos = ballOffsetFor(st.spots, beat.ball);
+    st.locked = g.preview ? [] : [2,3,4,5];   // dimmed: not yours to drag
+    if (App.reviewing){
+      st.ghost = beat.spots;
+      const res = App.results[App.beatIndex];
+      st.trails = SLOTS.map(s => ({ from:st.spots[s], to:beat.spots[s],
+        color: res && res.per[s].score >= .85 ? 'var(--c-arc)' : res && res.per[s].score >= .4 ? '#ffc247' : '#ff6b5e',
+        width:.3 }));
+      st.highlight = beat.keyPlayers || [];
+    }
+  }
+  else if (isPlacementMode() && App.play && App.attempt){
+    const beat = App.play.beats[App.beatIndex];
+    st.spots = App.attempt.spots;
+    st.ballPos = App.attempt.ballPos;
+    if (App.reviewing){
+      /* Ghost diff: hollow markers at the truth, one line per player coloured
+         by how good that placement was. This is the teaching moment. */
+      st.ghost = beat.spots;
+      const res = App.results[App.beatIndex];
+      st.trails = SLOTS.map(s => ({ from:App.attempt.spots[s], to:beat.spots[s],
+        color: res && res.per[s].score >= .85 ? 'var(--c-arc)' : res && res.per[s].score >= .4 ? '#ffc247' : '#ff6b5e',
+        width:.3 }));
+      st.highlight = beat.keyPlayers || [];
+    } else if (hintLevel() !== 'blind' && App.beatIndex > 0){
+      st.ghost = App.play.beats[App.beatIndex-1].spots;
+    }
+  }
+  App.renderer.draw(st);
+}
+function hintLevel(){ return App.mode === 'recall' ? 'blind' : App.settings.hints; }
+
+/* ================================================================== INPUT */
+let dragging = null;
+function draggableIds(){
+  if (App.mode === 'design') return ['ball',1,2,3,4,5];
+  if (isPlacementMode() && App.attempt && !App.reviewing) return ['ball',1,2,3,4,5];
+  if (App.mode === 'general' && App.general && !App.reviewing && !App.general.preview) return [1];
+  return [];
+}
+function onPointerDown(e){
+  const allowed = draggableIds();
+  if (!allowed.length) return;
+  const id = App.renderer.hitTest(e.clientX, e.clientY);
+  if (id === null || !allowed.includes(id)) return;
+  const [fx, fy] = App.renderer.toCourt(e.clientX, e.clientY);
+  const cur = id === 'ball' ? currentBallPos() : currentSpots()[id];
+  dragging = { id, dx:cur[0]-fx, dy:cur[1]-fy };
+  try{ $('#court').setPointerCapture(e.pointerId); }catch(err){}
+  e.preventDefault();
+}
+function onPointerMove(e){
+  if (!dragging) return;
+  const [fx, fy] = App.renderer.toCourt(e.clientX, e.clientY);
+  const x = Math.max(-App.court.width/2 + .5, Math.min(App.court.width/2 - .5, fx + dragging.dx));
+  const y = Math.max(.5, Math.min(App.court.len - .5, fy + dragging.dy));
+  if (dragging.id === 'ball') setBallPos([x,y]); else setSpot(dragging.id, [x,y]);
+  paint();
+}
+function onPointerUp(e){
+  if (!dragging) return;
+  const id = dragging.id;
+  dragging = null;
+  try{ $('#court').releasePointerCapture(e.pointerId); }catch(err){}
+  if (id === 'ball' && isPlacementMode() && App.attempt){
+    /* Snap the ball to whoever it was dropped nearest — that is the answer for
+       the ball component. Dropped in open space, it returns to its holder. */
+    const near = nearestSlot(App.attempt.spots, App.attempt.ballPos, 5.5);
+    setBallHolder(near || App.attempt.ball);
+  }
+  paint();
+  renderRail();
+}
+function currentSpots(){
+  if (App.mode === 'design') return App.designer.play.beats[App.designer.beat].spots;
+  if (App.mode === 'general') return App.general.spots;
+  return App.attempt.spots;
+}
+function currentBallPos(){
+  if (App.mode === 'design'){
+    const b = App.designer.play.beats[App.designer.beat];
+    return ballOffsetFor(b.spots, b.ball);
+  }
+  if (App.mode === 'general') return ballOffsetFor(App.general.spots, App.play.beats[App.beatIndex].ball);
+  return App.attempt.ballPos;
+}
+function setSpot(slot, pos){
+  if (App.mode === 'design'){
+    App.designer.play.beats[App.designer.beat].spots[slot] = pos;
+    App.designer.dirty = true;
+  } else if (App.mode === 'general'){
+    App.general.spots[slot] = pos;
+  } else {
+    App.attempt.spots[slot] = pos;
+    if (App.attempt.ball === slot) App.attempt.ballPos = ballOffsetFor(App.attempt.spots, slot);
+  }
+}
+function setBallPos(pos){ if (isPlacementMode() && App.attempt) App.attempt.ballPos = pos; }
+function setBallHolder(slot){
+  if (!slot) return;
+  if (App.mode === 'design'){
+    App.designer.play.beats[App.designer.beat].ball = slot;
+    App.designer.dirty = true;
+  } else if (App.attempt){
+    App.attempt.ball = slot;
+    App.attempt.ballPos = ballOffsetFor(App.attempt.spots, slot);
+  }
+}
+
+/* ============================================================ RUN / RECALL */
+function startRun(play){
+  App.play = play; App.beatIndex = 0; App.results = []; App.reviewing = false;
+  App.general = null;
+  newAttempt();
+  renderAll();
+}
+function newAttempt(){
+  /* Beat 1 starts from the rack; later beats start from the PREVIOUS beat's
+     correct positions, so one bad beat never compounds into the next. */
+  const spots = App.beatIndex === 0 ? neutralSpots() : cloneSpots(App.play.beats[App.beatIndex-1].spots);
+  const ball  = App.beatIndex === 0 ? 1 : App.play.beats[App.beatIndex-1].ball;
+  App.attempt = { spots, ball, ballPos:ballOffsetFor(spots, ball), actions:[] };
+}
+function checkBeat(){
+  const beat = App.play.beats[App.beatIndex];
+  App.results[App.beatIndex] = gradeBeat(App.attempt, beat, App.court);
+  if (App.mode === 'recall'){
+    if (App.beatIndex < App.play.beats.length - 1){ App.beatIndex++; newAttempt(); }
+    else return finishRun();
+  } else {
+    App.reviewing = true;
+  }
+  renderAll();
+}
+function nextBeat(){
+  App.reviewing = false;
+  if (App.beatIndex < App.play.beats.length - 1){
+    App.beatIndex++;
+    if (App.mode === 'general') newGeneralBeat(); else newAttempt();
+    renderAll();
+  } else finishRun();
+}
+function finishRun(){
+  const scores = App.results.map(r => r ? r.total : 0);
+  const total = gradePlay(scores);
+  Store.addHistory({
+    playId:App.play.id, playName:App.play.name, mode:App.mode,
+    score:round3(total), perBeat:scores.map(round3), ts:Date.now()
+  });
+  showSummary(total, scores);
+  renderLibrary(); renderHistory();
+}
+
+/* ========================================================= FLOOR GENERAL UI */
+function startGeneral(play){
+  App.play = play; App.beatIndex = 0; App.results = []; App.reviewing = false;
+  App.attempt = null;
+  newGeneralBeat();
+  renderAll();
+}
+function newGeneralBeat(){
+  const base = App.beatIndex === 0 ? neutralSpots() : cloneSpots(App.play.beats[App.beatIndex-1].spots);
+  const pg = App.beatIndex === 0 ? [0, App.court.len - 8] : [base[1][0], base[1][1]];
+  App.general = { spots:cloneSpots(base), calls:[], preview:null, draft:defaultDraft() };
+  App.general.spots[1] = pg;
+}
+function defaultDraft(){ return { v:'send', who:2, where:'corner', side:'left', type:'screen', for:3 }; }
+function runCalls(){
+  const g = App.general, beat = App.play.beats[App.beatIndex];
+  const base = App.beatIndex === 0 ? neutralSpots() : cloneSpots(App.play.beats[App.beatIndex-1].spots);
+  const res = resolveCalls(base, g.spots[1], g.calls, beat);
+  g.preview = res;
+  App.attempt = { spots:res.spots, ball:beat.ball, ballPos:ballOffsetFor(res.spots, beat.ball), actions:res.actions };
+  App.results[App.beatIndex] = gradeBeat(App.attempt, beat, App.court);
+  App.reviewing = true;
+  renderAll();
+}
+
+/* =============================================================== ANIMATION */
+function animatePlay(play, opts){
+  cancelAnim();
+  const beats = play.beats;
+  if (beats.length < 2){ App.anim = { frame:{ spots:beats[0].spots, ball:beats[0].ball } }; paint(); return; }
+  const dwell = (opts && opts.dwell) || 620, travel = (opts && opts.travel) || 900;
+  const seg = dwell + travel, totalMs = seg*(beats.length-1) + dwell;
+  const t0 = performance.now();
+  const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+  App.anim = { frame:{ spots:beats[0].spots, ball:beats[0].ball }, raf:0, onBeat:(opts&&opts.onBeat) };
+  const step = now => {
+    if (!App.anim) return;
+    const elapsed = Math.min(totalMs, now - t0);
+    const i = Math.min(beats.length-2, Math.floor(elapsed/seg));
+    const within = elapsed - i*seg;
+    const t = within <= dwell ? 0 : ease(clamp01((within-dwell)/travel));
+    const a = beats[i], b = beats[i+1], spots = {};
+    for (const s of SLOTS) spots[s] = [ lerp(a.spots[s][0], b.spots[s][0], t), lerp(a.spots[s][1], b.spots[s][1], t) ];
+    App.anim.frame = { spots, ball: t < .5 ? a.ball : b.ball };
+    if (App.anim.onBeat) App.anim.onBeat(t < .5 ? i : i+1);
+    paint();
+    if (elapsed < totalMs) App.anim.raf = requestAnimationFrame(step);
+    else { App.anim.done = true; if (opts && opts.onDone) opts.onDone(); }
+  };
+  App.anim.raf = requestAnimationFrame(step);
+}
+function cancelAnim(){ if (App.anim && App.anim.raf) cancelAnimationFrame(App.anim.raf); App.anim = null; }
+
+/* ============================================================== RENDER: UI */
+function renderAll(){ renderBar(); renderRail(); renderLibrary(); paint(); }
+function setStageNote(text){
+  const n = $('#stageNote');
+  if (!text){ n.hidden = true; return; }
+  n.hidden = false; $('b', n).textContent = text;
+}
+
+function renderBar(){
+  const bar = $('#bar');
+  bar.textContent = '';
+  const add = n => bar.appendChild(n);
+
+  if (!App.play && App.mode !== 'design' && App.mode !== 'name'){
+    add(el('span', { class:'bar-lbl', text:'Pick a play from the left to begin' }));
+    setStageNote(''); return;
+  }
+
+  if (App.mode === 'learn'){
+    add(el('span', { class:'bar-lbl', text:'Beat' }));
+    App.play.beats.forEach((b,i) => add(el('button', {
+      class:'btn sm' + (i === App.beatIndex ? ' pri' : ''), text:String(i+1),
+      onclick:()=>{ cancelAnim(); App.beatIndex = i; renderAll(); } })));
+    add(el('div', { class:'sp' }));
+    add(el('button', { class:'btn sm pri', text:'▶ Animate', onclick:()=>{
+      setStageNote('Playing — ' + App.play.name);
+      animatePlay(App.play, {
+        onBeat:i=>{ if (i !== App.beatIndex){ App.beatIndex = i; renderRail(); } },
+        onDone:()=>setStageNote('') });
+    }}));
+    add(el('button', { class:'btn sm', text:'Run it →', onclick:()=>setMode('run') }));
+    setStageNote('');
+    return;
+  }
+
+  if (isPlacementMode()){
+    const beat = App.play.beats[App.beatIndex];
+    add(el('span', { class:'bar-lbl', text:`Beat ${App.beatIndex+1} / ${App.play.beats.length}` }));
+    if (!App.reviewing){
+      add(el('span', { class:'bar-lbl', style:'color:var(--ink)',
+        text: hintLevel() === 'blind' ? '—' : beat.label }));
+      add(el('div', { class:'sp' }));
+      add(el('span', { class:'bar-lbl', text:'Action' }));
+      add(actionTagger());
+      add(el('button', { class:'btn sm pri', text: App.mode === 'recall' ? 'Lock in →' : 'Check beat', onclick:checkBeat }));
+      setStageNote(hintLevel() === 'blind' ? 'Blind — no reference shown'
+        : App.beatIndex > 0 ? 'Faint markers = where everyone stood last beat'
+        : 'Place all five, then drag the ball onto its handler');
+    } else {
+      const r = App.results[App.beatIndex], pct = Math.round(r.total*100);
+      add(el('span', { class:'bar-lbl',
+        style:`color:${pct>=80?'var(--good)':pct>=55?'var(--warn)':'var(--bad)'}`,
+        text:`${pct}% · ${letterFor(r.total)}` }));
+      add(el('div', { class:'sp' }));
+      add(el('button', { class:'btn sm', text:'Retry beat',
+        onclick:()=>{ App.reviewing = false; newAttempt(); renderAll(); } }));
+      add(el('button', { class:'btn sm pri',
+        text: App.beatIndex < App.play.beats.length-1 ? 'Next beat →' : 'Finish ✓', onclick:nextBeat }));
+      setStageNote('Hollow markers are the truth · lines show your error');
+    }
+    return;
+  }
+
+  if (App.mode === 'general'){
+    const beat = App.play.beats[App.beatIndex];
+    add(el('span', { class:'bar-lbl', text:`Beat ${App.beatIndex+1} / ${App.play.beats.length}` }));
+    add(el('span', { class:'bar-lbl', style:'color:var(--ink)', text:beat.label }));
+    add(el('div', { class:'sp' }));
+    if (!App.reviewing){
+      add(el('span', { class:'hint', text:'Drag the 1. Call the rest.' }));
+      add(el('button', { class:'btn sm pri', text:'Run the call →', onclick:runCalls }));
+      setStageNote('You are the 1 — drag yourself, then call your team-mates from the right');
+    } else {
+      const r = App.results[App.beatIndex], pct = Math.round(r.total*100);
+      add(el('span', { class:'bar-lbl',
+        style:`color:${pct>=80?'var(--good)':pct>=55?'var(--warn)':'var(--bad)'}`,
+        text:`${pct}% · ${letterFor(r.total)}` }));
+      add(el('div', { class:'sp' }));
+      add(el('button', { class:'btn sm', text:'Retry beat',
+        onclick:()=>{ App.reviewing = false; newGeneralBeat(); renderAll(); } }));
+      add(el('button', { class:'btn sm pri',
+        text: App.beatIndex < App.play.beats.length-1 ? 'Next beat →' : 'Finish ✓', onclick:nextBeat }));
+      setStageNote('Where your calls actually put them · hollow markers are the truth');
+    }
+    return;
+  }
+
+  if (App.mode === 'name'){
+    add(el('span', { class:'bar-lbl', text:'Watch the play, then name it' }));
+    add(el('div', { class:'sp' }));
+    add(el('button', { class:'btn sm', text:'↻ Replay', onclick:()=>{ if (App.quiz) animatePlay(App.quiz.play, {}); } }));
+    add(el('button', { class:'btn sm pri', text:'New question', onclick:newQuiz }));
+    setStageNote('');
+    return;
+  }
+
+  if (App.mode === 'design' && App.designer){
+    const d = App.designer;
+    add(el('span', { class:'bar-lbl', text:'Beats' }));
+    const chips = el('div', { class:'bchips' });
+    d.play.beats.forEach((b,i) => chips.appendChild(el('button', { class:'bchip',
+      'aria-current': i === d.beat ? 'true':'false', text:`${i+1}. ${b.label}`,
+      onclick:()=>{ d.beat = i; renderAll(); } })));
+    add(chips);
+    add(el('div', { class:'sp' }));
+    add(el('button', { class:'btn sm', text:'+ Beat', onclick:()=>{
+      const src = d.play.beats[d.beat];
+      d.play.beats.splice(d.beat+1, 0, { label:'Beat ' + (d.play.beats.length+1), ball:src.ball,
+        spots:cloneSpots(src.spots), actions:[], keyPlayers:[], spacingExempt:[], coaching:'', mistake:'' });
+      d.beat++; d.dirty = true; renderAll();
+    }}));
+    add(el('button', { class:'btn sm', text:'Delete beat', onclick:()=>{
+      if (d.play.beats.length <= 1) return toast('A play needs at least one beat.');
+      d.play.beats.splice(d.beat,1); d.beat = Math.max(0, d.beat-1); d.dirty = true; renderAll();
+    }}));
+    add(el('button', { class:'btn sm', text:'▶ Preview', onclick:()=>animatePlay(d.play, {}) }));
+    setStageNote('Drag the five. Each beat is a keyframe.');
+    return;
+  }
+  setStageNote('');
+}
+
+function actionTagger(){
+  const wrap = el('div', { class:'act' });
+  const acts = App.attempt.actions, a0 = acts[0] || { type:'none' };
+  const typeSel = el('select', { style:'flex:0 0 auto;min-width:148px', onchange:e=>{
+    const t = e.target.value;
+    App.attempt.actions = (t === 'none') ? [] : [{ type:t, by:(acts[0]&&acts[0].by)||1,
+      for: ACTION_NEEDS_FOR.has(t) ? ((acts[0]&&acts[0].for)||2) : undefined }];
+    renderBar();
+  }});
+  for (const t of ACTION_TYPES) typeSel.appendChild(el('option', { value:t.id, text:t.label, selected:a0.type===t.id }));
+  wrap.appendChild(typeSel);
+  if (a0.type !== 'none'){
+    const by = el('select', { class:'who', onchange:e=>{ App.attempt.actions[0].by = +e.target.value; } });
+    for (const s of SLOTS) by.appendChild(el('option', { value:s, text:'by '+s, selected:a0.by===s }));
+    wrap.appendChild(by);
+    if (ACTION_NEEDS_FOR.has(a0.type)){
+      const fr = el('select', { class:'who', onchange:e=>{ App.attempt.actions[0].for = +e.target.value; } });
+      for (const s of SLOTS) fr.appendChild(el('option', { value:s, text:'for '+s, selected:a0.for===s }));
+      wrap.appendChild(fr);
+    }
+  }
+  return wrap;
+}
+
+/* ------------------------------------------------------------ right rail -- */
+function renderRail(){
+  const r = $('#railR');
+  r.textContent = '';
+  if (App.mode === 'design' && App.designer) return renderDesignRail(r);
+  if (App.mode === 'name') return renderQuizRail(r);
+  if (!App.play){
+    r.appendChild(el('div', { class:'card', html:
+      '<h3>Getting started</h3><div style="font-size:13px;line-height:1.62;color:var(--ink-2)">' +
+      'Pick a play on the left. <b>Learn</b> walks you through it. <b>Run It</b> grades you beat by beat with ' +
+      'every player yours to place. <b>Floor General</b> gives you only the 1 — you direct the other four with calls. ' +
+      '<b>Recall</b> hides every hint, <b>Name It</b> shows a play and asks what it was, and <b>Design</b> builds your own.</div>' }));
+    return;
+  }
+  const beat = App.play.beats[App.beatIndex];
+
+  if (App.mode === 'general' && !App.reviewing) r.appendChild(callSheet());
+
+  // beat list
+  const bc = el('div', { class:'card' });
+  bc.appendChild(el('h3', { html:'Beats <span class="tag">' + esc(App.play.name) + '</span>' }));
+  const list = el('div', { class:'beats' });
+  App.play.beats.forEach((b,i) => {
+    const res = App.results[i];
+    const showScore = res && (App.mode !== 'recall' || App.results.length === App.play.beats.length);
+    const btn = el('button', { class:'beat', 'aria-current': i === App.beatIndex ? 'true':'false',
+      onclick:()=>{ if (App.mode === 'learn'){ cancelAnim(); App.beatIndex = i; renderAll(); } } });
+    btn.appendChild(el('span', { class:'n', text:String(i+1) }));
+    btn.appendChild(el('span', { class:'t', text: (App.mode === 'recall' && !showScore) ? '—' : b.label }));
+    if (showScore) btn.appendChild(el('span', { class:'sc',
+      style:`color:${res.total>=.8?'var(--good)':res.total>=.55?'var(--warn)':'var(--bad)'}`,
+      text:Math.round(res.total*100)+'%' }));
+    list.appendChild(btn);
+  });
+  bc.appendChild(list);
+  r.appendChild(bc);
+
+  if (App.mode === 'learn'){
+    const c = el('div', { class:'card grow' });
+    c.appendChild(el('h3', { html:'Coaching <span class="tag">Beat ' + (App.beatIndex+1) + '</span>' }));
+    const sc = el('div', { class:'scroll' });
+    sc.appendChild(el('div', { class:'coach', html: beat.coaching || 'No note for this beat.' }));
+    if (beat.mistake) sc.appendChild(el('div', { class:'mistake', html:'<b>Common mistake</b><br>' + esc(beat.mistake) }));
+    if (App.beatIndex === 0 && App.play.blurb)
+      sc.appendChild(el('div', { class:'mistake', html:'<b>About this play</b><br>' + esc(App.play.blurb) }));
+    c.appendChild(sc);
+    r.appendChild(c);
+    return;
+  }
+
+  if (App.reviewing && App.results[App.beatIndex]){
+    const res = App.results[App.beatIndex];
+    const c = el('div', { class:'card grow' });
+    c.appendChild(el('h3', { text:'Beat result' }));
+    const sc = el('div', { class:'scroll' });
+    const big = el('div', { class:'score-big' });
+    big.appendChild(el('b', { text:Math.round(res.total*100)+'%' }));
+    big.appendChild(el('span', { class:'gr', text:letterFor(res.total) }));
+    sc.appendChild(big);
+    sc.appendChild(meters([['Positions',res.parts.pos],['Ball',res.parts.ball],
+                           ['Action',res.parts.act],['Spacing',res.parts.space]]));
+    if (App.mode === 'general' && App.general && App.general.preview){
+      sc.appendChild(el('div', { class:'hint', style:'margin-top:12px', text:'Your calls' }));
+      const cl = el('div', { class:'calls' });
+      const lg = App.general.preview.log;
+      if (!lg.length) cl.appendChild(el('div', { class:'call no' }, [el('span', { class:'tx', text:'You called nothing. Everyone stood still.' })]));
+      for (const L of lg) cl.appendChild(el('div', { class:'call ' + (L.ok ? 'ok':'no') }, [
+        el('span', { class:'tx', html:`<b>${esc(L.text)}</b> — ${esc(L.note)}` }) ]));
+      sc.appendChild(cl);
+    }
+    const notes = el('div', { class:'notes' });
+    for (const n of res.notes){
+      notes.appendChild(el('div', { class:'note ' + n.level }, [
+        el('span', { class:'who', text:String(n.slot) }), el('span', { text:n.text }) ]));
+    }
+    sc.appendChild(notes);
+    if (beat.coaching) sc.appendChild(el('div', { class:'coach', style:'margin-top:11px', html:beat.coaching }));
+    if (beat.mistake)  sc.appendChild(el('div', { class:'mistake', html:'<b>Common mistake</b><br>' + esc(beat.mistake) }));
+    c.appendChild(sc);
+    r.appendChild(c);
+    return;
+  }
+
+  if (isPlacementMode()){
+    const c = el('div', { class:'card grow' });
+    c.appendChild(el('h3', { text: App.mode === 'recall' ? 'Recall' : 'Your job' }));
+    const sc = el('div', { class:'scroll' });
+    sc.appendChild(el('div', { class:'coach', html:
+      hintLevel() === 'blind'
+        ? `Beat <b>${App.beatIndex+1}</b> of <b>${esc(App.play.name)}</b>. No label, no reference. Place all five and the ball, tag the action, lock it in.`
+        : `Place all five for <b>${esc(beat.label)}</b>, drag the ball onto whoever should be holding it, and tag the action that defines this beat.` }));
+    sc.appendChild(slotLegend());
+    sc.appendChild(el('div', { class:'hint', style:'margin-top:13px', text:'Live check' }));
+    sc.appendChild(liveCheck());
+    sc.appendChild(el('div', { class:'hint', style:'margin-top:11px', html:
+      'Tolerance depends on role — a screener has about <b>2.5 ft</b> of slack, a spot-up shooter about <b>4.5 ft</b>. ' +
+      'Keep team-mates who are not screening each other at least <b>12 ft</b> apart.' }));
+    c.appendChild(sc);
+    r.appendChild(c);
+  }
+}
+/* Spacing is checked continuously while you place, not only when you commit —
+   the rule is easier to internalise if it answers back on every drag. */
+function liveCheck(){
+  const wrap = el('div', { class:'livechk' });
+  const beat = App.play.beats[App.beatIndex];
+  const spots = App.attempt.spots;
+  const sp = spacingReport(spots, beat, App.court);
+  const tight = sp.violations.filter(v => v.kind === 'tight');
+  const paint = sp.violations.find(v => v.kind === 'paint');
+  const inPaint = SLOTS.filter(x => Math.abs(spots[x][0]) <= App.court.paintHalf && spots[x][1] <= App.court.ftY);
+
+  if (!tight.length){
+    wrap.appendChild(el('div', { class:'lrow' }, [ el('span', { html:'Spacing legal — closest non-screen pair is <b>' +
+      closestPair(spots, beat).toFixed(1) + ' ft</b>' }) ]));
+  } else {
+    for (const v of tight.slice(0,3)) wrap.appendChild(el('div', { class:'lrow warn' },
+      [ el('span', { html:`<b>${v.a}</b> and <b>${v.b}</b> only <b>${v.d.toFixed(1)} ft</b> apart` }) ]));
+  }
+  wrap.appendChild(el('div', { class:'lrow' + (paint ? ' warn':'') },
+    [ el('span', { html:`<b>${inPaint.length}</b> in the paint` + (paint ? ' — two is the limit' : '') }) ]));
+  return wrap;
+}
+function closestPair(spots, beat){
+  const ex = exemptPairs(beat);
+  let best = Infinity;
+  for (let i = 0; i < SLOTS.length; i++)
+    for (let j = i+1; j < SLOTS.length; j++){
+      const a = SLOTS[i], b = SLOTS[j];
+      if (ex.has(a+'-'+b)) continue;
+      best = Math.min(best, dist(spots[a], spots[b]));
+    }
+  return isFinite(best) ? best : 0;
+}
+function slotLegend(){
+  const legend = el('div', { class:'notes', style:'margin-top:10px' });
+  for (const s of SLOTS){
+    const w = el('span', { class:'who', text:String(s) });
+    w.style.background = TOKEN_COLORS[s]; w.style.color = '#1a1005'; w.style.borderColor = 'transparent';
+    legend.appendChild(el('div', { class:'note' }, [ w, el('span', { text:SLOT_NAME[s] }) ]));
+  }
+  return legend;
+}
+
+/* ---------------------------------------------------------- the call sheet */
+function callSheet(){
+  const g = App.general, d = g.draft;
+  const c = el('div', { class:'card grow' });
+  c.appendChild(el('h3', { html:'Call sheet <span class="tag">you are the 1</span>' }));
+  const sc = el('div', { class:'scroll' });
+
+  sc.appendChild(el('div', { class:'coach', html:
+    'Drag <b>yourself</b> on the court. Everyone else moves only when you call them. ' +
+    'Anyone you never call <b>stays where they are</b>.' }));
+
+  // issued calls
+  const list = el('div', { class:'calls' });
+  if (!g.calls.length){
+    list.appendChild(el('div', { class:'hint', style:'padding-block:6px', text:'No calls yet.' }));
+  } else {
+    g.calls.forEach((cl, i) => list.appendChild(el('div', { class:'call' }, [
+      el('span', { class:'tx', text:callText(cl) }),
+      el('button', { class:'x', text:'×', title:'Remove call',
+        onclick:()=>{ g.calls.splice(i,1); renderRail(); } })
+    ])));
+  }
+  sc.appendChild(list);
+
+  /* The roster makes the mode's central rule visible: a team-mate you never
+     named simply does not move. */
+  sc.appendChild(el('div', { class:'hint', style:'margin-top:13px', text:'This beat' }));
+  const named = new Set();
+  for (const cl of g.calls){
+    if (cl.v === 'send' || cl.v === 'ballscreen') named.add(cl.who);
+    else if (cl.v === 'offball'){ named.add(cl.who); named.add(cl.for); }
+    else if (cl.v === 'clear'){
+      const sgn = sideSign(cl.side);
+      for (const n of SLOTS) if (n !== 1 && Math.sign(g.spots[n][0]) === sgn && Math.abs(g.spots[n][0]) >= 4) named.add(n);
+    }
+  }
+  const roster = el('div', { class:'roster' });
+  for (const n of [2,3,4,5]){
+    const on = named.has(n);
+    const pill = el('span', { class:'pill', text:String(n) });
+    pill.style.background = TOKEN_COLORS[n];
+    roster.appendChild(el('div', { class:'rrow ' + (on ? 'moved':'still') }, [
+      pill, el('span', { text:SLOT_NAME[n] }),
+      el('span', { class:'st', text: on ? 'called' : 'stays put' })
+    ]));
+  }
+  sc.appendChild(roster);
+
+  // composer
+  const verbSel = el('select', { onchange:e=>{ d.v = e.target.value; renderRail(); } });
+  [['send','Send a team-mate to a spot'],['ballscreen','Call a ball screen for me'],
+   ['offball','Call an off-ball screen'],['clear','Clear a side']]
+    .forEach(([v,l]) => verbSel.appendChild(el('option', { value:v, text:l, selected:d.v===v })));
+  sc.appendChild(field('Call', verbSel));
+
+  const row = el('div', { class:'act' });
+  const whoSel = (val, on, only) => {
+    const s = el('select', { class:'who', onchange:e=>{ on(+e.target.value); renderRail(); } });
+    for (const n of (only || [2,3,4,5])) s.appendChild(el('option', { value:n, text:String(n), selected:val===n }));
+    return s;
+  };
+  const sideSel = (val, on) => {
+    const s = el('select', { onchange:e=>{ on(e.target.value); renderRail(); } });
+    for (const v of ['left','right']) s.appendChild(el('option', { value:v, text:v, selected:val===v }));
+    return s;
+  };
+
+  if (d.v === 'send'){
+    row.appendChild(whoSel(d.who, v=>d.who=v));
+    const whereSel = el('select', { onchange:e=>{ d.where = e.target.value; renderRail(); } });
+    for (const k of SPOT_KEYS) whereSel.appendChild(el('option', { value:k, text:k, selected:d.where===k }));
+    row.appendChild(whereSel);
+    if (SIDED.has(d.where)) row.appendChild(sideSel(d.side, v=>d.side=v));
+  } else if (d.v === 'ballscreen'){
+    row.appendChild(whoSel(d.who, v=>d.who=v));
+    row.appendChild(el('span', { class:'hint', text:'screens on my' }));
+    row.appendChild(sideSel(d.side, v=>d.side=v));
+  } else if (d.v === 'offball'){
+    row.appendChild(whoSel(d.who, v=>d.who=v));
+    const tSel = el('select', { onchange:e=>{ d.type = e.target.value; renderRail(); } });
+    for (const t of ACTION_TYPES) if (ACTION_NEEDS_FOR.has(t.id) && t.id !== 'pass')
+      tSel.appendChild(el('option', { value:t.id, text:t.label, selected:d.type===t.id }));
+    row.appendChild(tSel);
+    row.appendChild(el('span', { class:'hint', text:'for' }));
+    row.appendChild(whoSel(d.for, v=>d.for=v, SLOTS));
+  } else {
+    row.appendChild(sideSel(d.side, v=>d.side=v));
+    row.appendChild(el('span', { class:'hint', text:'side' }));
+  }
+  sc.appendChild(row);
+
+  sc.appendChild(el('button', { class:'btn sm wide', style:'margin-top:8px', text:'+ Add this call', onclick:()=>{
+    if (g.calls.length >= 6) return toast('Six calls is plenty for one beat.');
+    const c2 = { v:d.v };
+    if (d.v === 'send'){ c2.who = d.who; c2.where = d.where; c2.side = d.side; }
+    else if (d.v === 'ballscreen'){ c2.who = d.who; c2.side = d.side; }
+    else if (d.v === 'offball'){ c2.who = d.who; c2.type = d.type; c2.for = d.for; }
+    else c2.side = d.side;
+    g.calls.push(c2); renderRail();
+  }}));
+
+  // one-tap presets for the calls people actually make
+  sc.appendChild(el('div', { class:'hint', style:'margin-top:12px', text:'Quick calls' }));
+  const pc = el('div', { class:'pcalls' });
+  const preset = (label, mk) => pc.appendChild(el('button', { class:'btn sm', text:label,
+    onclick:()=>{ if (g.calls.length < 6){ g.calls.push(mk()); renderRail(); } } }));
+  preset('2 → weak corner', ()=>({ v:'send', who:2, where:'corner', side:'left' }));
+  preset('3 → weak corner', ()=>({ v:'send', who:3, where:'corner', side:'left' }));
+  preset('Clear left',      ()=>({ v:'clear', side:'left' }));
+  preset('Clear right',     ()=>({ v:'clear', side:'right' }));
+  preset('5 screen right',  ()=>({ v:'ballscreen', who:5, side:'right' }));
+  preset('5 screen left',   ()=>({ v:'ballscreen', who:5, side:'left' }));
+  preset('4 screen right',  ()=>({ v:'ballscreen', who:4, side:'right' }));
+  preset('4 screen left',   ()=>({ v:'ballscreen', who:4, side:'left' }));
+  sc.appendChild(pc);
+
+  sc.appendChild(el('div', { class:'hint', style:'margin-top:12px', html:
+    'Two-man game: send the other three away, then call a ball screen. ' +
+    'The empty side is the whole point — no help defender can reach you.' }));
+
+  c.appendChild(sc);
+  return c;
+}
+
+function meters(rows){
+  const wrap = el('div', { class:'meters' });
+  for (const [name, v] of rows){
+    const m = el('div', { class:'meter' });
+    const lb = el('div', { class:'lb' });
+    lb.appendChild(el('span', { text:name }));
+    lb.appendChild(el('b', { text:Math.round(v*100)+'%' }));
+    m.appendChild(lb);
+    const tr = el('div', { class:'tr' }), fl = el('div', { class:'fl' });
+    fl.style.width = (v*100)+'%';
+    fl.style.background = v >= .8 ? 'var(--good)' : v >= .5 ? 'var(--warn)' : 'var(--bad)';
+    tr.appendChild(fl); m.appendChild(tr); wrap.appendChild(m);
+  }
+  return wrap;
+}
+
+/* ------------------------------------------------------------- left rail -- */
+function renderLibrary(){
+  const wrap = $('#plist');
+  wrap.textContent = '';
+  BUILTIN.forEach(p => wrap.appendChild(playItem(p)));
+  $('#playCount').textContent = BUILTIN.length + ' built in';
+
+  const mine = $('#mylist');
+  mine.textContent = '';
+  const custom = Store.plays();
+  if (!custom.length) mine.appendChild(el('div', { class:'empty', text:'No saved plays yet. Build one in Design.' }));
+  else custom.forEach(p => mine.appendChild(playItem(p, true)));
+}
+function playItem(p, custom){
+  const best = Store.bestFor(p.id);
+  const b = el('button', { class:'pitem', 'aria-current': (App.play && App.play.id === p.id) ? 'true':'false',
+    onclick:()=>{
+      cancelAnim();
+      const fresh = findPlay(p.id) || p;
+      if (App.mode === 'design') return openDesigner(JSON.parse(JSON.stringify(fresh)));
+      if (App.mode === 'name')   return newQuiz();
+      App.play = fresh; App.beatIndex = 0; App.results = []; App.reviewing = false;
+      if (App.mode === 'general') startGeneral(fresh);
+      else if (isPlacementMode()) startRun(fresh);
+      else renderAll();
+    }});
+  const col = el('div', { class:'col' });
+  col.appendChild(el('div', { class:'nm', text:p.name }));
+  col.appendChild(el('div', { class:'mt', text:`${p.formation} · ${p.beats.length} beats${custom ? ' · mine' : ''}` }));
+  b.appendChild(col);
+  const dots = el('div', { class:'dots' });
+  for (let i = 1; i <= 3; i++) dots.appendChild(el('i', { class: i <= p.difficulty ? 'on' : '' }));
+  b.appendChild(dots);
+  if (best !== null) b.appendChild(el('span', { class:'best', text:Math.round(best*100)+'%' }));
+  return b;
+}
+/* The Floor General call vocabulary, drawn from SPOT_MAP itself so the diagram
+   and the dropdown can never disagree. */
+const SPOT_ABBR = { 'corner':'C', 'wing':'W', 'slot':'S', 'top':'T', 'trail':'TR',
+                    'elbow':'E', 'block':'B', 'short corner':'SC', 'dunker':'D',
+                    'nail':'N', 'rim':'R' };
+function renderSpotMap(){
+  const host = $('#spotmap');
+  if (!host) return;
+  host.textContent = '';
+  const c = App.court, hw = c.width/2, pad = 2;
+  const m = svg('svg', { viewBox:`${-hw-pad} ${-pad} ${c.width+pad*2} ${c.len*.62+pad*2}`,
+    style:'width:100%;height:auto;display:block;border-radius:7px;overflow:hidden' });
+  const sq = y => y*.62;
+  m.appendChild(svg('rect', { x:-hw, y:0, width:c.width, height:c.len*.62, fill:'var(--c-floor)' }));
+  m.appendChild(svg('rect', { x:-c.paintHalf, y:0, width:c.paintHalf*2, height:sq(c.ftY),
+    fill:'var(--c-paint)', stroke:'var(--c-line)', 'stroke-width':.3 }));
+  const x3 = cornerX(c), by3 = breakY(c);
+  m.appendChild(svg('path', { d: c.straightCorner
+      ? `M ${-x3} 0 L ${-x3} ${sq(by3)} Q 0 ${sq(c.hoopY + c.arc3)} ${x3} ${sq(by3)} L ${x3} 0`
+      : `M ${-x3} 0 Q 0 ${sq(c.hoopY + c.arc3)} ${x3} 0`,
+    fill:'none', stroke:'var(--c-arc)', 'stroke-width':.4 }));
+  m.appendChild(svg('circle', { cx:0, cy:sq(c.hoopY), r:.8, fill:'none', stroke:'var(--c-arc)', 'stroke-width':.35 }));
+  for (const key of SPOT_KEYS){
+    const signs = SIDED.has(key) ? [-1,1] : [0];
+    for (const sg of signs){
+      const [x,y] = SPOT_MAP[key](sg === 0 ? 1 : sg);
+      const cy = sq(y);
+      m.appendChild(svg('circle', { cx:x, cy, r:1.5, fill:'var(--accent)', opacity:.9 }));
+      const t = svg('text', { x, y:cy+.62, 'text-anchor':'middle', 'font-size':1.75,
+        'font-family':'system-ui, sans-serif', 'font-weight':750, fill:'var(--accent-ink)' });
+      t.textContent = SPOT_ABBR[key] || '?';
+      m.appendChild(t);
+    }
+  }
+  host.appendChild(m);
+  const grid = el('div', { class:'spotgrid' });
+  for (const key of SPOT_KEYS){
+    grid.appendChild(el('b', { text:SPOT_ABBR[key] || '?' }));
+    grid.appendChild(el('span', { text: key + (SIDED.has(key) ? ' (left / right)' : '') }));
+  }
+  host.appendChild(grid);
+  host.appendChild(el('div', { class:'hint', style:'margin-top:9px',
+    text:'These are the destinations you can send a team-mate to in Floor General.' }));
+}
+
+function renderHistory(){
+  const h = $('#hist');
+  h.textContent = '';
+  const rows = Store.history().slice(0,8);
+  if (!rows.length){ h.appendChild(el('div', { class:'empty', text:'Nothing yet.' })); return; }
+  for (const r of rows){
+    h.appendChild(el('div', { class:'hrow' }, [
+      el('span', { class:'sc', style:`color:${r.score>=.8?'var(--good)':r.score>=.55?'var(--warn)':'var(--bad)'}`,
+        text:Math.round(r.score*100)+'%' }),
+      el('span', { class:'nm', text:r.playName }),
+      el('span', { class:'dt', text:new Date(r.ts).toLocaleDateString(undefined,{month:'short',day:'numeric'}) })
+    ]));
+  }
+}
+
+/* ================================================================= NAME IT */
+function newQuiz(){
+  cancelAnim();
+  const pool = allPlays();
+  if (pool.length < 2){ App.quiz = null; renderAll(); return; }
+  const answer = pool[Math.floor(Math.random()*pool.length)];
+  const others = pool.filter(p => p.id !== answer.id).sort(()=>Math.random()-.5).slice(0,3);
+  App.quiz = { play:answer, choices:others.concat([answer]).sort(()=>Math.random()-.5), picked:null };
+  renderAll();
+  animatePlay(answer, {});
+}
+function renderQuizRail(r){
+  const c = el('div', { class:'card grow' });
+  c.appendChild(el('h3', { text:'Which play is this?' }));
+  const sc = el('div', { class:'scroll' });
+  if (!App.quiz){
+    sc.appendChild(el('div', { class:'empty', text:'Needs at least two plays. Build one in Design to unlock this mode.' }));
+  } else {
+    const ch = el('div', { class:'choices' });
+    for (const p of App.quiz.choices){
+      const right = p.id === App.quiz.play.id;
+      const cls = !App.quiz.picked ? 'choice'
+                : right ? 'choice right'
+                : (App.quiz.picked === p.id ? 'choice wrong' : 'choice');
+      ch.appendChild(el('button', { class:cls, text:p.name, disabled:!!App.quiz.picked,
+        onclick:()=>{ App.quiz.picked = p.id; renderRail(); } }));
+    }
+    sc.appendChild(ch);
+    if (App.quiz.picked){
+      sc.appendChild(el('div', { class:'coach', style:'margin-top:12px',
+        html:`<b>${esc(App.quiz.play.name)}</b> — ${esc(App.quiz.play.blurb || '')}` }));
+      sc.appendChild(el('div', { style:'margin-top:12px' },
+        [ el('button', { class:'btn pri', text:'Next question', onclick:newQuiz }) ]));
+    }
+  }
+  c.appendChild(sc);
+  r.appendChild(c);
+}
+
+/* ================================================================= DESIGN */
+function blankPlay(){
+  return validatePlay({ id:uid('play'), name:'My play', formation:'Custom', difficulty:1, tags:[], blurb:'',
+    beats:[{ label:'Setup', ball:1, spots:{1:[0,30],2:[-22,5],3:[22,5],4:[-8,19],5:[8,19]},
+             actions:[], keyPlayers:[], coaching:'', mistake:'' }] });
+}
+function openDesigner(play){
+  App.designer = { play: play || blankPlay(), beat:0, dirty:false };
+  App.mode = 'design';
+  syncModeButtons();
+  renderAll();
+}
+function renderDesignRail(r){
+  const d = App.designer, b = d.play.beats[d.beat];
+
+  const meta = el('div', { class:'card' });
+  meta.appendChild(el('h3', { text:'Play' }));
+  meta.appendChild(field('Name', el('input', { type:'text', value:d.play.name,
+    oninput:e=>{ d.play.name = e.target.value; d.dirty = true; } })));
+  const row = el('div', { class:'row' });
+  row.appendChild(field('Formation', el('input', { type:'text', value:d.play.formation,
+    oninput:e=>{ d.play.formation = e.target.value; d.dirty = true; } })));
+  const dSel = el('select', { onchange:e=>{ d.play.difficulty = +e.target.value; d.dirty = true; } });
+  [['1','Easy'],['2','Medium'],['3','Hard']].forEach(([v,l]) =>
+    dSel.appendChild(el('option', { value:v, text:l, selected:d.play.difficulty === +v })));
+  row.appendChild(field('Difficulty', dSel));
+  meta.appendChild(row);
+  r.appendChild(meta);
+
+  const bc = el('div', { class:'card grow' });
+  bc.appendChild(el('h3', { html:'Beat <span class="tag">' + (d.beat+1) + ' of ' + d.play.beats.length + '</span>' }));
+  const sc = el('div', { class:'scroll' });
+  sc.appendChild(field('Label', el('input', { type:'text', value:b.label,
+    oninput:e=>{ b.label = e.target.value; d.dirty = true; renderBar(); } })));
+  sc.appendChild(el('div', { class:'hint', style:'margin-bottom:5px', text:'Actions on this beat' }));
+  const acts = el('div', { class:'calls' });
+  b.actions.forEach((a,i) => acts.appendChild(designAction(a,i)));
+  acts.appendChild(el('button', { class:'btn sm wide', text:'+ Add action', onclick:()=>{
+    if (b.actions.length >= 3) return;
+    b.actions.push({ type:'screen', by:5, for:1 }); d.dirty = true; renderRail();
+  }}));
+  sc.appendChild(acts);
+  sc.appendChild(field('Ball with', ballSelect(b,d)));
+  sc.appendChild(field('Coaching note', el('textarea', { value:b.coaching,
+    oninput:e=>{ b.coaching = e.target.value; d.dirty = true; } })));
+  sc.appendChild(field('Common mistake', el('textarea', { value:b.mistake,
+    oninput:e=>{ b.mistake = e.target.value; d.dirty = true; } })));
+  bc.appendChild(sc);
+  r.appendChild(bc);
+
+  const save = el('div', { class:'card' });
+  const rowA = el('div', { class:'row' });
+  rowA.appendChild(el('button', { class:'btn pri', style:'flex:1', text:'Save play', onclick:()=>{
+    let clean;
+    try{ clean = validatePlay(d.play); } catch(err){ return toast('Cannot save: ' + err.message); }
+    clean.id = d.play.id;
+    if (Store.savePlay(clean)){ d.dirty = false; d.play = clean; toast('Saved to this browser.'); renderLibrary(); }
+    else toast('This browser refused to store it (private window?). Export instead.');
+  }}));
+  rowA.appendChild(el('button', { class:'btn', style:'flex:1', text:'Test it', onclick:()=>{
+    let clean;
+    try{ clean = validatePlay(d.play); } catch(err){ return toast('Cannot test: ' + err.message); }
+    clean.id = d.play.id;
+    App.mode = 'run'; syncModeButtons(); startRun(clean);
+  }}));
+  save.appendChild(rowA);
+  const rowB = el('div', { class:'row', style:'margin-top:7px' });
+  rowB.appendChild(el('button', { class:'btn sm', style:'flex:1', text:'Share link', onclick:()=>sharePlay(d.play) }));
+  rowB.appendChild(el('button', { class:'btn sm', style:'flex:1', text:'Export', onclick:()=>exportPlay(d.play) }));
+  rowB.appendChild(el('button', { class:'btn sm', style:'flex:1', text:'Delete', onclick:()=>{
+    if (!Store.plays().some(p => p.id === d.play.id)) return toast('This play is not saved.');
+    Store.deletePlay(d.play.id); toast('Deleted.'); renderLibrary(); openDesigner(blankPlay());
+  }}));
+  save.appendChild(rowB);
+  save.appendChild(el('div', { class:'hint', style:'margin-top:8px',
+    text:'Saved plays live in this browser only. Share link or Export moves them to another device or to a player.' }));
+  r.appendChild(save);
+}
+function designAction(a, i){
+  const d = App.designer, b = d.play.beats[d.beat];
+  const wrap = el('div', { class:'act' });
+  const t = el('select', { onchange:e=>{
+    a.type = e.target.value;
+    if (!ACTION_NEEDS_FOR.has(a.type)) delete a.for; else if (!a.for) a.for = 1;
+    d.dirty = true; renderRail();
+  }});
+  for (const at of ACTION_TYPES){
+    if (at.id === 'none') continue;
+    t.appendChild(el('option', { value:at.id, text:at.label, selected:a.type === at.id }));
+  }
+  wrap.appendChild(t);
+  const by = el('select', { class:'who', onchange:e=>{ a.by = +e.target.value; d.dirty = true; } });
+  for (const s of SLOTS) by.appendChild(el('option', { value:s, text:'by '+s, selected:a.by === s }));
+  wrap.appendChild(by);
+  if (ACTION_NEEDS_FOR.has(a.type)){
+    const fr = el('select', { class:'who', onchange:e=>{ a.for = +e.target.value; d.dirty = true; } });
+    for (const s of SLOTS) fr.appendChild(el('option', { value:s, text:'for '+s, selected:a.for === s }));
+    wrap.appendChild(fr);
+  }
+  wrap.appendChild(el('button', { class:'btn sm ico', text:'×', title:'Remove',
+    onclick:()=>{ b.actions.splice(i,1); d.dirty = true; renderRail(); } }));
+  return wrap;
+}
+function ballSelect(b, d){
+  const s = el('select', { onchange:e=>{ b.ball = +e.target.value; d.dirty = true; paint(); } });
+  for (const n of SLOTS) s.appendChild(el('option', { value:n, text:`${n} — ${SLOT_NAME[n]}`, selected:b.ball === n }));
+  return s;
+}
+function field(label, node){
+  const l = el('label', { class:'fld' });
+  l.appendChild(el('span', { text:label }));
+  l.appendChild(node);
+  return l;
+}
+
+/* ============================================================ SHARE / FILE */
+async function sharePlay(play){
+  let clean;
+  try{ clean = validatePlay(play); } catch(err){ return toast('Cannot share: ' + err.message); }
+  const code = await encodePlay(clean);
+  const url = location.origin + location.pathname + '#p=' + code;
+  modal({
+    title:'Share this play',
+    sub:'Anyone who opens this link gets the play loaded and ready to run. Nothing is uploaded anywhere — the whole play travels inside the link itself.',
+    body:(box)=>{
+      const ta = el('textarea', { class:'codebox', readonly:true });
+      ta.value = url;
+      box.appendChild(ta);
+      box.appendChild(el('div', { class:'hint', style:'margin-top:8px',
+        text: url.length > 1800
+          ? 'This link is long — some chat apps will wrap it. Export to a file is safer for very long plays.'
+          : `${url.length} characters. Safe to paste anywhere.` }));
+      setTimeout(()=>{ try{ ta.focus(); ta.select(); }catch(e){} }, 30);
+    },
+    actions:[
+      ['Copy link', async ()=>{
+        try{ await navigator.clipboard.writeText(url); toast('Link copied.'); }
+        catch(e){ toast('Copy blocked — select the text and copy manually.'); }
+      }, true],
+      ['Close', null]
+    ]
+  });
+}
+function exportPlay(play){
+  let clean;
+  try{ clean = validatePlay(play); } catch(err){ return toast('Cannot export: ' + err.message); }
+  const blob = new Blob([JSON.stringify(clean, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = el('a', { href:url, download:(clean.name || 'play').replace(/[^a-z0-9]+/gi,'-').toLowerCase() + '.hoopsplay.json' });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+function importPlay(){
+  const inp = el('input', { type:'file', accept:'.json,application/json', style:'display:none' });
+  inp.addEventListener('change', ()=>{
+    const f = inp.files && inp.files[0];
+    if (!f){ inp.remove(); return; }
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      try{
+        const p = validatePlay(JSON.parse(String(rd.result)));
+        if (Store.savePlay(p)){ toast('Imported "' + p.name + '".'); renderLibrary(); openDesigner(p); }
+        else toast('Could not save the imported play to this browser.');
+      }catch(err){ toast('That file is not a valid play: ' + err.message); }
+      inp.remove();
+    };
+    rd.onerror = ()=>{ toast('Could not read that file.'); inp.remove(); };
+    rd.readAsText(f);
+  });
+  document.body.appendChild(inp);
+  inp.click();
+}
+
+/* ================================================================= MODALS */
+function modal(opts){
+  const back = el('div', { class:'modal', role:'dialog', 'aria-modal':'true' });
+  const box = el('div', { class:'box' });
+  if (opts.title) box.appendChild(el('h2', { text:opts.title }));
+  if (opts.sub)   box.appendChild(el('div', { class:'sub', html:opts.sub }));
+  if (opts.body)  opts.body(box);
+  const acts = el('div', { class:'actions' });
+  for (const [label, fn, pri] of (opts.actions || [['Close', null]])){
+    acts.appendChild(el('button', { class:'btn' + (pri ? ' pri':''), text:label,
+      onclick:()=>{ if (fn) fn(); if (!fn || opts.keepOpen !== true) close(); } }));
+  }
+  box.appendChild(acts);
+  back.appendChild(box);
+  function close(){ back.remove(); document.removeEventListener('keydown', onKey); }
+  function onKey(e){ if (e.key === 'Escape') close(); }
+  back.addEventListener('pointerdown', e => { if (e.target === back) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(back);
+  return { close, box };
+}
+let toastTimer = null;
+function toast(msg){
+  let t = $('#toast');
+  if (!t){
+    t = el('div', { id:'toast' });
+    Object.assign(t.style, { position:'fixed', insetInlineStart:'50%', bottom:'22px',
+      transform:'translateX(-50%)', background:'var(--bg-2)', border:'1px solid var(--line-2)',
+      color:'var(--ink)', padding:'9px 15px', borderRadius:'99px', zIndex:'90',
+      boxShadow:'var(--shadow)', fontSize:'13.5px', fontWeight:'600', maxWidth:'88vw',
+      textAlign:'center', transition:'opacity .25s ease' });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.style.opacity = '0'; }, 2600);
+}
+function avgPart(k){
+  const rs = App.results.filter(Boolean);
+  return rs.length ? rs.reduce((a,r)=>a+r.parts[k],0)/rs.length : 0;
+}
+function showSummary(total, scores){
+  const NAMES = { pos:'positioning', ball:'ball location', act:'reading the action', space:'spacing' };
+  const weakest = ['pos','ball','act','space'].map(k=>({ k, v:avgPart(k) })).sort((a,b)=>a.v-b.v)[0];
+  const play = App.play;
+  modal({
+    title:`${play.name} — ${Math.round(total*100)}%`,
+    sub:`Grade <b>${letterFor(total)}</b>. Weakest component: <b>${NAMES[weakest.k]}</b> at ${Math.round(weakest.v*100)}%.`,
+    body:(box)=>{
+      const grid = el('div', { class:'sumgrid' });
+      scores.forEach((s,i)=>{
+        const c = el('div', { class:'sumcell' });
+        c.appendChild(el('div', { class:'k', text:`Beat ${i+1}` }));
+        const v = el('div', { class:'v', text:Math.round(s*100)+'%' });
+        v.style.color = s >= .8 ? 'var(--good)' : s >= .55 ? 'var(--warn)' : 'var(--bad)';
+        c.appendChild(v);
+        c.appendChild(el('div', { class:'k',
+          style:'margin-top:3px;text-transform:none;letter-spacing:0;font-weight:600',
+          text:play.beats[i] ? play.beats[i].label : '' }));
+        grid.appendChild(c);
+      });
+      box.appendChild(grid);
+      box.appendChild(meters([['Positions',avgPart('pos')],['Ball',avgPart('ball')],
+                              ['Action',avgPart('act')],['Spacing',avgPart('space')]]));
+    },
+    actions:[
+      ['Run it again', ()=>{ App.mode === 'general' ? startGeneral(play) : startRun(play); }, true],
+      ['Review in Learn', ()=>{ App.beatIndex = 0; setMode('learn'); }],
+      ['Close', null]
+    ]
+  });
+}
+function openSettings(){
+  const s = App.settings;
+  modal({
+    title:'Settings', keepOpen:true,
+    sub:'Appearance, court surface and renderer are independent axes — changing one never disturbs another.',
+    body:(box)=>{
+      const mk = (label, key, opts) => {
+        const sel = el('select', { onchange:e=>{
+          s[key] = e.target.value; Store.saveSettings(s); applySettings(); renderAll();
+        }});
+        for (const [v,l] of opts) sel.appendChild(el('option', { value:v, text:l, selected:s[key] === v }));
+        box.appendChild(field(label, sel));
+      };
+      mk('Appearance','appearance',[['dark','Dark'],['light','Light']]);
+      mk('Court surface','court',[['hardwood','Hardwood'],['blueprint','Blueprint'],['chalkboard','Chalkboard'],['neon','Neon']]);
+      mk('Renderer','render',[['flat','Top-down 2D'],['tilt','Tilted 2.5D']]);
+      mk('Court spec','spec',[['nba','NBA'],['fiba','FIBA'],['hs','High school']]);
+      mk('Hints in Run It','hints',[['guided','Guided — label and previous positions'],
+                                    ['standard','Standard — previous positions'],['blind','Blind — nothing']]);
+      box.appendChild(el('div', { class:'hint', style:'margin-top:10px',
+        text:'Recall mode always forces Blind, whatever this is set to.' }));
+    },
+    actions:[['Done', null, true]]
+  });
+}
+function openHelp(){
+  modal({
+    title:'How this works',
+    sub:'Other basketball apps either let a coach <i>draw</i> plays, or quiz you on <i>decisions</i>. This one grades <b>where you stand</b>.',
+    body:(box)=>{
+      box.appendChild(el('div', { style:'font-size:13.5px;line-height:1.65;color:var(--ink-2)', html:`
+        <p style="margin:0 0 10px"><b style="color:var(--ink)">Run It</b> — you place all five. Drag every player to where they
+        belong on this beat, drag the ball onto its handler, tag the action, and get graded on four things:</p>
+        <ul style="margin:0 0 12px;padding-left:19px">
+          <li><b>Positions (55%)</b> — distance from the correct spot, tolerance by role. A screener gets 2.5 ft
+              of slack, a corner shooter 4.5 ft.</li>
+          <li><b>Ball (15%)</b> — is it with the right player.</li>
+          <li><b>Action (20%)</b> — right type, right screener, right target.</li>
+          <li><b>Spacing (10%)</b> — nobody within 12 ft of a team-mate they are not screening, no more than
+              two in the paint.</li>
+        </ul>
+        <p style="margin:0 0 10px"><b style="color:var(--ink)">Floor General</b> — you are the 1 and nothing else. Drag only
+        yourself, then <i>call</i> the other four: send 2 to the weak corner, clear the left side, 5 set a ball screen
+        on your right. A correct call means your team-mates execute the play properly. A wrong call sends them
+        literally where you said. Anyone you never call <b>stays where they are</b> — forgetting to move somebody
+        is how you learn that clearing a side is an action, not an assumption.</p>
+        <p style="margin:0 0 10px">Both modes feed the identical grader, so the scores are directly comparable.</p>
+        <p style="margin:0 0 10px">After each beat you get a <b>ghost diff</b>: hollow markers show the truth, and a
+        coloured line runs from where each player ended up to where they belonged. A bad beat never compounds —
+        the next one starts from the <i>correct</i> positions, not yours.</p>
+        <p style="margin:0"><b style="color:var(--ink)">One honest caveat:</b> real basketball is read-based, so "correct"
+        has genuine variance at the edges. Tolerances are generous, scoring is a percentage rather than
+        right/wrong, and every deduction explains itself. Treat it as a coach's opinion, not an oracle.</p>` }));
+    },
+    actions:[['Got it', null, true]]
+  });
+}
+
+/* =================================================================== MODES */
+function setMode(m){
+  cancelAnim();
+  App.mode = m;
+  App.reviewing = false;
+  syncModeButtons();
+  if (m === 'design'){
+    if (!App.designer) openDesigner(App.play ? JSON.parse(JSON.stringify(App.play)) : blankPlay());
+    else renderAll();
+    return;
+  }
+  if (m === 'name')    return newQuiz();
+  if (m === 'general') return App.play ? startGeneral(App.play) : renderAll();
+  if (isPlacementMode()) return App.play ? startRun(App.play) : renderAll();
+  renderAll();
+}
+function syncModeButtons(){
+  $$('#modes button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === App.mode)));
+}
+
+/* ==================================================================== BOOT */
+function boot(){
+  applySettings();
+
+  $('#modes').addEventListener('click', e => {
+    const b = e.target.closest('button[data-mode]');
+    if (b) setMode(b.dataset.mode);
+  });
+  $('#btnSettings').addEventListener('click', openSettings);
+  $('#btnHelp').addEventListener('click', openHelp);
+  $('#btnNewPlay').addEventListener('click', ()=>openDesigner(blankPlay()));
+  $('#btnImport').addEventListener('click', importPlay);
+
+  const court = $('#court');
+  /* The tilt squash is derived from the stage aspect, so a resize has to
+     rebuild the renderer. Debounced, and a no-op when nothing actually moved. */
+  if (typeof ResizeObserver === 'function'){
+    let rt = 0, lastW = 0, lastH = 0;
+    new ResizeObserver(entries => {
+      const r = entries[0].contentRect;
+      if (Math.abs(r.width-lastW) < 2 && Math.abs(r.height-lastH) < 2) return;
+      lastW = r.width; lastH = r.height;
+      clearTimeout(rt);
+      rt = setTimeout(()=>{ if (App.renderer && App.renderer.kind === 'tilt') buildRenderer(); else paint(); }, 130);
+    }).observe($('.stage'));
+  }
+  court.addEventListener('pointerdown', onPointerDown);
+  court.addEventListener('pointermove', onPointerMove);
+  court.addEventListener('pointerup', onPointerUp);
+  court.addEventListener('pointercancel', onPointerUp);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    if (document.querySelector('.modal')) return;
+    if (e.key === 'Enter' && isGradedMode() && App.play){
+      e.preventDefault();
+      if (App.reviewing) nextBeat();
+      else if (App.mode === 'general') runCalls();
+      else checkBeat();
+    }
+    if (App.mode === 'learn' && App.play){
+      if (e.key === 'ArrowRight'){ App.beatIndex = Math.min(App.play.beats.length-1, App.beatIndex+1); cancelAnim(); renderAll(); }
+      if (e.key === 'ArrowLeft'){  App.beatIndex = Math.max(0, App.beatIndex-1); cancelAnim(); renderAll(); }
+    }
+  });
+
+  renderLibrary();
+  renderHistory();
+  renderSpotMap();
+
+  /* A shared play in the URL takes precedence over everything else. */
+  const m = /(?:^|[#&])p=([A-Za-z0-9\-_]+)/.exec(location.hash || '');
+  if (m){
+    decodePlay(m[1]).then(p => {
+      App.play = p; App.mode = 'learn'; syncModeButtons(); renderAll();
+      modal({
+        title:'Shared play: ' + p.name,
+        sub:'Someone sent you this play. It is loaded and ready — save it to keep it in this browser.',
+        actions:[
+          ['Save to my plays', ()=>{ toast(Store.savePlay(p) ? 'Saved.' : 'Could not save.'); renderLibrary(); }, true],
+          ['Just run it', ()=>{ App.mode = 'run'; syncModeButtons(); startRun(p); }],
+          ['Close', null]
+        ]
+      });
+    }).catch(err => {
+      toast('That share link could not be read: ' + err.message);
+      App.play = BUILTIN[0];
+      setMode('learn');
+    });
+  } else {
+    App.play = BUILTIN[0];
+    setMode('run');
+  }
+}
+
+/* Exposed for the external verification harness. The app never reads these
+   back off window — they are here so the grading contract can be tested
+   without a DOM. */
+window.HOOPS = {
+  COURTS, BUILTIN, SLOTS, TOL, WEIGHTS, MIN_SPACING, SPOT_MAP,
+  gradeBeat, gradePlay, positionScore, scoreActions, spacingReport, roleForSlot,
+  resolveCalls, letterFor, encodePlay, decodePlay, validatePlay,
+  cornerX, breakY, Store, App, cloneSpots, exemptPairs
+};
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
