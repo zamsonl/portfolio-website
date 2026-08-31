@@ -6,7 +6,7 @@
 <title>Set Play Trainer — learn basketball plays by running them</title>
 <meta name="description" content="A basketball set-play trainer. Run a play beat by beat and get graded on position, spacing, ball location and action — or play as the point guard and direct your team-mates with calls. Includes a whiteboard designer for building and sharing your own plays.">
 <meta name="theme-color" content="#12100e">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e0702a'/%3E%3Cg fill='none' stroke='%23231a12' stroke-width='1.6'%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3Cpath d='M3 16h26M16 3v26M6.5 6.5c6 4 13 4 19 0M6.5 25.5c6-4 13-4 19 0'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e0702a'/%3E%3Cg fill='none' stroke='%2340200a' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3Cpath d='M3 16h26M16 3v26'/%3E%3Cpath d='M5.1 8.85Q16 21.1 26.9 8.85'/%3E%3Cpath d='M5.1 23.15Q16 10.9 26.9 23.15'/%3E%3C/g%3E%3C/svg%3E">
 
 <style>
 /* ============================================================================
@@ -295,6 +295,18 @@ label.fld > span{
 .modal h2{font-size:19px;margin-bottom:5px}
 .modal .sub{color:var(--ink-2);font-size:13.5px;margin-bottom:15px;line-height:1.55}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.seth{
+  font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
+  font-weight:700;margin-top:16px;margin-bottom:8px;padding-top:13px;border-top:1px solid var(--line);
+}
+.swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:7px}
+.sw{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.sw input[type=color]{
+  flex:none;width:32px;height:26px;padding:2px;cursor:pointer;
+  background:var(--bg);border:1px solid var(--line-2);border-radius:6px;
+}
+.sw input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.sw input[type=color]::-webkit-color-swatch{border:0;border-radius:4px}
 .codebox{
   width:100%;font-family:var(--mono);font-size:11.5px;line-height:1.45;background:var(--bg);
   border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:9px;min-height:86px;word-break:break-all;
@@ -353,9 +365,11 @@ label.fld > span{
     <div class="brand">
       <svg viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="13" fill="var(--accent)"/>
-        <g fill="none" stroke="var(--bg)" stroke-width="1.7">
+        <g fill="none" stroke="var(--bg)" stroke-width="1.6" stroke-linecap="round">
           <circle cx="16" cy="16" r="13"/>
-          <path d="M3 16h26M16 3v26M6.5 6.5c6 4 13 4 19 0M6.5 25.5c6-4 13-4 19 0"/>
+          <path d="M3 16h26M16 3v26"/>
+          <path d="M5.1 8.85Q16 21.1 26.9 8.85"/>
+          <path d="M5.1 23.15Q16 10.9 26.9 23.15"/>
         </g>
       </svg>
       <span>Set Play Trainer <em>· v1</em></span>
@@ -451,6 +465,32 @@ function breakY(c){
 
 const SLOTS = [1,2,3,4,5];
 const SLOT_NAME = {1:'Point guard',2:'Shooting guard',3:'Small forward',4:'Power forward',5:'Centre'};
+
+const DEFAULT_COLORS = { 1:'#f2c14e', 2:'#e0702a', 3:'#4ec97f', 4:'#5aa9e6', 5:'#c780e8', d:'#8b93a3' };
+const COLOR_PRESETS = {
+  'Default':      { 1:'#f2c14e', 2:'#e0702a', 3:'#4ec97f', 4:'#5aa9e6', 5:'#c780e8', d:'#8b93a3' },
+  /* Okabe-Ito: distinguishable under every common form of colour blindness. */
+  'Colour-safe':  { 1:'#e69f00', 2:'#56b4e9', 3:'#009e73', 4:'#f0e442', 5:'#cc79a7', d:'#9aa0a6' },
+  'Warm court':   { 1:'#ffd166', 2:'#ef8354', 3:'#e56b6f', 4:'#b56576', 5:'#eaac8b', d:'#7d8491' },
+  'Cool':         { 1:'#9bf6ff', 2:'#a0c4ff', 3:'#bdb2ff', 4:'#8ecae6', 5:'#caffbf', d:'#8d99ae' },
+  'Mono':         { 1:'#f5f0e8', 2:'#d3c8b8', 3:'#b0a28c', 4:'#8d7c64', 5:'#6b5b46', d:'#6f7378' }
+};
+const HEX = /^#[0-9a-f]{6}$/i;
+/* Colours come from user input, so every read is validated rather than trusted. */
+function slotColors(){
+  const c = (App.settings && App.settings.colors) || {};
+  const out = {};
+  for (const k of [1,2,3,4,5,'d']) out[k] = HEX.test(c[k]) ? c[k] : DEFAULT_COLORS[k];
+  return out;
+}
+/* A user can pick any colour, so the number on a token picks its own ink. */
+function readableInk(hex){
+  if (!HEX.test(hex)) return '#141014';
+  const v = i => parseInt(hex.slice(1+i*2, 3+i*2), 16) / 255;
+  const lin = u => u <= .03928 ? u/12.92 : Math.pow((u+.055)/1.055, 2.4);
+  const L = .2126*lin(v(0)) + .7152*lin(v(1)) + .0722*lin(v(2));
+  return L > .42 ? '#141014' : '#ffffff';
+}
 
 const ACTION_TYPES = [
   { id:'none',    label:'No action this beat' },
@@ -654,9 +694,12 @@ const Store = {
     return best;
   },
   settings(){
-    const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard' };
+    const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard',
+                defence:'off', colors: Object.assign({}, DEFAULT_COLORS) };
     const v = this._get(K_SET, {});
-    return Object.assign(d, (v && typeof v === 'object') ? v : {});
+    const out = Object.assign(d, (v && typeof v === 'object') ? v : {});
+    out.colors = Object.assign({}, DEFAULT_COLORS, (out.colors && typeof out.colors === 'object') ? out.colors : {});
+    return out;
   },
   saveSettings(s){ return this._set(K_SET, s); }
 };
@@ -1022,6 +1065,163 @@ function resolveCalls(baseSpots, pgPos, calls, beat){
   return { spots, actions, log };
 }
 
+
+/* ================================================================ DEFENCE ==
+   Defenders are DERIVED from the offensive shape, never authored. That means
+   every play — including one you design yourself — gets a defence for free,
+   and the defence reacts to where YOU actually put people rather than to some
+   stored ideal. All five wear one colour, because as an offensive player you
+   read the shape of a defence, not its individuals.
+
+   Pure functions. They never touch the DOM, and they never touch the score:
+   defenders are a reading layer, not a graded one.
+   ========================================================================= */
+const D_ON_BALL = 3.0;     // how tight the on-ball defender plays
+const D_MIN_GAP = 3.6;     // closest an off-ball defender sits to his man
+const D_MAX_GAP = 9.5;     // furthest he sags in help
+const D_PER_FT  = .20;     // extra sag per foot of distance from the ball
+const D_HOOP_BIAS = .58;   // ball-you-man: how much of the gap points at the rim
+
+function unitVec(from, to){
+  const dx = to[0]-from[0], dy = to[1]-from[1], m = Math.hypot(dx, dy);
+  return m < 1e-6 ? [0,0] : [dx/m, dy/m];
+}
+/* One defender's steady-state position, on the ball-you-man line. */
+function defenderPos(slot, spots, ballSlot, court){
+  const man = spots[slot], hoop = [0, court.hoopY];
+  if (slot === ballSlot){
+    const u = unitVec(man, hoop);
+    return clampCourt([man[0] + u[0]*D_ON_BALL, man[1] + u[1]*D_ON_BALL], court);
+  }
+  const ball = spots[ballSlot];
+  const gap = Math.max(D_MIN_GAP, Math.min(D_MAX_GAP, D_MIN_GAP + dist(man, ball)*D_PER_FT));
+  const uh = unitVec(man, hoop), ub = unitVec(man, ball);
+  let vx = uh[0]*D_HOOP_BIAS + ub[0]*(1-D_HOOP_BIAS);
+  let vy = uh[1]*D_HOOP_BIAS + ub[1]*(1-D_HOOP_BIAS);
+  const m = Math.hypot(vx, vy) || 1;
+  return clampCourt([man[0] + vx/m*gap, man[1] + vy/m*gap], court);
+}
+/* Nudge a defender clear of the others so a blown coverage is never rendered
+   underneath the token that caused it. */
+function separate(p, victim, spots, ballSlot, court){
+  let out = [p[0], p[1]];
+  for (let pass = 0; pass < 6; pass++){
+    let moved = false;
+    for (const s of SLOTS){
+      if (s === victim) continue;
+      const other = defenderPos(s, spots, ballSlot, court);
+      const dx = out[0]-other[0], dy = out[1]-other[1];
+      const dd = Math.hypot(dx, dy);
+      if (dd >= 3.0) continue;
+      const u = dd < 1e-6 ? [0, 1] : [dx/dd, dy/dd];
+      out = [ out[0] + u[0]*(3.0-dd), out[1] + u[1]*(3.0-dd) ];
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  return out;
+}
+function clampCourt(p, court){
+  return [ Math.max(-court.width/2 + .6, Math.min(court.width/2 - .6, p[0])),
+           Math.max(.6, Math.min(court.len - .6, p[1])) ];
+}
+/* How late a defender is to react. Being screened costs you the most; guarding
+   the screener costs a little; everyone else is just half a step behind. */
+function defenderLag(slot, beat){
+  for (const a of (beat && beat.actions) || []){
+    if (CONTACT_ACTIONS.has(a.type) && a.for === slot) return .55;
+    if (CONTACT_ACTIONS.has(a.type) && a.by  === slot) return .28;
+  }
+  return .15;
+}
+
+const MISTAKE_LABEL = {
+  caught:   'caught on the screen',
+  switched: 'blown switch',
+  overhelp: 'over-help',
+  ballwatch:'ball-watching'
+};
+/* Which coverage errors this particular beat could plausibly produce. */
+function mistakeOptions(beat, spots, ballSlot){
+  const out = [];
+  for (const a of (beat.actions || [])){
+    if (a.type !== 'screen' || !a.for) continue;
+    out.push({ type:'caught',   victim:a.for, by:a.by });
+    out.push({ type:'switched', victim:a.for, by:a.by });
+  }
+  const away = SLOTS.filter(x => x !== ballSlot)
+    .sort((a,b) => dist(spots[b], spots[ballSlot]) - dist(spots[a], spots[ballSlot]));
+  if (away[0]) out.push({ type:'overhelp',  victim:away[0] });
+  if (away[1]) out.push({ type:'ballwatch', victim:away[1] });
+  return out;
+}
+/**
+ * Apply one coverage error and report the window it opens.
+ * @returns {{type, victim, defender:[x,y], space:number, where:string, text:string}}
+ */
+function applyMistake(opt, spots, ballSlot, court){
+  const man = spots[opt.victim];
+  let d = defenderPos(opt.victim, spots, ballSlot, court);
+  if (opt.type === 'caught' || opt.type === 'switched'){
+    /* Stuck on the screen: he ends up on the far side of the screener from his
+       man, which is both what happens and what makes him visible. */
+    const scr = spots[opt.by] || spots[ballSlot];
+    const u = unitVec(man, scr);
+    d = (u[0] === 0 && u[1] === 0)
+      ? [d[0], d[1] + 4.6]
+      : [scr[0] + u[0]*2.3, scr[1] + u[1]*2.3];
+  } else {
+    /* Helped too far and cannot recover: pull the defender toward the ball. */
+    const u = unitVec(d, spots[ballSlot]);
+    const pull = opt.type === 'overhelp' ? 6.2 : 4.4;
+    d = [d[0] + u[0]*pull, d[1] + u[1]*pull];
+  }
+  d = separate(d, opt.victim, spots, ballSlot, court);
+  d = clampCourt(d, court);
+  const space = dist(d, man);
+  const where = nearestSpotName(man);
+  const who = opt.victim;
+  const text = opt.type === 'caught'
+      ? `X${who} got caught on ${opt.by}’s screen — ${who} has ${space.toFixed(1)} ft at the ${where}.`
+    : opt.type === 'switched'
+      ? `${opt.by} and ${who} switched late and nobody picked ${who} up — ${space.toFixed(1)} ft at the ${where}.`
+    : opt.type === 'overhelp'
+      ? `X${who} over-helped on the ball — ${who} is open by ${space.toFixed(1)} ft at the ${where}.`
+      : `X${who} ball-watched — ${who} slipped to ${space.toFixed(1)} ft at the ${where}.`;
+  return { type:opt.type, victim:who, by:opt.by, defender:d, space, where, text };
+}
+/* Name a point using the same vocabulary Floor General calls use. */
+function nearestSpotName(p){
+  let best = 'floor', bd = Infinity;
+  for (const key of SPOT_KEYS){
+    for (const sg of (SIDED.has(key) ? [-1,1] : [1])){
+      const t = SPOT_MAP[key](sg);
+      const d = dist(t, p);
+      if (d < bd){ bd = d; best = (SIDED.has(key) ? (sg < 0 ? 'left ' : 'right ') : '') + key; }
+    }
+  }
+  return best;
+}
+/**
+ * The whole defence for one frame.
+ * @param spots  current offensive positions
+ * @param prev   positions at the start of the move (for reaction lag), or null
+ * @param t      tween progress 0..1
+ */
+function buildDefence(spots, prev, t, beat, ballSlot, court, mistake){
+  const lagged = {};
+  for (const s of SLOTS){
+    if (!prev || t >= 1){ lagged[s] = spots[s]; continue; }
+    const lag = defenderLag(s, beat);
+    const ts = clamp01((t - lag) / (1 - lag));
+    lagged[s] = [ lerp(prev[s][0], spots[s][0], ts), lerp(prev[s][1], spots[s][1], ts) ];
+  }
+  const out = {};
+  for (const s of SLOTS) out[s] = defenderPos(s, lagged, ballSlot, court);
+  if (mistake) out[mistake.victim] = mistake.defender;
+  return out;
+}
+
 /* ============================================================== RENDERERS ==
    Both renderers implement the same interface:
      mount(svgEl, court) · draw(state) · toCourt(cx,cy) · fromCourt(x,y)
@@ -1036,6 +1236,28 @@ function svg(tag, attrs){
   for (const k in (attrs||{})) if (attrs[k] !== null && attrs[k] !== undefined) n.setAttribute(k, attrs[k]);
   return n;
 }
+/* A real basketball, face on. The recognisable pattern is the equator, the
+   meridian, and two seams that BOW between opposite points on the rim — not
+   four lines converging on the poles, which reads as a globe. */
+function ballGlyph(cx, cy, r){
+  const g = svg('g', { filter:'url(#tokShadow)' });
+  const ink = '#3d1e08';
+  g.appendChild(svg('circle', { cx, cy, r, fill:'url(#ballSkin)', stroke:ink, 'stroke-width':r*.10 }));
+  const seams = svg('g', { fill:'none', stroke:ink, 'stroke-width':r*.115, 'stroke-linecap':'round' });
+  seams.appendChild(svg('path', { d:`M ${cx-r} ${cy} H ${cx+r}` }));   // equator
+  seams.appendChild(svg('path', { d:`M ${cx} ${cy-r} V ${cy+r}` }));   // meridian
+  /* Both endpoints sit on the rim: 0.835^2 + 0.55^2 = 1. Kept well clear of the
+     equator, or the three lines bundle together in the middle. */
+  const ex = r*.835, ey = r*.55, bow = r*.15;
+  seams.appendChild(svg('path', { d:`M ${cx-ex} ${cy-ey} Q ${cx} ${cy+bow} ${cx+ex} ${cy-ey}` }));
+  seams.appendChild(svg('path', { d:`M ${cx-ex} ${cy+ey} Q ${cx} ${cy-bow} ${cx+ex} ${cy+ey}` }));
+  g.appendChild(seams);
+  /* a soft specular so it reads as a sphere rather than a disc */
+  g.appendChild(svg('ellipse', { cx:cx - r*.33, cy:cy - r*.44, rx:r*.30, ry:r*.19,
+    fill:'#fff', opacity:.28, transform:`rotate(-30 ${cx - r*.33} ${cy - r*.44})` }));
+  return g;
+}
+
 function courtPath3pt(c){
   const x = cornerX(c), by = breakY(c), r = c.arc3;
   if (!c.straightCorner) return `M ${-x} 0 A ${r} ${r} 0 0 0 ${x} 0`;
@@ -1095,6 +1317,12 @@ function makeRenderer(kind){
     const f = svg('filter', { id:'tokShadow', x:'-60%', y:'-60%', width:'220%', height:'220%' });
     f.appendChild(svg('feDropShadow', { dx:0, dy:.35, stdDeviation:.32, 'flood-color':'#000', 'flood-opacity':'.45' }));
     defs.appendChild(f);
+    /* Sphere shading for the ball: light from the upper left, as everywhere else. */
+    const bs = svg('radialGradient', { id:'ballSkin', cx:'36%', cy:'30%', r:'78%' });
+    bs.appendChild(svg('stop', { offset:'0%',   'stop-color':'#f0a057' }));
+    bs.appendChild(svg('stop', { offset:'55%',  'stop-color':'#df7328' }));
+    bs.appendChild(svg('stop', { offset:'100%', 'stop-color':'#a84a12' }));
+    defs.appendChild(bs);
     root.appendChild(defs);
 
     scene = svg('g'); root.appendChild(scene);
@@ -1111,7 +1339,10 @@ function makeRenderer(kind){
     layers.trails = svg('g'); world.appendChild(layers.trails);
     /* Tokens live outside the squashed group in tilt mode so the discs stay
        round; each one positions itself through fromCourt(). */
-    layers.tokens = svg('g'); (kind === 'tilt' ? scene : world).appendChild(layers.tokens);
+    /* Defenders sit under the offence, in the same space as the tokens so they
+       stay round in the tilted view. */
+    layers.defence = svg('g'); (kind === 'tilt' ? scene : world).appendChild(layers.defence);
+    layers.tokens  = svg('g'); (kind === 'tilt' ? scene : world).appendChild(layers.tokens);
   }
 
   /* Court feet -> whatever space the tokens layer lives in. */
@@ -1129,7 +1360,7 @@ function makeRenderer(kind){
     let best = null, bestD = Infinity;
     for (const t of tokens){
       const d = Math.hypot(t.pos[0]-fx, t.pos[1]-fy);
-      const r = (t.id === 'ball' ? 1.15 : TOK_R) * 1.6;
+      const r = (t.id === 'ball' ? 1.3 : TOK_R) * 1.6;
       if (d < r && d < bestD){ best = t.id; bestD = d; }
     }
     return best;
@@ -1164,6 +1395,39 @@ function makeRenderer(kind){
         layers.shadow.appendChild(svg('ellipse', { cx:p[0], cy:p[1], rx:TOK_R*.95, ry:TOK_R*.95, fill:'#000', opacity:.3 }));
       }
     }
+    if (st.defenders){
+      const dc = st.defColor || '#8b93a3';
+      /* The open man gets a dashed halo the size of the window he actually has,
+         so the space is something you see rather than something you are told. */
+      if (st.mistake){
+        const m = st.mistake, mp = st.spots[m.victim];
+        if (mp){
+          const [ox, oy] = fromCourt(mp[0], mp[1]);
+          layers.defence.appendChild(svg('circle', { cx:ox, cy:oy, r:Math.max(2.2, m.space*.5),
+            fill:'none', stroke:'var(--c-arc)', 'stroke-width':.26, 'stroke-dasharray':'1.2 .9', opacity:.85 }));
+          const dp = fromCourt(m.defender[0], m.defender[1]);
+          layers.defence.appendChild(svg('line', { x1:ox, y1:oy, x2:dp[0], y2:dp[1],
+            stroke:'var(--c-arc)', 'stroke-width':.18, 'stroke-dasharray':'.7 .6', opacity:.6 }));
+        }
+      }
+      const order = SLOTS.filter(s => !(st.mistake && st.mistake.victim === s))
+        .concat(st.mistake ? [st.mistake.victim] : []);
+      for (const s of order){
+        const p = st.defenders[s]; if (!p) continue;
+        const [px, py] = fromCourt(p[0], p[1]);
+        const beaten = st.mistake && st.mistake.victim === s;
+        const g = svg('g', { opacity: beaten ? .95 : .88 });
+        g.appendChild(svg('circle', { cx:px, cy:py, r:1.38, fill:'rgba(10,10,14,.55)',
+          stroke:dc, 'stroke-width': beaten ? .42 : .3,
+          'stroke-dasharray': beaten ? '1.1 .55' : null }));
+        const t = svg('text', { x:px, y:py+.5, 'text-anchor':'middle', 'font-size':1.5,
+          'font-family':'system-ui, -apple-system, sans-serif', 'font-weight':700,
+          fill:dc, 'pointer-events':'none' });
+        t.textContent = 'x' + s;
+        g.appendChild(t);
+        layers.defence.appendChild(g);
+      }
+    }
     for (const s of SLOTS){
       const p = st.spots[s]; if (!p) continue;
       const [px, py] = fromCourt(p[0], p[1]);
@@ -1177,7 +1441,7 @@ function makeRenderer(kind){
         opacity: locked ? .55 : 1 }));
       const t = svg('text', { x:px, y:py+.58, 'text-anchor':'middle', 'font-size':1.85,
         'font-family':'system-ui, -apple-system, sans-serif', 'font-weight':750,
-        fill:'var(--c-floor-2)', 'pointer-events':'none' });
+        fill: readableInk((st.colors && st.colors[s]) || '#cccccc'), 'pointer-events':'none' });
       t.textContent = s;
       g.appendChild(t);
       layers.tokens.appendChild(g);
@@ -1185,10 +1449,7 @@ function makeRenderer(kind){
     }
     if (st.ballPos){
       const [bx, by] = fromCourt(st.ballPos[0], st.ballPos[1]);
-      const g = svg('g', { filter:'url(#tokShadow)' });
-      g.appendChild(svg('circle', { cx:bx, cy:by, r:1.05, fill:'#e0702a', stroke:'#2a1608', 'stroke-width':.16 }));
-      g.appendChild(svg('path', { d:`M ${bx-1.05} ${by} h2.1 M ${bx} ${by-1.05} v2.1`, stroke:'#2a1608', 'stroke-width':.13, fill:'none' }));
-      layers.tokens.appendChild(g);
+      layers.tokens.appendChild(ballGlyph(bx, by, 1.2));
       tokens.push({ id:'ball', pos:st.ballPos });
     }
   }
@@ -1200,9 +1461,55 @@ function makeRenderer(kind){
 const App = {
   mode:'run', settings:Store.settings(), play:null, beatIndex:0,
   attempt:null, results:[], reviewing:false, renderer:null, court:COURTS.nba,
-  anim:null, designer:null, quiz:null, general:null
+  anim:null, designer:null, quiz:null, general:null, defMistakeOpt:null
 };
-const TOKEN_COLORS = { 1:'#f2c14e', 2:'#e0702a', 3:'#4ec97f', 4:'#5aa9e6', 5:'#c780e8' };
+
+/* The beat and ball-handler the defence should be reading, per mode. */
+function defenceContext(){
+  if (App.mode === 'design' && App.designer){
+    const b = App.designer.play.beats[App.designer.beat];
+    return { beat:b, ballSlot:b.ball };
+  }
+  if (App.mode === 'name' && App.quiz) return { beat:App.quiz.play.beats[0], ballSlot:App.quiz.play.beats[0].ball };
+  if (!App.play) return null;
+  const beat = App.play.beats[App.beatIndex];
+  if (!beat) return null;
+  if (isPlacementMode() && App.attempt) return { beat, ballSlot:App.attempt.ball };
+  return { beat, ballSlot:beat.ball };
+}
+/* The positions actually on screen right now. Every consumer of the defence
+   reads this one function; when triggerMistake and the readout each decided
+   for themselves, a forced mistake could name a player from a different mode's
+   leftover state. */
+function displaySpots(){
+  if (App.mode === 'design' && App.designer) return App.designer.play.beats[App.designer.beat].spots;
+  if (App.mode === 'general' && App.general)
+    return App.general.preview ? App.general.preview.spots : App.general.spots;
+  if (isPlacementMode() && App.attempt) return App.attempt.spots;
+  if (App.mode === 'name' && App.quiz) return App.quiz.play.beats[0].spots;
+  if (App.play && App.play.beats[App.beatIndex]) return App.play.beats[App.beatIndex].spots;
+  return null;
+}
+/* Used by both the renderer and the readout so they can never disagree. */
+function defenceFor(spots, prev, t){
+  if (App.settings.defence === 'off') return null;
+  const ctx = defenceContext();
+  if (!ctx || !spots) return null;
+  const mistake = App.defMistakeOpt
+    ? applyMistake(App.defMistakeOpt, spots, ctx.ballSlot, App.court) : null;
+  return { defenders: buildDefence(spots, prev || null, t == null ? 1 : t, ctx.beat, ctx.ballSlot, App.court, mistake),
+           mistake, color: slotColors().d };
+}
+function triggerMistake(force){
+  const ctx = defenceContext();
+  App.defMistakeOpt = null;
+  if (!ctx) return;
+  if (!force && App.settings.defence !== 'mistakes') return;
+  if (!force && Math.random() > .42) return;
+  const spots = displaySpots() || ctx.beat.spots;
+  const opts = mistakeOptions(ctx.beat, spots, ctx.ballSlot);
+  if (opts.length) App.defMistakeOpt = opts[Math.floor(Math.random()*opts.length)];
+}
 
 function neutralSpots(){
   /* An off-court rack along the half-court line, so every placement in beat 1
@@ -1242,7 +1549,7 @@ function buildRenderer(){
 function paint(){
   if (!App.renderer) return;
   const st = { spots:neutralSpots(), ballPos:null, ghost:null, trails:[],
-               colors:TOKEN_COLORS, highlight:[], locked:[] };
+               colors:slotColors(), highlight:[], locked:[] };
 
   if (App.mode === 'design' && App.designer){
     const d = App.designer, b = d.play.beats[d.beat];
@@ -1252,7 +1559,7 @@ function paint(){
     if (d.beat > 0){
       const prev = d.play.beats[d.beat-1];
       st.ghost = prev.spots;
-      st.trails = SLOTS.map(s => ({ from:prev.spots[s], to:b.spots[s], color:TOKEN_COLORS[s],
+      st.trails = SLOTS.map(s => ({ from:prev.spots[s], to:b.spots[s], color:slotColors()[s],
         width:.2, dash:'.8 .6', opacity:.5 }));
     }
   }
@@ -1260,6 +1567,7 @@ function paint(){
     const beat = App.play.beats[App.beatIndex];
     const f = App.anim ? App.anim.frame : { spots:beat.spots, ball:beat.ball };
     st.spots = f.spots;
+    st.prevSpots = f.prev; st.t = f.t;
     st.ballPos = ballOffsetFor(f.spots, f.ball);
     st.highlight = beat.keyPlayers || [];
   }
@@ -1267,6 +1575,7 @@ function paint(){
     const b0 = App.quiz.play.beats[0];
     const f = App.anim ? App.anim.frame : { spots:b0.spots, ball:b0.ball };
     st.spots = f.spots;
+    st.prevSpots = f.prev; st.t = f.t;
     st.ballPos = ballOffsetFor(f.spots, f.ball);
   }
   else if (App.mode === 'general' && App.play && App.general){
@@ -1300,6 +1609,8 @@ function paint(){
       st.ghost = App.play.beats[App.beatIndex-1].spots;
     }
   }
+  const dfn = defenceFor(st.spots, st.prevSpots, st.t);
+  if (dfn){ st.defenders = dfn.defenders; st.mistake = dfn.mistake; st.defColor = dfn.color; }
   App.renderer.draw(st);
 }
 function hintLevel(){ return App.mode === 'recall' ? 'blind' : App.settings.hints; }
@@ -1394,6 +1705,7 @@ function newAttempt(){
   const spots = App.beatIndex === 0 ? neutralSpots() : cloneSpots(App.play.beats[App.beatIndex-1].spots);
   const ball  = App.beatIndex === 0 ? 1 : App.play.beats[App.beatIndex-1].ball;
   App.attempt = { spots, ball, ballPos:ballOffsetFor(spots, ball), actions:[] };
+  triggerMistake(false);
 }
 function checkBeat(){
   const beat = App.play.beats[App.beatIndex];
@@ -1437,6 +1749,7 @@ function newGeneralBeat(){
   const pg = App.beatIndex === 0 ? [0, App.court.len - 8] : [base[1][0], base[1][1]];
   App.general = { spots:cloneSpots(base), calls:[], preview:null, draft:defaultDraft() };
   App.general.spots[1] = pg;
+  triggerMistake(false);
 }
 function defaultDraft(){ return { v:'send', who:2, where:'corner', side:'left', type:'screen', for:3 }; }
 function runCalls(){
@@ -1459,7 +1772,7 @@ function animatePlay(play, opts){
   const seg = dwell + travel, totalMs = seg*(beats.length-1) + dwell;
   const t0 = performance.now();
   const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
-  App.anim = { frame:{ spots:beats[0].spots, ball:beats[0].ball }, raf:0, onBeat:(opts&&opts.onBeat) };
+  App.anim = { frame:{ spots:beats[0].spots, ball:beats[0].ball, prev:null, t:1 }, raf:0, onBeat:(opts&&opts.onBeat) };
   const step = now => {
     if (!App.anim) return;
     const elapsed = Math.min(totalMs, now - t0);
@@ -1468,7 +1781,7 @@ function animatePlay(play, opts){
     const t = within <= dwell ? 0 : ease(clamp01((within-dwell)/travel));
     const a = beats[i], b = beats[i+1], spots = {};
     for (const s of SLOTS) spots[s] = [ lerp(a.spots[s][0], b.spots[s][0], t), lerp(a.spots[s][1], b.spots[s][1], t) ];
-    App.anim.frame = { spots, ball: t < .5 ? a.ball : b.ball };
+    App.anim.frame = { spots, ball: t < .5 ? a.ball : b.ball, prev: a.spots, t };
     if (App.anim.onBeat) App.anim.onBeat(t < .5 ? i : i+1);
     paint();
     if (elapsed < totalMs) App.anim.raf = requestAnimationFrame(step);
@@ -1489,7 +1802,8 @@ function setStageNote(text){
 function renderBar(){
   const bar = $('#bar');
   bar.textContent = '';
-  const add = n => bar.appendChild(n);
+  /* Some bar items are conditional and return null, so appending is guarded. */
+  const add = n => { if (n) bar.appendChild(n); };
 
   if (!App.play && App.mode !== 'design' && App.mode !== 'name'){
     add(el('span', { class:'bar-lbl', text:'Pick a play from the left to begin' }));
@@ -1500,7 +1814,7 @@ function renderBar(){
     add(el('span', { class:'bar-lbl', text:'Beat' }));
     App.play.beats.forEach((b,i) => add(el('button', {
       class:'btn sm' + (i === App.beatIndex ? ' pri' : ''), text:String(i+1),
-      onclick:()=>{ cancelAnim(); App.beatIndex = i; renderAll(); } })));
+      onclick:()=>{ cancelAnim(); App.beatIndex = i; triggerMistake(false); renderAll(); } })));
     add(el('div', { class:'sp' }));
     add(el('button', { class:'btn sm pri', text:'▶ Animate', onclick:()=>{
       setStageNote('Playing — ' + App.play.name);
@@ -1508,6 +1822,7 @@ function renderBar(){
         onBeat:i=>{ if (i !== App.beatIndex){ App.beatIndex = i; renderRail(); } },
         onDone:()=>setStageNote('') });
     }}));
+    add(defenceButton());
     add(el('button', { class:'btn sm', text:'Run it →', onclick:()=>setMode('run') }));
     setStageNote('');
     return;
@@ -1522,6 +1837,7 @@ function renderBar(){
       add(el('div', { class:'sp' }));
       add(el('span', { class:'bar-lbl', text:'Action' }));
       add(actionTagger());
+      add(defenceButton());
       add(el('button', { class:'btn sm pri', text: App.mode === 'recall' ? 'Lock in →' : 'Check beat', onclick:checkBeat }));
       setStageNote(hintLevel() === 'blind' ? 'Blind — no reference shown'
         : App.beatIndex > 0 ? 'Faint markers = where everyone stood last beat'
@@ -1548,6 +1864,7 @@ function renderBar(){
     add(el('div', { class:'sp' }));
     if (!App.reviewing){
       add(el('span', { class:'hint', text:'Drag the 1. Call the rest.' }));
+      add(defenceButton());
       add(el('button', { class:'btn sm pri', text:'Run the call →', onclick:runCalls }));
       setStageNote('You are the 1 — drag yourself, then call your team-mates from the right');
     } else {
@@ -1600,6 +1917,31 @@ function renderBar(){
   setStageNote('');
 }
 
+/* One button, because forcing the error is how you practise seeing it. */
+function defenceButton(){
+  if (App.settings.defence === 'off') return null;
+  return App.defMistakeOpt
+    ? el('button', { class:'btn sm', text:'Reset coverage',
+        onclick:()=>{ App.defMistakeOpt = null; renderAll(); } })
+    : el('button', { class:'btn sm', text:'Force a mistake',
+        onclick:()=>{ triggerMistake(true);
+          if (!App.defMistakeOpt) toast('No coverage error is available on this beat.');
+          renderAll(); } });
+}
+/* The window a blown coverage opens, named in the same vocabulary as the calls. */
+function defenceNote(){
+  if (App.settings.defence === 'off' || !App.defMistakeOpt) return null;
+  const ctx = defenceContext();
+  if (!ctx) return null;
+  const m = applyMistake(App.defMistakeOpt, displaySpots() || ctx.beat.spots, ctx.ballSlot, App.court);
+  const verdict = m.space >= 6 ? 'That is a shot.'
+                : m.space >= 4 ? 'That is a catch, not a shot.'
+                               : 'Not enough — keep it moving.';
+  const c = el('div', { class:'card' });
+  c.appendChild(el('h3', { html:'Coverage broken <span class="tag">' + esc(MISTAKE_LABEL[m.type]) + '</span>' }));
+  c.appendChild(el('div', { class:'coach', html: esc(m.text) + '<br><b>' + esc(verdict) + '</b>' }));
+  return c;
+}
 function actionTagger(){
   const wrap = el('div', { class:'act' });
   const acts = App.attempt.actions, a0 = acts[0] || { type:'none' };
@@ -1629,7 +1971,7 @@ function renderRail(){
   const r = $('#railR');
   r.textContent = '';
   if (App.mode === 'design' && App.designer) return renderDesignRail(r);
-  if (App.mode === 'name') return renderQuizRail(r);
+  if (App.mode === 'name'){ const q = defenceNote(); if (q) r.appendChild(q); return renderQuizRail(r); }
   if (!App.play){
     r.appendChild(el('div', { class:'card', html:
       '<h3>Getting started</h3><div style="font-size:13px;line-height:1.62;color:var(--ink-2)">' +
@@ -1640,6 +1982,8 @@ function renderRail(){
   }
   const beat = App.play.beats[App.beatIndex];
 
+  const dn = defenceNote();
+  if (dn) r.appendChild(dn);
   if (App.mode === 'general' && !App.reviewing) r.appendChild(callSheet());
 
   // beat list
@@ -1650,7 +1994,7 @@ function renderRail(){
     const res = App.results[i];
     const showScore = res && (App.mode !== 'recall' || App.results.length === App.play.beats.length);
     const btn = el('button', { class:'beat', 'aria-current': i === App.beatIndex ? 'true':'false',
-      onclick:()=>{ if (App.mode === 'learn'){ cancelAnim(); App.beatIndex = i; renderAll(); } } });
+      onclick:()=>{ if (App.mode === 'learn'){ cancelAnim(); App.beatIndex = i; triggerMistake(false); renderAll(); } } });
     btn.appendChild(el('span', { class:'n', text:String(i+1) }));
     btn.appendChild(el('span', { class:'t', text: (App.mode === 'recall' && !showScore) ? '—' : b.label }));
     if (showScore) btn.appendChild(el('span', { class:'sc',
@@ -1762,7 +2106,8 @@ function slotLegend(){
   const legend = el('div', { class:'notes', style:'margin-top:10px' });
   for (const s of SLOTS){
     const w = el('span', { class:'who', text:String(s) });
-    w.style.background = TOKEN_COLORS[s]; w.style.color = '#1a1005'; w.style.borderColor = 'transparent';
+    const sc0 = slotColors()[s];
+    w.style.background = sc0; w.style.color = readableInk(sc0); w.style.borderColor = 'transparent';
     legend.appendChild(el('div', { class:'note' }, [ w, el('span', { text:SLOT_NAME[s] }) ]));
   }
   return legend;
@@ -1808,7 +2153,8 @@ function callSheet(){
   for (const n of [2,3,4,5]){
     const on = named.has(n);
     const pill = el('span', { class:'pill', text:String(n) });
-    pill.style.background = TOKEN_COLORS[n];
+    pill.style.background = slotColors()[n];
+    pill.style.color = readableInk(slotColors()[n]);
     roster.appendChild(el('div', { class:'rrow ' + (on ? 'moved':'still') }, [
       pill, el('span', { text:SLOT_NAME[n] }),
       el('span', { class:'st', text: on ? 'called' : 'stays put' })
@@ -2308,8 +2654,35 @@ function openSettings(){
       mk('Court spec','spec',[['nba','NBA'],['fiba','FIBA'],['hs','High school']]);
       mk('Hints in Run It','hints',[['guided','Guided — label and previous positions'],
                                     ['standard','Standard — previous positions'],['blind','Blind — nothing']]);
+      mk('Defenders','defence',[['off','Off'],['on','On — they track and trail'],
+                                ['mistakes','On, and they make mistakes']]);
+      box.appendChild(el('div', { class:'hint', style:'margin-top:6px',
+        text:'Defenders are derived from wherever you actually put the offence, and they never affect your score.' }));
       box.appendChild(el('div', { class:'hint', style:'margin-top:10px',
         text:'Recall mode always forces Blind, whatever this is set to.' }));
+
+      box.appendChild(el('h3', { class:'seth', text:'Position colours' }));
+      const swatches = el('div', { class:'swatches' });
+      const rows = [[1,'1 — Point guard'],[2,'2 — Shooting guard'],[3,'3 — Small forward'],
+                    [4,'4 — Power forward'],[5,'5 — Centre'],['d','Defenders (all one colour)']];
+      const redraw = () => { applySettings(); renderAll(); };
+      for (const [k, label] of rows){
+        const inp = el('input', { type:'color', value: slotColors()[k],
+          oninput:e=>{ s.colors[k] = e.target.value; Store.saveSettings(s); redraw(); } });
+        inp.dataset.slot = k;
+        swatches.appendChild(el('label', { class:'sw' }, [ inp, el('span', { text:label }) ]));
+      }
+      box.appendChild(swatches);
+      const presets = el('div', { class:'pcalls', style:'margin-top:9px' });
+      for (const name of Object.keys(COLOR_PRESETS)){
+        presets.appendChild(el('button', { class:'btn sm', text:name, onclick:()=>{
+          s.colors = Object.assign({}, COLOR_PRESETS[name]);
+          Store.saveSettings(s);
+          $$('.swatches input[type=color]').forEach(i => { i.value = s.colors[i.dataset.slot]; });
+          redraw();
+        }}));
+      }
+      box.appendChild(presets);
     },
     actions:[['Done', null, true]]
   });
@@ -2352,6 +2725,7 @@ function setMode(m){
   cancelAnim();
   App.mode = m;
   App.reviewing = false;
+  App.defMistakeOpt = null;
   syncModeButtons();
   if (m === 'design'){
     if (!App.designer) openDesigner(App.play ? JSON.parse(JSON.stringify(App.play)) : blankPlay());
@@ -2408,8 +2782,8 @@ function boot(){
       else checkBeat();
     }
     if (App.mode === 'learn' && App.play){
-      if (e.key === 'ArrowRight'){ App.beatIndex = Math.min(App.play.beats.length-1, App.beatIndex+1); cancelAnim(); renderAll(); }
-      if (e.key === 'ArrowLeft'){  App.beatIndex = Math.max(0, App.beatIndex-1); cancelAnim(); renderAll(); }
+      if (e.key === 'ArrowRight'){ App.beatIndex = Math.min(App.play.beats.length-1, App.beatIndex+1); cancelAnim(); triggerMistake(false); renderAll(); }
+      if (e.key === 'ArrowLeft'){  App.beatIndex = Math.max(0, App.beatIndex-1); cancelAnim(); triggerMistake(false); renderAll(); }
     }
   });
 
@@ -2449,6 +2823,9 @@ window.HOOPS = {
   COURTS, BUILTIN, SLOTS, TOL, WEIGHTS, MIN_SPACING, SPOT_MAP,
   gradeBeat, gradePlay, positionScore, scoreActions, spacingReport, roleForSlot,
   resolveCalls, letterFor, encodePlay, decodePlay, validatePlay,
+  defenderPos, defenderLag, buildDefence, mistakeOptions, applyMistake, nearestSpotName,
+  defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
+  slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
 
