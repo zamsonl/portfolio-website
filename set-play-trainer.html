@@ -6,7 +6,7 @@
 <title>Set Play Trainer — learn basketball plays by running them</title>
 <meta name="description" content="A basketball set-play trainer. Run a play beat by beat and get graded on position, spacing, ball location and action — or play as the point guard and direct your team-mates with calls. Includes a whiteboard designer for building and sharing your own plays.">
 <meta name="theme-color" content="#12100e">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e0702a'/%3E%3Cg fill='none' stroke='%2340200a' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='16' cy='16' r='13'/%3E%3Cpath d='M3 16h26M16 3v26'/%3E%3Cpath d='M5.1 8.85Q16 21.1 26.9 8.85'/%3E%3Cpath d='M5.1 23.15Q16 10.9 26.9 23.15'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='9' fill='%23ff8a3d'/%3E%3Cg fill='none' stroke='%2312100e' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8.5 23.5 C 8.5 14.5, 14 10.5, 22 10.5'/%3E%3Cpath d='M18.6 6.8 L 22.8 10.5 L 18.6 14.2'/%3E%3C/g%3E%3Ccircle cx='8.5' cy='23.5' r='3.1' fill='%2312100e'/%3E%3C/svg%3E">
 
 <style>
 /* ============================================================================
@@ -364,13 +364,12 @@ label.fld > span{
   <header class="hd">
     <div class="brand">
       <svg viewBox="0 0 32 32" aria-hidden="true">
-        <circle cx="16" cy="16" r="13" fill="var(--accent)"/>
-        <g fill="none" stroke="var(--bg)" stroke-width="1.6" stroke-linecap="round">
-          <circle cx="16" cy="16" r="13"/>
-          <path d="M3 16h26M16 3v26"/>
-          <path d="M5.1 8.85Q16 21.1 26.9 8.85"/>
-          <path d="M5.1 23.15Q16 10.9 26.9 23.15"/>
+        <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="var(--accent)"/>
+        <g fill="none" stroke="var(--bg)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8.5 23.5 C 8.5 14.5, 14 10.5, 22 10.5"/>
+          <path d="M18.6 6.8 L 22.8 10.5 L 18.6 14.2"/>
         </g>
+        <circle cx="8.5" cy="23.5" r="3.1" fill="var(--bg)"/>
       </svg>
       <span>Set Play Trainer <em>· v1</em></span>
     </div>
@@ -1103,13 +1102,13 @@ function defenderPos(slot, spots, ballSlot, court){
 }
 /* Nudge a defender clear of the others so a blown coverage is never rendered
    underneath the token that caused it. */
-function separate(p, victim, spots, ballSlot, court){
+function separate(p, victim, spots, ballSlot, court, overrides){
   let out = [p[0], p[1]];
   for (let pass = 0; pass < 6; pass++){
     let moved = false;
     for (const s of SLOTS){
       if (s === victim) continue;
-      const other = defenderPos(s, spots, ballSlot, court);
+      const other = (overrides && overrides[s]) || defenderPos(s, spots, ballSlot, court);
       const dx = out[0]-other[0], dy = out[1]-other[1];
       const dd = Math.hypot(dx, dy);
       if (dd >= 3.0) continue;
@@ -1157,30 +1156,86 @@ function mistakeOptions(beat, spots, ballSlot){
 }
 /**
  * Apply one coverage error and report the window it opens.
- * @returns {{type, victim, defender:[x,y], space:number, where:string, text:string}}
+ *
+ * Returns an override map rather than a single position, because a real
+ * breakdown moves more than one defender: when a man is screened, the
+ * screener's defender is busy with the screener and is not there to help.
+ * Without that second override the "mistake" could open no space at all.
+ *
+ * @returns {{type, victim, by, overrides, defender, space, where, text}}
  */
 function applyMistake(opt, spots, ballSlot, court){
   const man = spots[opt.victim];
+  const overrides = {};
   let d = defenderPos(opt.victim, spots, ballSlot, court);
+
   if (opt.type === 'caught' || opt.type === 'switched'){
     /* Stuck on the screen: he ends up on the far side of the screener from his
-       man, which is both what happens and what makes him visible. */
+       man, which is both what happens and what keeps him visible. */
     const scr = spots[opt.by] || spots[ballSlot];
     const u = unitVec(man, scr);
     d = (u[0] === 0 && u[1] === 0)
       ? [d[0], d[1] + 4.6]
       : [scr[0] + u[0]*2.3, scr[1] + u[1]*2.3];
+    if (opt.by && opt.by !== opt.victim){
+      /* The screener's man is attached to his own man and therefore not
+         available to help. Which side he is attached on is a free choice, so
+         take the one that stays furthest from the victim rather than guessing
+         a direction that might drift into the very window being opened. */
+      const sp = spots[opt.by];
+      const cands = [
+        unitVec(sp, [0, court.hoopY]),   // goalside
+        unitVec(man, sp),                // away from the victim
+        unitVec(sp, spots[ballSlot])     // ballside
+      ].filter(u => u[0] || u[1])
+       .map(u => clampCourt([sp[0] + u[0]*2.4, sp[1] + u[1]*2.4], court));
+      if (cands.length){
+        overrides[opt.by] = cands.reduce((a, b) => dist(b, man) > dist(a, man) ? b : a);
+      }
+    }
   } else {
-    /* Helped too far and cannot recover: pull the defender toward the ball. */
-    const u = unitVec(d, spots[ballSlot]);
+    /* Helped or ball-watched. Drifting at the ball is only an error if it
+       actually leaves his man; when his clean position already sits between the
+       man and the ball, moving ballward would CLOSE the gap, so the error that
+       really happens is losing the man altogether. */
+    const uBall = unitVec(d, spots[ballSlot]);
     const pull = opt.type === 'overhelp' ? 6.2 : 4.4;
-    d = [d[0] + u[0]*pull, d[1] + u[1]*pull];
+    let cand = [d[0] + uBall[0]*pull, d[1] + uBall[1]*pull];
+    if (dist(cand, man) <= dist(d, man) + .5){
+      const uAway = unitVec(man, d);
+      const vx = uAway[0]*.7 + uBall[0]*.3, vy = uAway[1]*.7 + uBall[1]*.3;
+      const m = Math.hypot(vx, vy) || 1;
+      cand = [d[0] + vx/m*pull, d[1] + vy/m*pull];
+    }
+    d = cand;
   }
-  d = separate(d, opt.victim, spots, ballSlot, court);
-  d = clampCourt(d, court);
-  const space = dist(d, man);
-  const where = nearestSpotName(man);
-  const who = opt.victim;
+
+  let beaten = clampCourt(separate(d, opt.victim, spots, ballSlot, court, overrides), court);
+  /* Untangling defenders must never hand the beaten one back to his man — the
+     separation pass pushes along an arbitrary axis and can undo the mistake. */
+  const want = dist(d, man);
+  if (dist(beaten, man) < want){
+    const u = unitVec(man, beaten);
+    if (u[0] || u[1]) beaten = clampCourt([man[0] + u[0]*want, man[1] + u[1]*want], court);
+  }
+  overrides[opt.victim] = beaten;
+
+  /* The window is whatever the NEAREST remaining defender leaves, which is the
+     same number shotQuality will use — the text and the shot cannot disagree. */
+  const minTo = ov => {
+    let m = Infinity;
+    for (const sl of SLOTS) m = Math.min(m, dist(ov[sl] || defenderPos(sl, spots, ballSlot, court), man));
+    return m;
+  };
+  /* Hard guarantee: a breakdown must never leave the victim TIGHTER than clean
+     coverage did. Secondary overrides are a flourish; if one would close the
+     window instead of opening it, drop it. */
+  const cleanMin = minTo({});
+  if (minTo(overrides) < cleanMin){
+    for (const k of Object.keys(overrides)) if (+k !== opt.victim) delete overrides[k];
+  }
+  const space = Math.max(minTo(overrides), cleanMin);
+  const where = nearestSpotName(man), who = opt.victim;
   const text = opt.type === 'caught'
       ? `X${who} got caught on ${opt.by}’s screen — ${who} has ${space.toFixed(1)} ft at the ${where}.`
     : opt.type === 'switched'
@@ -1188,7 +1243,8 @@ function applyMistake(opt, spots, ballSlot, court){
     : opt.type === 'overhelp'
       ? `X${who} over-helped on the ball — ${who} is open by ${space.toFixed(1)} ft at the ${where}.`
       : `X${who} ball-watched — ${who} slipped to ${space.toFixed(1)} ft at the ${where}.`;
-  return { type:opt.type, victim:who, by:opt.by, defender:d, space, where, text };
+  return { type:opt.type, victim:who, by:opt.by, overrides,
+           defender:overrides[who], space, where, text };
 }
 /* Name a point using the same vocabulary Floor General calls use. */
 function nearestSpotName(p){
@@ -1218,8 +1274,77 @@ function buildDefence(spots, prev, t, beat, ballSlot, court, mistake){
   }
   const out = {};
   for (const s of SLOTS) out[s] = defenderPos(s, lagged, ballSlot, court);
-  if (mistake) out[mistake.victim] = mistake.defender;
+  if (mistake){
+    const ov = mistake.overrides || { [mistake.victim]: mistake.defender };
+    for (const k of Object.keys(ov)) out[+k] = ov[k];
+  }
   return out;
+}
+
+
+/* =================================================================== SHOT ==
+   Finishing the possession. Shot quality is the only honest way to grade a
+   shot: distance decides the zone, the nearest defender decides the contest,
+   and the two together give an expected-points figure. That number is the
+   lesson — a wide-open three is worth more than a contested twelve-footer,
+   and the defenders/mistake layer exists to manufacture exactly that choice.
+
+   Pure functions. They read no app state and touch no DOM.
+   ========================================================================= */
+function isThree(p, court){
+  const x = cornerX(court), by = breakY(court);
+  if (court.straightCorner && p[1] <= by) return Math.abs(p[0]) >= x;
+  return dist(p, [0, court.hoopY]) >= court.arc3;
+}
+const ZONE = {
+  rim:   { base:.63, pts:2, name:'layup' },
+  paint: { base:.46, pts:2, name:'floater' },
+  mid:   { base:.41, pts:2, name:'jumper' },
+  three: { base:.37, pts:3, name:'three' },
+  deep:  { base:.32, pts:3, name:'deep three' }
+};
+function shotZone(p, court){
+  const d = dist(p, [0, court.hoopY]);
+  if (isThree(p, court)) return d > court.arc3 + 4 ? 'deep' : 'three';
+  if (d <= 4)  return 'rim';
+  if (d <= 10) return 'paint';
+  return 'mid';
+}
+/* Every foot of separation matters, so the contest is continuous rather than
+   bucketed; the label is only there to say it in words. */
+function contestMult(openFt){
+  return Math.max(.58, Math.min(1.12, .58 + openFt * .085));
+}
+function contestLabel(openFt){
+  return openFt < 2 ? 'heavily contested' : openFt < 4 ? 'contested'
+       : openFt < 6 ? 'open' : 'wide open';
+}
+function shotVerdict(exp){
+  return exp >= 1.15 ? 'The best shot on the floor.'
+       : exp >= 1.00 ? 'A good shot — take it every time.'
+       : exp >= .85  ? 'Acceptable.'
+       : exp >= .70  ? 'Only late in the clock.'
+                     : 'A bad shot. Keep the ball moving.';
+}
+/**
+ * @param shooter slot taking it
+ * @param spots   offensive positions
+ * @param defenders  derived defence, or null for an uncontested drill
+ * @returns {{zone,name,dist,openFt,contest,pct,pts,expected,verdict}}
+ */
+function shotQuality(shooter, spots, defenders, court){
+  const p = spots[shooter];
+  const zone = shotZone(p, court);
+  const z = ZONE[zone];
+  let openFt = 99;
+  if (defenders) for (const s of SLOTS) openFt = Math.min(openFt, dist(p, defenders[s]));
+  if (!isFinite(openFt)) openFt = 99;
+  const mult = contestMult(openFt);
+  const pct = Math.max(.05, Math.min(.95, z.base * mult));
+  const expected = pct * z.pts;
+  return { zone, name:z.name, dist:dist(p, [0, court.hoopY]), openFt,
+           contest:contestLabel(openFt), pct, pts:z.pts, expected,
+           verdict:shotVerdict(expected) };
 }
 
 /* ============================================================== RENDERERS ==
@@ -1449,7 +1574,12 @@ function makeRenderer(kind){
     }
     if (st.ballPos){
       const [bx, by] = fromCourt(st.ballPos[0], st.ballPos[1]);
-      layers.tokens.appendChild(ballGlyph(bx, by, 1.2));
+      layers.tokens.appendChild(ballGlyph(bx, by, 1.2 * (st.ballScale || 1)));
+      if (st.shotFlash !== null && st.shotFlash !== undefined){
+        const [hx, hy] = fromCourt(0, court.hoopY);
+        layers.tokens.appendChild(svg('circle', { cx:hx, cy:hy, r:3.2, fill:'none',
+          stroke: st.shotFlash ? 'var(--good, #4ec97f)' : '#ff6b5e', 'stroke-width':.45, opacity:.9 }));
+      }
       tokens.push({ id:'ball', pos:st.ballPos });
     }
   }
@@ -1461,7 +1591,8 @@ function makeRenderer(kind){
 const App = {
   mode:'run', settings:Store.settings(), play:null, beatIndex:0,
   attempt:null, results:[], reviewing:false, renderer:null, court:COURTS.nba,
-  anim:null, designer:null, quiz:null, general:null, defMistakeOpt:null
+  anim:null, designer:null, quiz:null, general:null, defMistakeOpt:null,
+  shot:null, shotResult:null, shotLog:[]
 };
 
 /* The beat and ball-handler the defence should be reading, per mode. */
@@ -1499,6 +1630,41 @@ function defenceFor(spots, prev, t){
     ? applyMistake(App.defMistakeOpt, spots, ctx.ballSlot, App.court) : null;
   return { defenders: buildDefence(spots, prev || null, t == null ? 1 : t, ctx.beat, ctx.ballSlot, App.court, mistake),
            mistake, color: slotColors().d };
+}
+/* Who can shoot: whoever is holding it, plus anyone you could realistically
+   pass to. Choosing the shooter IS the read, so it is a control, not a guess. */
+function currentShooter(){
+  const ctx = defenceContext();
+  if (!ctx) return null;
+  if (App.shooterSlot && SLOTS.includes(App.shooterSlot)) return App.shooterSlot;
+  return ctx.ballSlot;
+}
+function takeShot(){
+  const ctx = defenceContext();
+  const spots = displaySpots();
+  if (!ctx || !spots) return;
+  const shooter = currentShooter();
+  const dfn = defenceFor(spots, null, 1);
+  const q = shotQuality(shooter, spots, dfn ? dfn.defenders : null, App.court);
+  const made = Math.random() < q.pct;
+  App.shotResult = Object.assign({}, q, { shooter, made, ts: Date.now() });
+  App.shotLog.push({ made, expected:q.expected, pts: made ? q.pts : 0 });
+  /* Fly the ball to the rim, then report. */
+  App.shot = { from:[spots[shooter][0], spots[shooter][1]], t:0, made };
+  const t0 = performance.now(), dur = 780;
+  const step = now => {
+    if (!App.shot) return;
+    App.shot.t = clamp01((now - t0) / dur);
+    paint();
+    if (App.shot.t < 1) App.shot.raf = requestAnimationFrame(step);
+    else { App.shot = null; renderAll(); }
+  };
+  App.shot.raf = requestAnimationFrame(step);
+  renderBar();
+}
+function cancelShot(){
+  if (App.shot && App.shot.raf) cancelAnimationFrame(App.shot.raf);
+  App.shot = null;
 }
 function triggerMistake(force){
   const ctx = defenceContext();
@@ -1608,6 +1774,16 @@ function paint(){
     } else if (hintLevel() !== 'blind' && App.beatIndex > 0){
       st.ghost = App.play.beats[App.beatIndex-1].spots;
     }
+  }
+  if (App.shot && st.spots){
+    /* Top-down, so height reads as scale: the ball swells at the apex. */
+    const t = App.shot.t, hoop = [0, App.court.hoopY];
+    const miss = App.shot.made ? 0 : (1 - Math.abs(.5 - t)*2) * 0;
+    const ex = App.shot.made ? hoop[0] : hoop[0] + 1.9;
+    const ey = App.shot.made ? hoop[1] : hoop[1] - 1.4;
+    st.ballPos = [ lerp(App.shot.from[0], ex, t) + miss, lerp(App.shot.from[1], ey, t) ];
+    st.ballScale = 1 + Math.sin(Math.PI * t) * .55;
+    st.shotFlash = t > .88 ? App.shot.made : null;
   }
   const dfn = defenceFor(st.spots, st.prevSpots, st.t);
   if (dfn){ st.defenders = dfn.defenders; st.mistake = dfn.mistake; st.defColor = dfn.color; }
@@ -1750,6 +1926,7 @@ function newGeneralBeat(){
   App.general = { spots:cloneSpots(base), calls:[], preview:null, draft:defaultDraft() };
   App.general.spots[1] = pg;
   triggerMistake(false);
+  App.shotResult = null; App.shooterSlot = null;
 }
 function defaultDraft(){ return { v:'send', who:2, where:'corner', side:'left', type:'screen', for:3 }; }
 function runCalls(){
@@ -1823,6 +2000,7 @@ function renderBar(){
         onDone:()=>setStageNote('') });
     }}));
     add(defenceButton());
+    add(shotControls());
     add(el('button', { class:'btn sm', text:'Run it →', onclick:()=>setMode('run') }));
     setStageNote('');
     return;
@@ -1838,6 +2016,7 @@ function renderBar(){
       add(el('span', { class:'bar-lbl', text:'Action' }));
       add(actionTagger());
       add(defenceButton());
+      add(shotControls());
       add(el('button', { class:'btn sm pri', text: App.mode === 'recall' ? 'Lock in →' : 'Check beat', onclick:checkBeat }));
       setStageNote(hintLevel() === 'blind' ? 'Blind — no reference shown'
         : App.beatIndex > 0 ? 'Faint markers = where everyone stood last beat'
@@ -1865,6 +2044,7 @@ function renderBar(){
     if (!App.reviewing){
       add(el('span', { class:'hint', text:'Drag the 1. Call the rest.' }));
       add(defenceButton());
+      add(shotControls());
       add(el('button', { class:'btn sm pri', text:'Run the call →', onclick:runCalls }));
       setStageNote('You are the 1 — drag yourself, then call your team-mates from the right');
     } else {
@@ -1918,6 +2098,51 @@ function renderBar(){
 }
 
 /* One button, because forcing the error is how you practise seeing it. */
+/* One button whose label is the shot it will actually take. */
+function shotControls(){
+  const ctx = defenceContext();
+  const spots = displaySpots();
+  if (!ctx || !spots) return null;
+  const wrap = el('div', { class:'act', style:'gap:5px' });
+  const shooter = currentShooter();
+  const sel = el('select', { class:'who', title:'Who takes it',
+    onchange:e=>{ App.shooterSlot = +e.target.value; renderBar(); } });
+  for (const n of SLOTS) sel.appendChild(el('option', { value:n, text:String(n), selected:shooter===n }));
+  wrap.appendChild(sel);
+  const dfn = defenceFor(spots, null, 1);
+  const q = shotQuality(shooter, spots, dfn ? dfn.defenders : null, App.court);
+  const label = q.name.charAt(0).toUpperCase() + q.name.slice(1);
+  wrap.appendChild(el('button', { class:'btn sm pri', text: label + ' →',
+    title:`${q.contest} ${q.name} from ${q.dist.toFixed(0)} ft`,
+    onclick:takeShot }));
+  return wrap;
+}
+function shotCard(){
+  const r = App.shotResult;
+  if (!r) return null;
+  const c = el('div', { class:'card' });
+  c.appendChild(el('h3', { html:'Shot <span class="tag">' + (r.made ? 'good' : 'no good') + '</span>' }));
+  const big = el('div', { class:'score-big' });
+  const b = el('b', { text: r.made ? '+' + r.pts : '0' });
+  b.style.color = r.made ? 'var(--good)' : 'var(--bad)';
+  big.appendChild(b);
+  big.appendChild(el('span', { class:'gr', text: Math.round(r.pct*100) + '%' }));
+  c.appendChild(big);
+  c.appendChild(el('div', { class:'coach', html:
+    `<b>${esc(r.contest)} ${esc(r.name)}</b> by ${r.shooter} from ${r.dist.toFixed(0)} ft, ` +
+    `${r.openFt > 20 ? 'nobody within twenty feet' : r.openFt.toFixed(1) + ' ft of space'}.<br>` +
+    `<b>${r.expected.toFixed(2)} expected points.</b> ${esc(r.verdict)}` }));
+  const n = App.shotLog.length;
+  if (n > 1){
+    const made = App.shotLog.filter(x=>x.made).length;
+    const avg = App.shotLog.reduce((a,x)=>a+x.expected,0)/n;
+    c.appendChild(el('div', { class:'hint', style:'margin-top:9px',
+      text:`This session: ${made}/${n} · ${avg.toFixed(2)} expected points per shot` }));
+  }
+  c.appendChild(el('div', { style:'margin-top:9px' }, [
+    el('button', { class:'btn sm', text:'Clear', onclick:()=>{ App.shotResult = null; renderAll(); } }) ]));
+  return c;
+}
 function defenceButton(){
   if (App.settings.defence === 'off') return null;
   return App.defMistakeOpt
@@ -1982,6 +2207,8 @@ function renderRail(){
   }
   const beat = App.play.beats[App.beatIndex];
 
+  const sr = shotCard();
+  if (sr) r.appendChild(sr);
   const dn = defenceNote();
   if (dn) r.appendChild(dn);
   if (App.mode === 'general' && !App.reviewing) r.appendChild(callSheet());
@@ -2726,6 +2953,7 @@ function setMode(m){
   App.mode = m;
   App.reviewing = false;
   App.defMistakeOpt = null;
+  App.shotResult = null; App.shooterSlot = null; cancelShot();
   syncModeButtons();
   if (m === 'design'){
     if (!App.designer) openDesigner(App.play ? JSON.parse(JSON.stringify(App.play)) : blankPlay());
@@ -2825,6 +3053,7 @@ window.HOOPS = {
   resolveCalls, letterFor, encodePlay, decodePlay, validatePlay,
   defenderPos, defenderLag, buildDefence, mistakeOptions, applyMistake, nearestSpotName,
   defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
+  shotQuality, shotZone, isThree, contestMult, contestLabel, shotVerdict, ZONE, takeShot,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
