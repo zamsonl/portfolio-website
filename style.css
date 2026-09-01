@@ -1095,6 +1095,8 @@ mark {
   transition: color .18s var(--ease), border-color .18s var(--ease);
 }
 .toggle-all:hover { color: var(--ink); border-color: var(--accent); }
+.index-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#showAll[aria-expanded="false"] { border-color: var(--accent-line); color: var(--accent); background: var(--accent-soft); }
 .toggle-all svg { transition: transform .22s var(--ease); }
 .toggle-all[aria-expanded='true'] svg { transform: rotate(180deg); }
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Zamson Lim — SOC Engineering, Detection &amp; Purple Team</title>
-<meta name="description" content="Final-year Cybersecurity student at APU. Spent a year as Network &amp; Security Administrator at Palmgold Management, where after a ransomware incident I proposed a Security Operations Centre, got approval, and built it as the only person on security: Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and three open-source SOC tools." />
+<meta name="description" content="Final-year Cybersecurity student at APU. Network &amp; Security Administrator at Palmgold Management from May to August 2026. The company had been hit by ransomware with no monitoring in place, so I proposed a SOC, got approval, and built it as the only person on security: Wazuh SIEM, Zeek network monitoring, detection engineering, purple-team exercises, and three open-source SOC tools." />
 <meta name="author" content="Zamson Lim" />
 <meta name="theme-color" content="#08090d" />
 <meta property="og:type" content="profile" />
@@ -88,11 +88,11 @@
         <span class="l2">I built a company&rsquo;s <em>SOC</em>.</span>
       </h1>
       <p class="hero-p">
-        Final-year Cybersecurity undergraduate at Asia Pacific University. I spent a year as
-        Network &amp; Security Administrator at Palmgold Management Sdn Bhd, where in August 2025 the
-        company was hit by ransomware. There was no monitoring in place, so there was no way to reconstruct how it
-        got in or how far it reached. I proposed a Security Operations Centre, got approval, and
-        built it as the only person on security.
+        Final-year Cybersecurity undergraduate at Asia Pacific University. I joined Palmgold
+        Management Sdn Bhd as Network &amp; Security Administrator in May 2026. The company had been hit
+        by ransomware the previous August with no monitoring in place, so nobody could reconstruct how
+        it got in or how far it reached &mdash; and nothing had been put in since. I proposed a Security
+        Operations Centre, got approval, and built it as the only person on security.
       </p>
       <div class="hero-cta">
         <a class="btn btn-fill" href="#work">See the work</a>
@@ -152,11 +152,8 @@
 <section class="sec shell" id="work">
   <header class="sec-head rv">
     <p class="tag">01 — Featured work</p>
-    <h2>Three things worth reading in full</h2>
-    <p>
-      The rest is indexed further down. These are the ones where the reasoning matters more than
-      the tool list.
-    </p>
+    <h2>The work in detail</h2>
+    <p>The rest is indexed further down.</p>
   </header>
 
   <div class="cases">
@@ -171,9 +168,9 @@
         </div>
           <h3>Enterprise SOC build-out</h3>
           <p>
-          From a proof of concept on a spare desktop to the production stack that now runs the
-          company&rsquo;s monitoring. I am the only person on security, so the architecture, the
-          detection content, the incident response and the reporting are all mine.
+          It started as a proof of concept on a spare desktop and ended up as the stack that runs
+          the company&rsquo;s monitoring. I was the only person on security, so the architecture,
+          the detection content, the incident response and the reporting were all mine.
         </p>
         </div>
         <div>
@@ -227,13 +224,13 @@
           <span class="badge">Purple team</span>
           <span class="badge">Authorized exercise</span>
         </div>
-          <h3>I attacked my own network, then caught it</h3>
+          <h3>Purple team, both chairs</h3>
           <p>
-          I played both sides of the same exercise. First I set up the attack: a machine of mine
-          acting as a remote-control server, hidden behind a tunnelling service so its real address
-          never showed, with test machines checking in with it every few seconds. Then I switched
-          seats and tried to find it using nothing but the monitoring. Being the attacker taught me
-          more about writing detections than any rule template did.
+          I ran the red side from Kali Purple: a C2 listener reached through a tunnelling service,
+          with implants beaconing on a fixed interval. On the blue side I watched the same activity
+          in Wazuh and wrote detection rules for that signature. Building the samples is my
+          favourite part of the job &mdash; writing the payload and detonating it in an isolated VM
+          tells you exactly what your rules see and what they miss.
         </p>
         </div>
         <div>
@@ -478,31 +475,38 @@
 
   <div class="index-bar rv">
     <p class="tag" id="fcount" aria-live="polite">Showing all 15</p>
-    <button class="toggle-all" id="toggleAll" type="button" aria-expanded="false">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      <span>Expand all</span>
-    </button>
+    <div class="index-actions">
+      <button class="toggle-all" id="showAll" type="button" aria-expanded="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        <span>Show all</span>
+      </button>
+      <button class="toggle-all" id="toggleAll" type="button" aria-expanded="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        <span>Expand all</span>
+      </button>
+    </div>
   </div>
 
   <div class="grid" id="pgrid">
 
-    <article class="item rv" data-cat="detection">
+    <article data-key="1" class="item rv" data-cat="detection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg></span><span class="item-n">01 / DETECTION</span></div>
       <h3>Malicious code analysis for detection validation</h3>
-      <p>In isolated lab VMs I built and analysed samples purely to test signatures.</p>
+      <p>My favourite part of the job. In isolated lab VMs I built and analysed samples purely to test signatures.</p>
 <details class="more">
-        <summary>Details <i>4</i></summary>
+        <summary>Details <i>5</i></summary>
         <ul>
         <li>Ransomware behaviour in Rust, a browser credential stealer in Python, a C2 client in C++</li>
-        <li>Macro abuse and DLL injection, analysed for the artefacts they leave behind</li>
+        <li>Word macro abuse, DLL injection, and phishing kits analysed for exfiltration patterns</li>
         <li>Encryption testing stayed hard-guarded to a canary folder — benign by construction</li>
+        <li>Writing the payload and detonating it tells you exactly what your rules see and what they miss</li>
         <li>Every one became Wazuh rules, Zeek scripts and OpenSearch queries</li>
       </ul>
       </details>
       <div class="chips"><span class="chip">Rust</span><span class="chip">Python</span><span class="chip">C++</span><span class="chip">FIM</span></div>
     </article>
 
-    <article class="item rv" data-cat="collection">
+    <article data-key="1" class="item rv" data-cat="collection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
       <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
@@ -518,7 +522,7 @@
       <div class="chips"><span class="chip">Zeek</span><span class="chip">Python</span><span class="chip">NSM</span></div>
     </article>
 
-    <article class="item rv" data-cat="detection">
+    <article data-key="1" class="item rv" data-cat="detection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg></span><span class="item-n">03 / DETECTION</span></div>
       <h3>Active Directory security monitoring</h3>
       <p>I had to learn AD properly — domain structure, Group Policy, event log semantics — before I could monitor it.</p>
@@ -533,7 +537,7 @@
       <div class="chips"><span class="chip">Active Directory</span><span class="chip">Windows Event Log</span><span class="chip">OpenSearch</span></div>
     </article>
 
-    <article class="item rv" data-cat="collection">
+    <article data-key="1" class="item rv" data-cat="collection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">04 / COLLECTION</span></div>
       <h3>Agent rollout to 80+ endpoints via GPO</h3>
       <p>Agents deployed across the Windows estate through Group Policy, without visiting each desk.</p>
@@ -565,7 +569,7 @@
       <div class="chips"><span class="chip">Syslog</span><span class="chip">Custom decoders</span><span class="chip">Python</span></div>
     </article>
 
-    <article class="item rv" data-cat="offensive">
+    <article data-key="1" class="item rv" data-cat="offensive">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span><span class="item-n">06 / OFFENSIVE</span></div>
       <h3>Authorized internal vulnerability assessment</h3>
       <p>With written authorization from my senior, an internal assessment run from Kali Purple — written up three times for three readers.</p>
@@ -627,7 +631,7 @@
       <div class="chips"><span class="chip">Autopsy</span><span class="chip">Digital forensics</span></div>
     </article>
 
-    <article class="item rv" data-cat="opensource">
+    <article data-key="1" class="item rv" data-cat="opensource">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">10 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
       <h3>Packet Highway &mdash; open-source template</h3>
       <p>The 3D traffic visualizer, published alongside the two consoles above.</p>
@@ -646,7 +650,7 @@
       </div>
     </article>
 
-    <article class="item rv" data-cat="opensource">
+    <article data-key="1" class="item rv" data-cat="opensource">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">11 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
       <h3>SOC Traffic Map &mdash; open-source template</h3>
       <p>The production traffic map, de-identified and published so anyone with a Wazuh or OpenSearch backend can run it.</p>
@@ -666,7 +670,7 @@
       </div>
     </article>
 
-    <article class="item rv" data-cat="opensource">
+    <article data-key="1" class="item rv" data-cat="opensource">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-2c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8 0-.6.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1a3.6 3.6 0 0 1 .1 2.6 3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.8-4.6 5 .4.3.7.9.7 1.8v2.7c0 .3.2.6.7.5A10 10 0 0 0 12 2z"/></svg></span><span class="item-n">12 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
       <h3>SOC Alert Console &mdash; open-source template</h3>
       <p>The endpoint alert console, de-identified and published alongside the traffic map.</p>
@@ -823,12 +827,12 @@
 
   <ol class="tl rv">
     <li class="tl-row">
-      <div class="tl-when"><b>Aug 2025 — Aug 2026</b>Palmgold Management Sdn Bhd<br />Kuala Lumpur</div>
+      <div class="tl-when"><b>May 2026 — Aug 2026</b>Palmgold Management Sdn Bhd<br />Kuala Lumpur</div>
       <div class="tl-body">
         <h3>Network &amp; Security Administrator (Intern)</h3>
         <p class="tl-org">Sole owner of security operations</p>
         <ul>
-          <li>Joined after a ransomware incident and built the company&rsquo;s Security Operations Centre as the <b>only person on security</b></li>
+          <li>Joined nine months after a ransomware incident that still had no monitoring behind it, and built the company&rsquo;s Security Operations Centre as the <b>only person on security</b></li>
           <li>Deployed a Wazuh SIEM integrating firewall, switching, wireless, Windows endpoint, Active Directory and Zeek sensor telemetry, on a Proxmox host I set up in the office</li>
           <li>Rolled out monitoring agents to <b>80+ Windows machines</b> via Group Policy with an idempotent, re-runnable installer</li>
           <li>Wrote custom decoders, correlation rules and dashboards for the hardware actually in use</li>
@@ -881,9 +885,9 @@
   <div class="about rv">
     <div class="prose">
       <p class="big">
-        I am a final-year Cybersecurity student at Asia Pacific University. For the past year I
-        ran security operations for Palmgold Management, a licensed gaming operator in Malaysia —
-        the steepest learning curve I have had so far.
+        I am a final-year Cybersecurity student at Asia Pacific University. I ran security
+        operations for Palmgold Management, a licensed gaming operator in Malaysia — the steepest
+        learning curve I have had so far.
       </p>      <p>
         Running both sides of a purple-team exercise changed how I write detections. Being the
         attacker for a week taught me more about what a rule needs to catch than any template did,
@@ -903,7 +907,7 @@
         <h3>Details</h3>
         <dl class="spec">
           <div><dt>Education</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
-          <div><dt>Last role</dt><dd>Network &amp; Security Administrator, Palmgold Management Sdn Bhd (Aug 2025 – Aug 2026)</dd></div>
+          <div><dt>Last role</dt><dd>Network &amp; Security Administrator, Palmgold Management Sdn Bhd (May &ndash; Aug 2026)</dd></div>
           <div><dt>Focus</dt><dd>Detection engineering, purple teaming, SOC automation</dd></div>
           <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
           <div><dt>Status</dt><dd>Open to graduate &amp; junior analyst roles</dd></div>

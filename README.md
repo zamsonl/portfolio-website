@@ -2,9 +2,9 @@
 
 **Live site:** https://zamsonl.github.io/portfolio-website/
 
-Personal portfolio. I am a final-year Cybersecurity student at Asia Pacific University (APU), Malaysia. From August 2025 to August 2026 I was Network & Security Administrator at Palmgold Management Sdn Bhd.
+Personal portfolio. I am a final-year Cybersecurity student at Asia Pacific University (APU), Malaysia. From May to August 2026 I was Network & Security Administrator at Palmgold Management Sdn Bhd.
 
-In August 2025 the company was hit by ransomware. There was no monitoring in place at the time, so there was no way to reconstruct how it got in or how far it reached. I proposed a Security Operations Centre, got approval, and built it as the only person on security. That build is the thread running through most of the work here.
+The company had been hit by ransomware in August 2025, before I joined. There was no monitoring in place at the time, so there was no way to reconstruct how it got in or how far it reached. I proposed a Security Operations Centre, got approval, and built it as the only person on security. That build is the thread running through most of the work here.
 
 ## Sections
 

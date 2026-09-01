@@ -145,18 +145,34 @@
 
     var search = $('#psearch');
     var clear = $('#pclear');
+    var showAllBtn = $('#showAll');
     var empty = null;
     var cat = 'all';
     var q = '';
+    var showAll = false;
+
+    var essentials = items.filter(function (el) { return el.dataset.key; }).length;
 
     function run() {
+      // The short list applies only when the reader is browsing. The moment
+      // they filter or search they are looking for something specific, so
+      // showing them a truncated set would just hide the answer.
+      var browsing = !showAll && !q && cat === 'all';
       var shown = 0;
       items.forEach(function (el, i) {
         var hit = (cat === 'all' || el.dataset.cat === cat) &&
-                  (!q || haystack[i].indexOf(q) !== -1);
+                  (!q || haystack[i].indexOf(q) !== -1) &&
+                  (!browsing || !!el.dataset.key);
         el.hidden = !hit;
         if (hit) shown++;
       });
+
+      if (showAllBtn) {
+        showAllBtn.hidden = !browsing && !showAll;
+        showAllBtn.setAttribute('aria-expanded', showAll ? 'true' : 'false');
+        var lbl = showAllBtn.querySelector('span');
+        if (lbl) lbl.textContent = showAll ? 'Show fewer' : 'Show all ' + items.length;
+      }
 
       $$('.filter', bar).forEach(function (b) {
         b.setAttribute('aria-pressed', b.dataset.f === cat ? 'true' : 'false');
@@ -165,6 +181,7 @@
 
       if (count) {
         if (shown === items.length) count.textContent = 'Showing all ' + shown;
+        else if (browsing) count.textContent = 'Showing ' + shown + ' key projects of ' + items.length;
         else count.textContent = 'Showing ' + shown + ' of ' + items.length;
       }
 
@@ -209,6 +226,12 @@
       clear.addEventListener('click', function () {
         if (search) { search.value = ''; search.focus(); }
         q = ''; run();
+      });
+    }
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', function () {
+        showAll = !showAll;
+        run();
       });
     }
 
