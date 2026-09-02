@@ -340,6 +340,11 @@ label.fld > span{
 .lnk{background:none;border:0;padding:0;margin-inline-start:5px;color:var(--accent);
   cursor:pointer;font-size:11.5px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
 .lnk:hover{filter:brightness(1.15)}
+.steps{display:grid;grid-template-columns:auto 1fr;gap:5px 9px;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.steps > b{width:17px;height:17px;border-radius:99px;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font-size:10.5px;font-weight:750;margin-top:2px}
+.steps > span b{color:var(--ink);font-weight:650}
+.steps > span i{font-style:normal;color:var(--accent)}
 .gloss{display:grid;grid-template-columns:minmax(96px,auto) 1fr;gap:6px 12px;font-size:13px;line-height:1.5}
 .gloss b{color:var(--ink);font-weight:650}
 .gloss span{color:var(--ink-2)}
@@ -762,16 +767,21 @@ async function decodePlay(code){
 
 /* Anything arriving from a URL, a file or another person is untrusted input.
    Normalise it into the shape the engine expects, or refuse it outright. */
+/* Anything that reaches a `html:` sink must lose its markup first. Plays travel
+   between people as links and files, so this is the boundary. */
+function stripTags(v){
+  return String(v == null ? '' : v).replace(/<[^>]*>/g, '').replace(/[<>]/g, '');
+}
 function validatePlay(raw){
   if (!raw || typeof raw !== 'object') throw new Error('not a play object');
   const num = (v, d) => (typeof v === 'number' && isFinite(v)) ? v : d;
   const play = {
     id: (typeof raw.id === 'string' && raw.id) ? raw.id.slice(0,64) : uid('play'),
-    name: String(raw.name || 'Untitled play').slice(0,80),
-    formation: String(raw.formation || 'Custom').slice(0,40),
+    name: stripTags(raw.name || 'Untitled play').slice(0,80),
+    formation: stripTags(raw.formation || 'Custom').slice(0,40),
     difficulty: Math.min(3, Math.max(1, Math.round(num(raw.difficulty, 1)))),
-    tags: Array.isArray(raw.tags) ? raw.tags.slice(0,6).map(t=>String(t).slice(0,24)) : [],
-    blurb: String(raw.blurb || '').slice(0,700),
+    tags: Array.isArray(raw.tags) ? raw.tags.slice(0,6).map(t=>stripTags(t).slice(0,24)) : [],
+    blurb: stripTags(raw.blurb || '').slice(0,700),
     custom: true, beats: []
   };
   const beats = Array.isArray(raw.beats) ? raw.beats.slice(0,12) : [];
@@ -792,15 +802,15 @@ function validatePlay(raw){
       return out;
     }).filter(Boolean);
     play.beats.push({
-      label: String((b && b.label) || 'Beat').slice(0,48),
+      label: stripTags((b && b.label) || 'Beat').slice(0,48),
       ball: SLOTS.includes(b && b.ball) ? b.ball : 1,
       spots, actions,
       keyPlayers: Array.isArray(b && b.keyPlayers) ? b.keyPlayers.filter(s=>SLOTS.includes(s)) : [],
       spacingExempt: Array.isArray(b && b.spacingExempt)
         ? b.spacingExempt.filter(p => Array.isArray(p) && p.length===2 && SLOTS.includes(p[0]) && SLOTS.includes(p[1]))
         : [],
-      coaching: String((b && b.coaching) || '').slice(0,700),
-      mistake:  String((b && b.mistake)  || '').slice(0,500)
+      coaching: stripTags((b && b.coaching) || '').slice(0,700),
+      mistake:  stripTags((b && b.mistake)  || '').slice(0,500)
     });
   }
   return play;
@@ -2713,6 +2723,12 @@ function blankPlay(){
              actions:[], keyPlayers:[], coaching:'', mistake:'' }] });
 }
 function openDesigner(play){
+  /* A cloned built-in carries <b> markup in its notes; the editor is plain
+     text, so clean it on the way in rather than showing people tags. */
+  if (play && Array.isArray(play.beats)){
+    play.beats.forEach(b => { b.coaching = stripTags(b.coaching); b.mistake = stripTags(b.mistake); });
+    play.blurb = stripTags(play.blurb || '');
+  }
   App.designer = { play: play || blankPlay(), beat:0, dirty:false };
   App.mode = 'design';
   syncModeButtons();
@@ -2721,17 +2737,37 @@ function openDesigner(play){
 function renderDesignRail(r){
   const d = App.designer, b = d.play.beats[d.beat];
 
+  /* Design used to open as a bare form. Practice tells you what your job is;
+     building a play deserves the same. */
+  const how = el('div', { class:'card' });
+  how.appendChild(el('h3', { html:'Building a play <span class="tag">' + esc(d.play.name) + '</span>' }));
+  how.appendChild(el('div', { class:'steps', html:
+    '<b>1</b><span>A play is a handful of <i>beats</i> — freeze-frames, in order. ' +
+    'You are editing beat <b>' + (d.beat+1) + ' of ' + d.play.beats.length + '</b>.</span>' +
+    '<b>2</b><span><b>Drag the five players</b> on the court to where they stand on this beat.</span>' +
+    '<b>3</b><span>Say who has the ball, and what happens — a screen, a cut, a pass.</span>' +
+    '<b>4</b><span>Hit <b>+ Beat</b> below the court for the next moment, and move them again.</span>' +
+    '<b>5</b><span><b>Save play</b> when you are done. <b>Test it</b> runs it like any other play.</span>' }));
+  const nb = el('div', { class:'row', style:'margin-top:9px' });
+  nb.appendChild(el('button', { class:'btn sm', style:'flex:1', text:'Start a blank play',
+    onclick:()=>{ if (!d.dirty || confirm('Discard unsaved changes to this play?')) openDesigner(blankPlay()); } }));
+  nb.appendChild(el('button', { class:'btn sm', style:'flex:1', text:'Basketball terms', onclick:openGlossary }));
+  how.appendChild(nb);
+  r.appendChild(how);
+
   const meta = el('div', { class:'card' });
   meta.appendChild(el('h3', { text:'Play' }));
   meta.appendChild(field('Name', el('input', { type:'text', value:d.play.name,
-    oninput:e=>{ d.play.name = e.target.value; d.dirty = true; } })));
+    oninput:e=>{ d.play.name = e.target.value; d.dirty = true; } }),
+    'What you call this play — what a coach would shout.'));
   const row = el('div', { class:'row' });
   row.appendChild(field('Formation', el('input', { type:'text', value:d.play.formation,
-    oninput:e=>{ d.play.formation = e.target.value; d.dirty = true; } })));
+    oninput:e=>{ d.play.formation = e.target.value; d.dirty = true; } }),
+    'The starting shape, e.g. Horns, 5-Out.'));
   const dSel = el('select', { onchange:e=>{ d.play.difficulty = +e.target.value; d.dirty = true; } });
   [['1','Easy'],['2','Medium'],['3','Hard']].forEach(([v,l]) =>
     dSel.appendChild(el('option', { value:v, text:l, selected:d.play.difficulty === +v })));
-  row.appendChild(field('Difficulty', dSel));
+  row.appendChild(field('Difficulty', dSel, 'How hard it is to run.'));
   meta.appendChild(row);
   r.appendChild(meta);
 
@@ -2739,8 +2775,11 @@ function renderDesignRail(r){
   bc.appendChild(el('h3', { html:'Beat <span class="tag">' + (d.beat+1) + ' of ' + d.play.beats.length + '</span>' }));
   const sc = el('div', { class:'scroll' });
   sc.appendChild(field('Label', el('input', { type:'text', value:b.label,
-    oninput:e=>{ b.label = e.target.value; d.dirty = true; renderBar(); } })));
+    oninput:e=>{ b.label = e.target.value; d.dirty = true; renderBar(); } }),
+    'A short name for THIS beat only, like "Ball screen right".'));
   sc.appendChild(el('div', { class:'hint', style:'margin-bottom:5px', text:'Actions on this beat' }));
+  if (!b.actions.length) sc.appendChild(el('div', { class:'defn',
+    text:'What actually happens here — a screen, a cut, a pass. Leave it empty if this beat is only players getting to their spots.' }));
   const acts = el('div', { class:'calls' });
   b.actions.forEach((a,i) => acts.appendChild(designAction(a,i)));
   acts.appendChild(el('button', { class:'btn sm wide', text:'+ Add action', onclick:()=>{
@@ -2748,11 +2787,14 @@ function renderDesignRail(r){
     b.actions.push({ type:'screen', by:5, for:1 }); d.dirty = true; renderRail();
   }}));
   sc.appendChild(acts);
-  sc.appendChild(field('Ball with', ballSelect(b,d)));
+  sc.appendChild(field('Ball with', ballSelect(b,d),
+    'Who is holding the ball at this moment in the play.'));
   sc.appendChild(field('Coaching note', el('textarea', { value:b.coaching,
-    oninput:e=>{ b.coaching = e.target.value; d.dirty = true; } })));
+    oninput:e=>{ b.coaching = e.target.value; d.dirty = true; } }),
+    'Why the players stand here. Shown while someone is learning the play. Plain text.'));
   sc.appendChild(field('Common mistake', el('textarea', { value:b.mistake,
-    oninput:e=>{ b.mistake = e.target.value; d.dirty = true; } })));
+    oninput:e=>{ b.mistake = e.target.value; d.dirty = true; } }),
+    'The error people usually make on this beat. Shown after they are graded.'));
   bc.appendChild(sc);
   r.appendChild(bc);
 
@@ -2817,10 +2859,11 @@ function ballSelect(b, d){
   for (const n of SLOTS) s.appendChild(el('option', { value:n, text:`${n} — ${SLOT_NAME[n]}`, selected:b.ball === n }));
   return s;
 }
-function field(label, node){
+function field(label, node, help){
   const l = el('label', { class:'fld' });
   l.appendChild(el('span', { text:label }));
   l.appendChild(node);
+  if (help) l.appendChild(el('div', { class:'defn', text:help }));
   return l;
 }
 
@@ -3260,7 +3303,7 @@ window.HOOPS = {
   defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
   shotQuality, shotZone, isThree, contestMult, contestLabel, shotVerdict, ZONE, takeShot,
   exportPlaybook, openPlaybookMenu, openGlossary, ACTION_HELP, SPOT_HELP, TERM_HELP,
-  ACTION_TYPES, ACTION_LABEL, SPOT_KEYS, SLOT_NAME, SIDED,
+  ACTION_TYPES, ACTION_LABEL, SPOT_KEYS, SLOT_NAME, SIDED, stripTags,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
