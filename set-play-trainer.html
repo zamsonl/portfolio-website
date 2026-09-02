@@ -133,6 +133,7 @@ a{color:var(--accent)}
   font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
   margin-bottom:9px;display:flex;align-items:center;gap:7px;font-weight:700;
 }
+.card > h3 .btn{margin-left:6px;padding-block:1px;padding-inline:6px;font-size:13px;line-height:1.1}
 .card > h3 .tag{margin-left:auto;text-transform:none;letter-spacing:0;color:var(--ink-2);font-weight:600;font-size:11px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:58%}
 
@@ -188,6 +189,8 @@ label.fld > span{
 
 /* play list */
 .plist{display:flex;flex-direction:column;gap:5px}
+.plsep{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-3);
+  font-weight:700;margin-top:9px;margin-bottom:1px}
 .pitem{
   display:flex;align-items:center;gap:9px;width:100%;text-align:left;
   background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);
@@ -258,6 +261,11 @@ label.fld > span{
 .empty{color:var(--ink-3);font-size:12.5px;line-height:1.5;text-align:center;padding-block:14px}
 
 /* action tagger / call composer */
+.seg{display:flex;gap:2px;background:var(--bg-3);padding:2px;border-radius:var(--radius-sm);border:1px solid var(--line)}
+.segb{border:0;background:transparent;color:var(--ink-2);cursor:pointer;font-weight:600;font-size:12.5px;
+  padding-block:4px;padding-inline:10px;border-radius:5px;white-space:nowrap}
+.segb:hover{color:var(--ink)}
+.segb[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
 .act{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .act select{flex:1 1 auto;min-width:104px}
 .act select.who{flex:0 0 68px;min-width:0}
@@ -374,12 +382,9 @@ label.fld > span{
       <span>Set Play Trainer <em>· v1</em></span>
     </div>
     <nav class="modes" id="modes" role="tablist" aria-label="Mode">
-      <button role="tab" data-mode="learn"   aria-selected="false">Learn</button>
-      <button role="tab" data-mode="run"     aria-selected="true">Run It</button>
-      <button role="tab" data-mode="general" aria-selected="false">Floor General</button>
-      <button role="tab" data-mode="recall"  aria-selected="false">Recall</button>
-      <button role="tab" data-mode="name"    aria-selected="false">Name It</button>
-      <button role="tab" data-mode="design"  aria-selected="false">Design</button>
+      <button role="tab" data-tab="learn"    aria-selected="false">Learn</button>
+      <button role="tab" data-tab="practice" aria-selected="true">Practice</button>
+      <button role="tab" data-tab="design"   aria-selected="false">Design</button>
     </nav>
     <div class="hd-sp"></div>
     <button class="btn sm" id="btnHelp">Help</button>
@@ -387,25 +392,14 @@ label.fld > span{
   </header>
 
   <aside class="rail rail-l">
-    <div class="card">
-      <h3>Playbook <span class="tag" id="playCount"></span></h3>
-      <div class="scroll capped"><div class="plist" id="plist"></div></div>
-    </div>
-    <div class="card">
-      <h3>My plays</h3>
-      <div class="plist" id="mylist"></div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn sm" id="btnNewPlay" style="flex:1">New play</button>
-        <button class="btn sm" id="btnImport" style="flex:1">Import</button>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Recent attempts</h3>
-      <div class="hist" id="hist"></div>
-    </div>
     <div class="card grow">
+      <h3>Playbook <span class="tag" id="playCount"></span>
+        <button class="btn sm ico" id="btnBook" title="New, import, export">⋯</button></h3>
+      <div class="scroll"><div class="plist" id="plist"></div></div>
+    </div>
+    <div class="card" id="cardSpots" hidden>
       <h3>Court spots <span class="tag">call vocabulary</span></h3>
-      <div class="scroll" id="spotmap"></div>
+      <div id="spotmap" style="max-height:46vh;overflow:auto"></div>
     </div>
   </aside>
 
@@ -1691,7 +1685,7 @@ function nearestSlot(spots, pos, maxFt){
 }
 function allPlays(){ return BUILTIN.concat(Store.plays()); }
 function findPlay(id){ return allPlays().find(p => p.id === id) || null; }
-function isPlacementMode(){ return App.mode === 'run' || App.mode === 'recall'; }
+function isPlacementMode(){ return App.mode === 'run'; }
 function isGradedMode(){ return isPlacementMode() || App.mode === 'general'; }
 
 /* --------------------------------------------------------------- theming -- */
@@ -1789,7 +1783,9 @@ function paint(){
   if (dfn){ st.defenders = dfn.defenders; st.mistake = dfn.mistake; st.defColor = dfn.color; }
   App.renderer.draw(st);
 }
-function hintLevel(){ return App.mode === 'recall' ? 'blind' : App.settings.hints; }
+/* "Blind" replaces what used to be a separate Recall mode: no label, no
+   reference, and grading held back until the end. One control, not two. */
+function hintLevel(){ return App.settings.hints; }
 
 /* ================================================================== INPUT */
 let dragging = null;
@@ -1886,7 +1882,7 @@ function newAttempt(){
 function checkBeat(){
   const beat = App.play.beats[App.beatIndex];
   App.results[App.beatIndex] = gradeBeat(App.attempt, beat, App.court);
-  if (App.mode === 'recall'){
+  if (hintLevel() === 'blind'){
     if (App.beatIndex < App.play.beats.length - 1){ App.beatIndex++; newAttempt(); }
     else return finishRun();
   } else {
@@ -1999,25 +1995,23 @@ function renderBar(){
         onBeat:i=>{ if (i !== App.beatIndex){ App.beatIndex = i; renderRail(); } },
         onDone:()=>setStageNote('') });
     }}));
-    add(defenceButton());
-    add(shotControls());
-    add(el('button', { class:'btn sm', text:'Run it →', onclick:()=>setMode('run') }));
+    add(el('button', { class:'btn sm', text:'Quiz me', onclick:()=>setMode('name') }));
+    add(el('button', { class:'btn sm', text:'Practice →', onclick:()=>setMode('run') }));
     setStageNote('');
     return;
   }
 
   if (isPlacementMode()){
     const beat = App.play.beats[App.beatIndex];
+    add(practiceToggle());
     add(el('span', { class:'bar-lbl', text:`Beat ${App.beatIndex+1} / ${App.play.beats.length}` }));
     if (!App.reviewing){
       add(el('span', { class:'bar-lbl', style:'color:var(--ink)',
         text: hintLevel() === 'blind' ? '—' : beat.label }));
       add(el('div', { class:'sp' }));
-      add(el('span', { class:'bar-lbl', text:'Action' }));
-      add(actionTagger());
       add(defenceButton());
       add(shotControls());
-      add(el('button', { class:'btn sm pri', text: App.mode === 'recall' ? 'Lock in →' : 'Check beat', onclick:checkBeat }));
+      add(el('button', { class:'btn sm pri', text: hintLevel() === 'blind' ? 'Lock in →' : 'Check beat', onclick:checkBeat }));
       setStageNote(hintLevel() === 'blind' ? 'Blind — no reference shown'
         : App.beatIndex > 0 ? 'Faint markers = where everyone stood last beat'
         : 'Place all five, then drag the ball onto its handler');
@@ -2038,6 +2032,7 @@ function renderBar(){
 
   if (App.mode === 'general'){
     const beat = App.play.beats[App.beatIndex];
+    add(practiceToggle());
     add(el('span', { class:'bar-lbl', text:`Beat ${App.beatIndex+1} / ${App.play.beats.length}` }));
     add(el('span', { class:'bar-lbl', style:'color:var(--ink)', text:beat.label }));
     add(el('div', { class:'sp' }));
@@ -2167,6 +2162,17 @@ function defenceNote(){
   c.appendChild(el('div', { class:'coach', html: esc(m.text) + '<br><b>' + esc(verdict) + '</b>' }));
   return c;
 }
+/* The one real choice inside Practice: do you place everybody, or only the 1
+   and direct the rest. It used to be two separate top-level tabs. */
+function practiceToggle(){
+  const wrap = el('div', { class:'seg' });
+  const mk = (mode, label, title) => el('button', {
+    class:'segb', 'aria-selected': String(App.mode === mode), title,
+    text:label, onclick:()=>{ if (App.mode !== mode) setMode(mode); } });
+  wrap.appendChild(mk('run', 'All five', 'Place every player yourself'));
+  wrap.appendChild(mk('general', 'Just the 1', 'You are the point guard — direct the others with calls'));
+  return wrap;
+}
 function actionTagger(){
   const wrap = el('div', { class:'act' });
   const acts = App.attempt.actions, a0 = acts[0] || { type:'none' };
@@ -2174,7 +2180,7 @@ function actionTagger(){
     const t = e.target.value;
     App.attempt.actions = (t === 'none') ? [] : [{ type:t, by:(acts[0]&&acts[0].by)||1,
       for: ACTION_NEEDS_FOR.has(t) ? ((acts[0]&&acts[0].for)||2) : undefined }];
-    renderBar();
+    renderRail();
   }});
   for (const t of ACTION_TYPES) typeSel.appendChild(el('option', { value:t.id, text:t.label, selected:a0.type===t.id }));
   wrap.appendChild(typeSel);
@@ -2200,9 +2206,12 @@ function renderRail(){
   if (!App.play){
     r.appendChild(el('div', { class:'card', html:
       '<h3>Getting started</h3><div style="font-size:13px;line-height:1.62;color:var(--ink-2)">' +
-      'Pick a play on the left. <b>Learn</b> walks you through it. <b>Run It</b> grades you beat by beat with ' +
-      'every player yours to place. <b>Floor General</b> gives you only the 1 — you direct the other four with calls. ' +
-      '<b>Recall</b> hides every hint, <b>Name It</b> shows a play and asks what it was, and <b>Design</b> builds your own.</div>' }));
+      'Pick a play on the left, then choose a tab.<br><br>' +
+      '<b>Learn</b> walks you through it beat by beat.<br>' +
+      '<b>Practice</b> grades you — either placing all five yourself, or as <i>Just the 1</i>, ' +
+      'where you drag only the point guard and direct the rest with calls.<br>' +
+      '<b>Design</b> builds your own plays.<br><br>' +
+      'The <b>⋯</b> next to Playbook is where you import and export.</div>' }));
     return;
   }
   const beat = App.play.beats[App.beatIndex];
@@ -2219,11 +2228,11 @@ function renderRail(){
   const list = el('div', { class:'beats' });
   App.play.beats.forEach((b,i) => {
     const res = App.results[i];
-    const showScore = res && (App.mode !== 'recall' || App.results.length === App.play.beats.length);
+    const showScore = res && (hintLevel() !== 'blind' || App.results.length === App.play.beats.length);
     const btn = el('button', { class:'beat', 'aria-current': i === App.beatIndex ? 'true':'false',
       onclick:()=>{ if (App.mode === 'learn'){ cancelAnim(); App.beatIndex = i; triggerMistake(false); renderAll(); } } });
     btn.appendChild(el('span', { class:'n', text:String(i+1) }));
-    btn.appendChild(el('span', { class:'t', text: (App.mode === 'recall' && !showScore) ? '—' : b.label }));
+    btn.appendChild(el('span', { class:'t', text: (hintLevel() === 'blind' && !showScore) ? '—' : b.label }));
     if (showScore) btn.appendChild(el('span', { class:'sc',
       style:`color:${res.total>=.8?'var(--good)':res.total>=.55?'var(--warn)':'var(--bad)'}`,
       text:Math.round(res.total*100)+'%' }));
@@ -2280,12 +2289,14 @@ function renderRail(){
 
   if (isPlacementMode()){
     const c = el('div', { class:'card grow' });
-    c.appendChild(el('h3', { text: App.mode === 'recall' ? 'Recall' : 'Your job' }));
+    c.appendChild(el('h3', { text:'Your job' }));
     const sc = el('div', { class:'scroll' });
     sc.appendChild(el('div', { class:'coach', html:
       hintLevel() === 'blind'
         ? `Beat <b>${App.beatIndex+1}</b> of <b>${esc(App.play.name)}</b>. No label, no reference. Place all five and the ball, tag the action, lock it in.`
         : `Place all five for <b>${esc(beat.label)}</b>, drag the ball onto whoever should be holding it, and tag the action that defines this beat.` }));
+    sc.appendChild(el('div', { class:'hint', style:'margin-top:13px', text:'Action on this beat' }));
+    sc.appendChild(actionTagger());
     sc.appendChild(slotLegend());
     sc.appendChild(el('div', { class:'hint', style:'margin-top:13px', text:'Live check' }));
     sc.appendChild(liveCheck());
@@ -2302,6 +2313,15 @@ function liveCheck(){
   const wrap = el('div', { class:'livechk' });
   const beat = App.play.beats[App.beatIndex];
   const spots = App.attempt.spots;
+  /* Untouched, everyone is still shoulder to shoulder in the starting rack.
+     Reporting that as three spacing violations is technically true and
+     completely useless — wait until there is a placement to check. */
+  const rack = neutralSpots();
+  if (SLOTS.every(s => dist(spots[s], rack[s]) < .01)){
+    wrap.appendChild(el('div', { class:'lrow' },
+      [ el('span', { text:'Nothing placed yet — drag the five onto the court.' }) ]));
+    return wrap;
+  }
   const sp = spacingReport(spots, beat, App.court);
   const tight = sp.violations.filter(v => v.kind === 'tight');
   const paint = sp.violations.find(v => v.kind === 'paint');
@@ -2486,13 +2506,13 @@ function renderLibrary(){
   const wrap = $('#plist');
   wrap.textContent = '';
   BUILTIN.forEach(p => wrap.appendChild(playItem(p)));
-  $('#playCount').textContent = BUILTIN.length + ' built in';
-
-  const mine = $('#mylist');
-  mine.textContent = '';
   const custom = Store.plays();
-  if (!custom.length) mine.appendChild(el('div', { class:'empty', text:'No saved plays yet. Build one in Design.' }));
-  else custom.forEach(p => mine.appendChild(playItem(p, true)));
+  if (custom.length){
+    wrap.appendChild(el('div', { class:'plsep', text:'My plays' }));
+    custom.forEach(p => wrap.appendChild(playItem(p, true)));
+  }
+  const n = BUILTIN.length + custom.length;
+  $('#playCount').textContent = n + ' play' + (n === 1 ? '' : 's');
 }
 function playItem(p, custom){
   const best = Store.bestFor(p.id);
@@ -2562,8 +2582,11 @@ function renderSpotMap(){
     text:'These are the destinations you can send a team-mate to in Floor General.' }));
 }
 
+/* Past attempts now surface as the best score on each play row, which is the
+   only part anyone read. */
 function renderHistory(){
   const h = $('#hist');
+  if (!h) return;
   h.textContent = '';
   const rows = Store.history().slice(0,8);
   if (!rows.length){ h.appendChild(el('div', { class:'empty', text:'Nothing yet.' })); return; }
@@ -2769,16 +2792,24 @@ function exportPlay(play){
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
 }
 function importPlay(){
-  const inp = el('input', { type:'file', accept:'.json,application/json', style:'display:none' });
+  const inp = el('input', { type:'file', accept:'.json,application/json,.hoopsplay.json,.hoopsbook.json', style:'display:none' });
   inp.addEventListener('change', ()=>{
     const f = inp.files && inp.files[0];
     if (!f){ inp.remove(); return; }
     const rd = new FileReader();
     rd.onload = ()=>{
       try{
-        const p = validatePlay(JSON.parse(String(rd.result)));
-        if (Store.savePlay(p)){ toast('Imported "' + p.name + '".'); renderLibrary(); openDesigner(p); }
-        else toast('Could not save the imported play to this browser.');
+        const raw = JSON.parse(String(rd.result));
+        /* A file may hold one play or a whole exported playbook. */
+        const list = Array.isArray(raw) ? raw : Array.isArray(raw.plays) ? raw.plays : [raw];
+        let saved = 0, last = null;
+        for (const item of list){
+          const pl = validatePlay(item);
+          if (Store.savePlay(pl)){ saved++; last = pl; }
+        }
+        if (!saved) toast('Could not save the imported play to this browser.');
+        else if (saved === 1){ toast('Imported "' + last.name + '".'); renderLibrary(); openDesigner(last); }
+        else { toast('Imported ' + saved + ' plays.'); renderLibrary(); renderAll(); }
       }catch(err){ toast('That file is not a valid play: ' + err.message); }
       inp.remove();
     };
@@ -2787,6 +2818,58 @@ function importPlay(){
   });
   document.body.appendChild(inp);
   inp.click();
+}
+
+/* Everything you can do to the playbook, in one place off the ⋯ button —
+   exporting used to be buried three rows deep inside Design. */
+function openPlaybookMenu(){
+  const mine = Store.plays();
+  modal({
+    title:'Playbook',
+    sub:`${BUILTIN.length} built-in plays and ${mine.length} of your own. Your plays live in this browser, so export them if you want them anywhere else.`,
+    body:(box)=>{
+      const grid = el('div', { style:'display:flex;flex-direction:column;gap:7px' });
+      grid.appendChild(el('button', { class:'btn wide', text:'✎  New play',
+        onclick:()=>openDesigner(blankPlay()) }));
+      grid.appendChild(el('button', { class:'btn wide', text:'↧  Import a play or playbook',
+        onclick:importPlay }));
+      grid.appendChild(el('button', { class:'btn wide',
+        text:`↥  Export my playbook${mine.length ? ' (' + mine.length + ')' : ''}`,
+        disabled: !mine.length, onclick:exportPlaybook }));
+      box.appendChild(grid);
+      if (!mine.length) box.appendChild(el('div', { class:'hint', style:'margin-top:9px',
+        text:'You have no plays of your own yet — build one in Design and it will appear here.' }));
+      else {
+        box.appendChild(el('div', { class:'hint', style:'margin-top:11px', text:'Your plays' }));
+        const list = el('div', { class:'plist', style:'margin-top:5px' });
+        for (const pl of mine){
+          const row = el('div', { class:'pitem', style:'cursor:default' });
+          const col = el('div', { class:'col' });
+          col.appendChild(el('div', { class:'nm', text:pl.name }));
+          col.appendChild(el('div', { class:'mt', text:`${pl.formation} · ${pl.beats.length} beats` }));
+          row.appendChild(col);
+          row.appendChild(el('button', { class:'btn sm', text:'Export', onclick:()=>exportPlay(pl) }));
+          row.appendChild(el('button', { class:'btn sm', text:'Share', onclick:()=>sharePlay(pl) }));
+          list.appendChild(row);
+        }
+        box.appendChild(list);
+      }
+    },
+    actions:[['Done', null, true]]
+  });
+}
+/* One file holding every play you have made, so a whole playbook moves in one go. */
+function exportPlaybook(){
+  const plays = Store.plays();
+  if (!plays.length) return toast('You have no plays of your own to export yet.');
+  const doc = { format:'set-play-trainer/playbook', version:1,
+                exported:new Date().toISOString(), plays };
+  const blob = new Blob([JSON.stringify(doc, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = el('a', { href:url, download:'my-playbook.hoopsbook.json' });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  toast(`Exported ${plays.length} play${plays.length === 1 ? '' : 's'}.`);
 }
 
 /* ================================================================= MODALS */
@@ -2879,14 +2962,14 @@ function openSettings(){
       mk('Court surface','court',[['hardwood','Hardwood'],['blueprint','Blueprint'],['chalkboard','Chalkboard'],['neon','Neon']]);
       mk('Renderer','render',[['flat','Top-down 2D'],['tilt','Tilted 2.5D']]);
       mk('Court spec','spec',[['nba','NBA'],['fiba','FIBA'],['hs','High school']]);
-      mk('Hints in Run It','hints',[['guided','Guided — label and previous positions'],
-                                    ['standard','Standard — previous positions'],['blind','Blind — nothing']]);
+      mk('Difficulty','hints',[['guided','Guided — beat label and last positions'],
+                               ['standard','Standard — last positions only'],
+                               ['blind','Blind — nothing, graded at the end']]);
       mk('Defenders','defence',[['off','Off'],['on','On — they track and trail'],
                                 ['mistakes','On, and they make mistakes']]);
       box.appendChild(el('div', { class:'hint', style:'margin-top:6px',
         text:'Defenders are derived from wherever you actually put the offence, and they never affect your score.' }));
-      box.appendChild(el('div', { class:'hint', style:'margin-top:10px',
-        text:'Recall mode always forces Blind, whatever this is set to.' }));
+
 
       box.appendChild(el('h3', { class:'seth', text:'Position colours' }));
       const swatches = el('div', { class:'swatches' });
@@ -2920,7 +3003,7 @@ function openHelp(){
     sub:'Other basketball apps either let a coach <i>draw</i> plays, or quiz you on <i>decisions</i>. This one grades <b>where you stand</b>.',
     body:(box)=>{
       box.appendChild(el('div', { style:'font-size:13.5px;line-height:1.65;color:var(--ink-2)', html:`
-        <p style="margin:0 0 10px"><b style="color:var(--ink)">Run It</b> — you place all five. Drag every player to where they
+        <p style="margin:0 0 10px"><b style="color:var(--ink)">Practice · All five</b> — you place everybody. Drag every player to where they
         belong on this beat, drag the ball onto its handler, tag the action, and get graded on four things:</p>
         <ul style="margin:0 0 12px;padding-left:19px">
           <li><b>Positions (55%)</b> — distance from the correct spot, tolerance by role. A screener gets 2.5 ft
@@ -2930,12 +3013,19 @@ function openHelp(){
           <li><b>Spacing (10%)</b> — nobody within 12 ft of a team-mate they are not screening, no more than
               two in the paint.</li>
         </ul>
-        <p style="margin:0 0 10px"><b style="color:var(--ink)">Floor General</b> — you are the 1 and nothing else. Drag only
+        <p style="margin:0 0 10px"><b style="color:var(--ink)">Practice · Just the 1</b> — you are the point guard and nothing else. Drag only
         yourself, then <i>call</i> the other four: send 2 to the weak corner, clear the left side, 5 set a ball screen
         on your right. A correct call means your team-mates execute the play properly. A wrong call sends them
         literally where you said. Anyone you never call <b>stays where they are</b> — forgetting to move somebody
         is how you learn that clearing a side is an action, not an assumption.</p>
-        <p style="margin:0 0 10px">Both modes feed the identical grader, so the scores are directly comparable.</p>
+        <p style="margin:0 0 10px">Both feed the identical grader, so the scores are directly comparable.
+        <b>Difficulty</b> in Settings controls how much you are shown: Guided gives the beat label and
+        where everyone stood last beat, Standard drops the label, and Blind shows nothing and holds
+        every score back until the end.</p>
+        <p style="margin:0 0 10px"><b style="color:var(--ink)">Your plays are yours.</b> Anything you build in Design
+        is saved in this browser only. The <b>⋯</b> button beside Playbook exports a single play, or your
+        whole playbook as one file, and imports either one back. A play can also travel as a link with
+        the whole thing packed inside it — nothing is uploaded anywhere.</p>
         <p style="margin:0 0 10px">After each beat you get a <b>ghost diff</b>: hollow markers show the truth, and a
         coloured line runs from where each player ended up to where they belonged. A bad beat never compounds —
         the next one starts from the <i>correct</i> positions, not yours.</p>
@@ -2965,8 +3055,14 @@ function setMode(m){
   if (isPlacementMode()) return App.play ? startRun(App.play) : renderAll();
   renderAll();
 }
+/* Three tabs cover five internal modes: Name It is a button inside Learn, and
+   Floor General is a choice inside Practice. Fewer top-level places to be. */
+const TAB_OF_MODE = { learn:'learn', name:'learn', run:'practice', general:'practice', design:'design' };
 function syncModeButtons(){
-  $$('#modes button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === App.mode)));
+  const tab = TAB_OF_MODE[App.mode] || 'practice';
+  $$('#modes button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  const spots = $('#cardSpots');
+  if (spots) spots.hidden = App.mode !== 'general';
 }
 
 /* ==================================================================== BOOT */
@@ -2974,13 +3070,16 @@ function boot(){
   applySettings();
 
   $('#modes').addEventListener('click', e => {
-    const b = e.target.closest('button[data-mode]');
-    if (b) setMode(b.dataset.mode);
+    const b = e.target.closest('button[data-tab]');
+    if (!b) return;
+    const t = b.dataset.tab;
+    setMode(t === 'learn' ? 'learn'
+          : t === 'design' ? 'design'
+          : (App.mode === 'general' ? 'general' : 'run'));
   });
   $('#btnSettings').addEventListener('click', openSettings);
   $('#btnHelp').addEventListener('click', openHelp);
-  $('#btnNewPlay').addEventListener('click', ()=>openDesigner(blankPlay()));
-  $('#btnImport').addEventListener('click', importPlay);
+  $('#btnBook').addEventListener('click', e => { e.stopPropagation(); openPlaybookMenu(); });
 
   const court = $('#court');
   /* The tilt squash is derived from the stage aspect, so a resize has to
@@ -3054,6 +3153,7 @@ window.HOOPS = {
   defenderPos, defenderLag, buildDefence, mistakeOptions, applyMistake, nearestSpotName,
   defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
   shotQuality, shotZone, isThree, contestMult, contestLabel, shotVerdict, ZONE, takeShot,
+  exportPlaybook, openPlaybookMenu,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
