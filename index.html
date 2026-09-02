@@ -889,10 +889,17 @@
         operations for Palmgold Management, a licensed gaming operator in Malaysia — the steepest
         learning curve I have had so far.
       </p>      <p>
+        <strong>Malware development for purple-team testing is the part I care most about.</strong>
+        Ransomware behaviour in Rust, a credential stealer in Python, a C2 client in C++, macro abuse
+        and DLL injection &mdash; all built and detonated in isolated lab VMs to see what my rules
+        catch and what they miss. Most of my detection content came out of that loop rather than out
+        of a template.
+      </p>
+      <p>
         Running both sides of a purple-team exercise changed how I write detections. Being the
-        attacker for a week taught me more about what a rule needs to catch than any template did,
-        and the most useful thing to come out of it was not the catch &mdash; it was discovering a
-        segment whose egress the sensor could not see at all.
+        attacker taught me more about what a rule needs to catch than any template did, and the most
+        useful thing to come out of it was not the catch &mdash; it was discovering a segment whose
+        egress the sensor could not see at all.
       </p>
       <p>
         Next I want to take the SOC from detection into response: automated blocking and host
