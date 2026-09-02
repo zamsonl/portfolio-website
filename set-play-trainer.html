@@ -335,6 +335,14 @@ label.fld > span{
 .choice.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--bg))}
 .choice:disabled{cursor:default}
 .hint{font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.defn{font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:6px;
+  border-left:2px solid var(--line-2);padding-inline-start:8px}
+.lnk{background:none;border:0;padding:0;margin-inline-start:5px;color:var(--accent);
+  cursor:pointer;font-size:11.5px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
+.lnk:hover{filter:brightness(1.15)}
+.gloss{display:grid;grid-template-columns:minmax(96px,auto) 1fr;gap:6px 12px;font-size:13px;line-height:1.5}
+.gloss b{color:var(--ink);font-weight:650}
+.gloss span{color:var(--ink-2)}
 
 /* --------------------------------------------------------- responsive --- */
 @media (max-width:1240px){ :root{--rail-l:224px;--rail-r:302px} }
@@ -485,19 +493,34 @@ function readableInk(hex){
   return L > .42 ? '#141014' : '#ffffff';
 }
 
+/* Every action carries its own definition. The app is full of coaching
+   vocabulary, and a dropdown reading "Flare / Pop / Curl / Seal" is useless to
+   anyone who does not already know what those words mean. */
 const ACTION_TYPES = [
-  { id:'none',    label:'No action this beat' },
-  { id:'screen',  label:'Screen',           needsFor:true },
-  { id:'handoff', label:'Dribble handoff',  needsFor:true },
-  { id:'pass',    label:'Pass',             needsFor:true },
-  { id:'cut',     label:'Cut' },
-  { id:'roll',    label:'Roll' },
-  { id:'pop',     label:'Pop' },
-  { id:'dribble', label:'Dribble' },
-  { id:'flare',   label:'Flare' },
-  { id:'curl',    label:'Curl' },
-  { id:'seal',    label:'Seal' }
+  { id:'none',    label:'No action this beat',
+    help:'Nobody screens, cuts or passes on this beat — everyone is simply getting to a spot.' },
+  { id:'screen',  label:'Screen',          needsFor:true,
+    help:'One player stands still and lets a defender run into him, freeing a team-mate. The one standing still is the screener ("by"); the one who gets free is who it is "for".' },
+  { id:'handoff', label:'Dribble handoff', needsFor:true,
+    help:'The ball handler dribbles up to a team-mate and hands him the ball as he runs past. A pass and a screen in one move.' },
+  { id:'pass',    label:'Pass',            needsFor:true,
+    help:'The ball is thrown from one player to another.' },
+  { id:'cut',     label:'Cut',
+    help:'A hard, sharp run to get open — usually toward the basket.' },
+  { id:'roll',    label:'Roll',
+    help:'After setting a ball screen, the screener turns and runs hard to the rim, hoping for a pass on the way.' },
+  { id:'pop',     label:'Pop',
+    help:'The opposite of a roll. After screening, he steps OUT to open space for a shot instead of diving to the rim. Bigs who can shoot pop; bigs who dunk roll.' },
+  { id:'dribble', label:'Dribble',
+    help:'The ball handler advances or attacks with the ball himself.' },
+  { id:'flare',   label:'Flare',
+    help:'A cut AWAY from the ball — out toward the sideline or corner, usually off a screen — to catch with space for a shot. You flare away; you curl toward.' },
+  { id:'curl',    label:'Curl',
+    help:'Running tight around a screen and hooking toward the basket, staying shoulder-to-shoulder with the screener. The opposite choice to a flare.' },
+  { id:'seal',    label:'Seal',
+    help:'A big man puts his body between his defender and the ball and holds him there, opening a passing lane at the rim.' }
 ];
+const ACTION_HELP = Object.fromEntries(ACTION_TYPES.map(a => [a.id, a.help]));
 const ACTION_LABEL = Object.fromEntries(ACTION_TYPES.map(a=>[a.id,a.label]));
 const ACTION_NEEDS_FOR = new Set(ACTION_TYPES.filter(a=>a.needsFor).map(a=>a.id));
 /* Contact is the entire point of these actions, so the pair involved is exempt
@@ -962,6 +985,36 @@ const SPOT_MAP = {
   'rim':          _ => [0, 8]
 };
 const SPOT_KEYS = Object.keys(SPOT_MAP);
+const SPOT_HELP = {
+  'corner':       'The very bottom of the three-point line, by the baseline. The shortest three on the floor.',
+  'wing':         'The side of the arc, roughly level with the free-throw line.',
+  'slot':         'Between the wing and the top — a guard spot above the arc.',
+  'top':          'Straight out from the basket, above the arc. Also called the top of the key.',
+  'trail':        'Behind the play in transition — the last big man up the floor.',
+  'elbow':        'The corner of the free-throw line, where it meets the lane.',
+  'block':        'The painted block beside the lane, right next to the rim.',
+  'short corner': 'On the baseline just outside the lane, between the block and the corner.',
+  'dunker':       'Just off the lane near the baseline, on the weak side, waiting for a drop-off pass.',
+  'nail':         'The middle of the free-throw line — the most important help position on defence.',
+  'rim':          'Right at the basket — the highest-percentage shot there is.'
+};
+/* The words the coaching notes use. Being able to run a play is no help if the
+   note explaining it is in a language you do not speak. */
+const TERM_HELP = {
+  'Strong side':  'The half of the floor the ball is on.',
+  'Weak side':    'The half of the floor away from the ball. Also called the help side.',
+  'Goalside':     'Between your man and your own basket — where a defender wants to be.',
+  'Low man':      'The bottom weak-side defender. His job is to step in on a rolling big.',
+  'Tag':          'Stepping in briefly to slow a rolling big, then recovering to your own man.',
+  'Skip pass':    'A long pass thrown across the floor, over the top of the defence, to the far side.',
+  'Drag screen':  'A ball screen set early in transition, before the defence is organised.',
+  'Back screen':  'A screen set on a defender from behind, where he cannot see it coming.',
+  'Flare screen': 'A screen that sends the cutter away from the ball, out toward the sideline.',
+  'Ball screen':  'A screen set for the player holding the ball. The basis of the pick-and-roll.',
+  'Empty side':   'A side of the floor deliberately cleared of team-mates, so no help defender is near.',
+  'Spacing':      'How far apart the offence stands. Twelve feet or more means one defender cannot guard two players.',
+  'Beat':         'One moment in a play, like a frame. A play is a handful of beats in order.'
+};
 const SIDED = new Set(['corner','wing','slot','elbow','block','short corner','dunker']);
 const SNAP_FT = 6.5;   // how close a called destination must be to count as right
 
@@ -2194,7 +2247,17 @@ function actionTagger(){
       wrap.appendChild(fr);
     }
   }
-  return wrap;
+  const box = el('div');
+  box.appendChild(wrap);
+  box.appendChild(actionHelpLine(a0.type));
+  return box;
+}
+/* What the selected action actually means, plus a way into the full glossary. */
+function actionHelpLine(type){
+  const d = el('div', { class:'defn' });
+  d.appendChild(el('span', { text: ACTION_HELP[type] || '' }));
+  d.appendChild(el('button', { class:'lnk', text:'All terms', onclick:openGlossary }));
+  return d;
 }
 
 /* ------------------------------------------------------------ right rail -- */
@@ -2446,6 +2509,7 @@ function callSheet(){
     row.appendChild(tSel);
     row.appendChild(el('span', { class:'hint', text:'for' }));
     row.appendChild(whoSel(d.for, v=>d.for=v, SLOTS));
+    row.appendChild(actionHelpLine(d.type));
   } else {
     row.appendChild(sideSel(d.side, v=>d.side=v));
     row.appendChild(el('span', { class:'hint', text:'side' }));
@@ -2574,12 +2638,15 @@ function renderSpotMap(){
   host.appendChild(m);
   const grid = el('div', { class:'spotgrid' });
   for (const key of SPOT_KEYS){
-    grid.appendChild(el('b', { text:SPOT_ABBR[key] || '?' }));
-    grid.appendChild(el('span', { text: key + (SIDED.has(key) ? ' (left / right)' : '') }));
+    grid.appendChild(el('b', { text:SPOT_ABBR[key] || '?', title:SPOT_HELP[key] || '' }));
+    grid.appendChild(el('span', { title:SPOT_HELP[key] || '',
+      text: key + (SIDED.has(key) ? ' (left / right)' : '') }));
   }
   host.appendChild(grid);
-  host.appendChild(el('div', { class:'hint', style:'margin-top:9px',
-    text:'These are the destinations you can send a team-mate to in Floor General.' }));
+  const foot = el('div', { class:'hint', style:'margin-top:9px' });
+  foot.appendChild(el('span', { text:'Where you can send a team-mate. ' }));
+  foot.appendChild(el('button', { class:'lnk', text:'What do these mean?', onclick:openGlossary }));
+  host.appendChild(foot);
 }
 
 /* Past attempts now surface as the best score on each play row, which is the
@@ -2740,7 +2807,10 @@ function designAction(a, i){
   }
   wrap.appendChild(el('button', { class:'btn sm ico', text:'×', title:'Remove',
     onclick:()=>{ b.actions.splice(i,1); d.dirty = true; renderRail(); } }));
-  return wrap;
+  const box = el('div');
+  box.appendChild(wrap);
+  box.appendChild(actionHelpLine(a.type));
+  return box;
 }
 function ballSelect(b, d){
   const s = el('select', { onchange:e=>{ b.ball = +e.target.value; d.dirty = true; paint(); } });
@@ -2997,6 +3067,42 @@ function openSettings(){
     actions:[['Done', null, true]]
   });
 }
+/* Every word the app uses, in one place. Reachable from wherever a term is
+   actually shown, not only from a help page nobody opens. */
+function openGlossary(){
+  const POS_HELP = {
+    1:'Brings the ball up and runs the offence.',
+    2:'Usually the best shooter.',
+    3:'A wing who can shoot, cut and defend.',
+    4:'A big who often shoots from range in the modern game.',
+    5:'The biggest player, closest to the rim — sets most of the screens.'
+  };
+  const section = (title, rows) => {
+    const wrap = el('div');
+    wrap.appendChild(el('h3', { class:'seth', text:title }));
+    const dl = el('div', { class:'gloss' });
+    for (const [term, def] of rows){
+      dl.appendChild(el('b', { text:term }));
+      dl.appendChild(el('span', { text:def }));
+    }
+    wrap.appendChild(dl);
+    return wrap;
+  };
+  modal({
+    title:'Basketball terms',
+    sub:'Everything this app says, in plain English. Nothing here assumes you already play.',
+    body:(box)=>{
+      box.appendChild(section('Actions — what a player does on a beat',
+        ACTION_TYPES.filter(a => a.id !== 'none').map(a => [a.label, a.help])));
+      box.appendChild(section('Spots on the floor',
+        SPOT_KEYS.map(k => [k, SPOT_HELP[k] || ''])));
+      box.appendChild(section('Words in the coaching notes', Object.entries(TERM_HELP)));
+      box.appendChild(section('Positions',
+        SLOTS.map(n => [n + ' — ' + SLOT_NAME[n], POS_HELP[n]])));
+    },
+    actions:[['Done', null, true]]
+  });
+}
 function openHelp(){
   modal({
     title:'How this works',
@@ -3033,7 +3139,7 @@ function openHelp(){
         has genuine variance at the edges. Tolerances are generous, scoring is a percentage rather than
         right/wrong, and every deduction explains itself. Treat it as a coach's opinion, not an oracle.</p>` }));
     },
-    actions:[['Got it', null, true]]
+    actions:[['Basketball terms', openGlossary], ['Got it', null, true]]
   });
 }
 
@@ -3153,7 +3259,8 @@ window.HOOPS = {
   defenderPos, defenderLag, buildDefence, mistakeOptions, applyMistake, nearestSpotName,
   defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
   shotQuality, shotZone, isThree, contestMult, contestLabel, shotVerdict, ZONE, takeShot,
-  exportPlaybook, openPlaybookMenu,
+  exportPlaybook, openPlaybookMenu, openGlossary, ACTION_HELP, SPOT_HELP, TERM_HELP,
+  ACTION_TYPES, ACTION_LABEL, SPOT_KEYS, SLOT_NAME, SIDED,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
