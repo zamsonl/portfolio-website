@@ -68,9 +68,9 @@ a{color:var(--accent)}
 /* ---------------------------------------------------------------- shell -- */
 .app{
   display:grid; height:100dvh; min-height:0;
-  grid-template-columns:var(--rail-l) minmax(0,1fr) var(--rail-r);
+  grid-template-columns:var(--rail-l) 7px minmax(0,1fr) 7px var(--rail-r);
   grid-template-rows:auto minmax(0,1fr);
-  grid-template-areas:"hd hd hd" "lf ct rt";
+  grid-template-areas:"hd hd hd hd hd" "lf gl ct gr rt";
 }
 .hd{
   grid-area:hd; display:flex; align-items:center; gap:13px;
@@ -95,8 +95,22 @@ a{color:var(--accent)}
   overflow:auto; overscroll-behavior:contain;
   padding-block:12px; padding-inline:12px; background:var(--bg-2);
 }
-.rail-l{grid-area:lf;border-right:1px solid var(--line)}
-.rail-r{grid-area:rt;border-left:1px solid var(--line)}
+.rail-l{grid-area:lf}
+.rail-r{grid-area:rt}
+/* Drag to rebalance the columns; double-click to put them back. */
+.grip{
+  grid-area:gl; position:relative; cursor:col-resize; touch-action:none;
+  background:var(--bg-2); border-inline:1px solid var(--line);
+  transition:background .12s ease;
+}
+.grip#gripR{grid-area:gr}
+.grip::after{content:'';position:absolute;inset-block:0;inset-inline:-5px}
+.grip::before{
+  content:''; position:absolute; inset-block:calc(50% - 14px); inset-inline:2px;
+  border-radius:99px; background:var(--line-2);
+}
+.grip:hover, .grip.dragging{background:color-mix(in srgb,var(--accent) 42%,var(--bg-2))}
+.grip:hover::before, .grip.dragging::before{background:var(--accent)}
 .card{
   background:var(--bg-3);border:1px solid var(--line);border-radius:var(--radius);
   padding-block:11px; padding-inline:11px; min-height:0;
@@ -340,6 +354,13 @@ label.fld > span{
 .lnk{background:none;border:0;padding:0;margin-inline-start:5px;color:var(--accent);
   cursor:pointer;font-size:11.5px;font-weight:650;text-decoration:underline;text-underline-offset:2px}
 .lnk:hover{filter:brightness(1.15)}
+.aref{margin-top:7px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--bg);padding-block:7px;padding-inline:9px}
+.aref > summary{cursor:pointer;font-size:12px;font-weight:650;color:var(--accent);list-style:none}
+.aref > summary::-webkit-details-marker{display:none}
+.aref > summary::before{content:'▸ ';font-size:10px}
+.aref[open] > summary::before{content:'▾ '}
+.aref .gloss{font-size:12px;grid-template-columns:minmax(78px,auto) 1fr;gap:5px 9px}
 .steps{display:grid;grid-template-columns:auto 1fr;gap:5px 9px;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
 .steps > b{width:17px;height:17px;border-radius:99px;background:var(--accent);color:var(--accent-ink);
   display:grid;place-items:center;font-size:10.5px;font-weight:750;margin-top:2px}
@@ -360,8 +381,9 @@ label.fld > span{
     height:auto;min-height:100dvh;
   }
   .rail{overflow:visible;max-height:none}
-  .rail-l{border-right:0;border-bottom:1px solid var(--line)}
-  .rail-r{border-left:0;border-top:1px solid var(--line)}
+  .rail-l{border-bottom:1px solid var(--line)}
+  .rail-r{border-top:1px solid var(--line)}
+  .grip{display:none}
   .card.grow{flex:0 0 auto}
   /* `.grow` is off here, so the scroll child has no free space to claim from
      flex:1 1 0 and would collapse the card to a bare header. */
@@ -416,6 +438,9 @@ label.fld > span{
     </div>
   </aside>
 
+  <div class="grip" id="gripL" role="separator" aria-orientation="vertical"
+       aria-label="Resize the playbook column"></div>
+
   <main class="ct">
     <div class="stage">
       <svg id="court" role="img" aria-label="Basketball half court"></svg>
@@ -423,6 +448,9 @@ label.fld > span{
     </div>
     <div class="bar" id="bar"></div>
   </main>
+
+  <div class="grip" id="gripR" role="separator" aria-orientation="vertical"
+       aria-label="Resize the detail column"></div>
 
   <aside class="rail rail-r" id="railR"></aside>
 </div>
@@ -502,29 +530,36 @@ function readableInk(hex){
    vocabulary, and a dropdown reading "Flare / Pop / Curl / Seal" is useless to
    anyone who does not already know what those words mean. */
 const ACTION_TYPES = [
-  { id:'none',    label:'No action this beat',
+  { id:'none',    label:'No action this beat', short:'players are just getting to their spots',
     help:'Nobody screens, cuts or passes on this beat — everyone is simply getting to a spot.' },
-  { id:'screen',  label:'Screen',          needsFor:true,
+  { id:'screen',  label:'Screen',          needsFor:true, short:'stand still and free a team-mate',
     help:'One player stands still and lets a defender run into him, freeing a team-mate. The one standing still is the screener ("by"); the one who gets free is who it is "for".' },
-  { id:'handoff', label:'Dribble handoff', needsFor:true,
+  { id:'clearout',label:'Clear out',                      short:'empty your side so a team-mate can go 1-on-1',
+    help:'A player leaves his side of the floor and takes his defender with him, so a team-mate can attack one-on-one or run a two-man game with no help defender nearby. This is what the point guard is asking for when he waves a wing across to the far side.' },
+  { id:'handoff', label:'Dribble handoff', needsFor:true, short:'hand the ball off on the run',
     help:'The ball handler dribbles up to a team-mate and hands him the ball as he runs past. A pass and a screen in one move.' },
-  { id:'pass',    label:'Pass',            needsFor:true,
+  { id:'pass',    label:'Pass',            needsFor:true, short:'throw it to a team-mate',
     help:'The ball is thrown from one player to another.' },
-  { id:'cut',     label:'Cut',
+  { id:'cut',     label:'Cut',                            short:'hard run to get open',
     help:'A hard, sharp run to get open — usually toward the basket.' },
-  { id:'roll',    label:'Roll',
+  { id:'roll',    label:'Roll',                           short:'after screening, dive to the rim',
     help:'After setting a ball screen, the screener turns and runs hard to the rim, hoping for a pass on the way.' },
-  { id:'pop',     label:'Pop',
+  { id:'pop',     label:'Pop',                            short:'after screening, step out for a shot',
     help:'The opposite of a roll. After screening, he steps OUT to open space for a shot instead of diving to the rim. Bigs who can shoot pop; bigs who dunk roll.' },
-  { id:'dribble', label:'Dribble',
+  { id:'dribble', label:'Dribble',                        short:'drive or advance the ball yourself',
     help:'The ball handler advances or attacks with the ball himself.' },
-  { id:'flare',   label:'Flare',
+  { id:'flare',   label:'Flare',                          short:'cut AWAY from the ball for a shot',
     help:'A cut AWAY from the ball — out toward the sideline or corner, usually off a screen — to catch with space for a shot. You flare away; you curl toward.' },
-  { id:'curl',    label:'Curl',
+  { id:'curl',    label:'Curl',                           short:'hook tight around a screen to the rim',
     help:'Running tight around a screen and hooking toward the basket, staying shoulder-to-shoulder with the screener. The opposite choice to a flare.' },
-  { id:'seal',    label:'Seal',
+  { id:'lift',    label:'Lift',                           short:'step up from the corner as an outlet',
+    help:'Stepping up from the corner toward the wing to give the ball handler somewhere to pass. Lifting drags a defender with you, which is often the whole point.' },
+  { id:'post',    label:'Post up',                        short:'set up with your back to the basket',
+    help:'A player sets up near the lane with his back to the basket, asking for the ball so he can score close in.' },
+  { id:'seal',    label:'Seal',                           short:'pin your defender to open the rim',
     help:'A big man puts his body between his defender and the ball and holds him there, opening a passing lane at the rim.' }
 ];
+const ACTION_SHORT = Object.fromEntries(ACTION_TYPES.map(a => [a.id, a.short]));
 const ACTION_HELP = Object.fromEntries(ACTION_TYPES.map(a => [a.id, a.help]));
 const ACTION_LABEL = Object.fromEntries(ACTION_TYPES.map(a=>[a.id,a.label]));
 const ACTION_NEEDS_FOR = new Set(ACTION_TYPES.filter(a=>a.needsFor).map(a=>a.id));
@@ -685,6 +720,8 @@ function cloneSpots(s){ const o = {}; for (const k of SLOTS) o[k] = [s[k][0], s[
    Every storage access is wrapped: a private window throws on read as well as
    write, and the app has to keep working when it does.
    ======================================================================== */
+const RAIL_DEFAULT = { l:262, r:336 };
+const RAIL_MIN = 190, RAIL_MAX = 560;
 const K_PLAYS = 'hoops.plays.v1', K_HIST = 'hoops.history.v1', K_SET = 'hoops.settings.v1';
 const HIST_CAP = 200;
 const Store = {
@@ -716,7 +753,8 @@ const Store = {
   },
   settings(){
     const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard',
-                defence:'off', colors: Object.assign({}, DEFAULT_COLORS) };
+                defence:'off', railL:RAIL_DEFAULT.l, railR:RAIL_DEFAULT.r,
+                colors: Object.assign({}, DEFAULT_COLORS) };
     const v = this._get(K_SET, {});
     const out = Object.assign(d, (v && typeof v === 'object') ? v : {});
     out.colors = Object.assign({}, DEFAULT_COLORS, (out.colors && typeof out.colors === 'object') ? out.colors : {});
@@ -1022,6 +1060,8 @@ const TERM_HELP = {
   'Flare screen': 'A screen that sends the cutter away from the ball, out toward the sideline.',
   'Ball screen':  'A screen set for the player holding the ball. The basis of the pick-and-roll.',
   'Empty side':   'A side of the floor deliberately cleared of team-mates, so no help defender is near.',
+  'Clear out':    'Sending a team-mate away to the far side so the ball handler can attack alone. The action that creates an empty side.',
+  'Two-man game': 'Just two attackers working together — usually a guard and a big — on a side with nobody else on it.',
   'Spacing':      'How far apart the offence stands. Twelve feet or more means one defender cannot guard two players.',
   'Beat':         'One moment in a play, like a frame. A play is a handful of beats in order.'
 };
@@ -1752,8 +1792,22 @@ function isPlacementMode(){ return App.mode === 'run'; }
 function isGradedMode(){ return isPlacementMode() || App.mode === 'general'; }
 
 /* --------------------------------------------------------------- theming -- */
+/* A saved width must never be allowed to squeeze the court off the screen, so
+   it is re-clamped against the viewport rather than trusted as an absolute. */
+function applyRailWidths(){
+  if (innerWidth <= 1040) {
+    document.documentElement.style.removeProperty('--rail-l');
+    document.documentElement.style.removeProperty('--rail-r');
+    return;
+  }
+  const cap = Math.max(RAIL_MIN, Math.min(RAIL_MAX, innerWidth * .34));
+  const fix = v => Math.round(Math.max(RAIL_MIN, Math.min(cap, Number(v) || 0)));
+  document.documentElement.style.setProperty('--rail-l', fix(App.settings.railL || RAIL_DEFAULT.l) + 'px');
+  document.documentElement.style.setProperty('--rail-r', fix(App.settings.railR || RAIL_DEFAULT.r) + 'px');
+}
 function applySettings(){
   const s = App.settings;
+  applyRailWidths();
   document.documentElement.dataset.appearance = s.appearance;
   document.documentElement.dataset.court = s.court;
   document.documentElement.dataset.render = s.render;
@@ -2245,7 +2299,8 @@ function actionTagger(){
       for: ACTION_NEEDS_FOR.has(t) ? ((acts[0]&&acts[0].for)||2) : undefined }];
     renderRail();
   }});
-  for (const t of ACTION_TYPES) typeSel.appendChild(el('option', { value:t.id, text:t.label, selected:a0.type===t.id }));
+  for (const t of ACTION_TYPES) typeSel.appendChild(el('option', { value:t.id,
+    text: t.id === 'none' ? t.label : t.label + ' — ' + t.short, selected:a0.type===t.id }));
   wrap.appendChild(typeSel);
   if (a0.type !== 'none'){
     const by = el('select', { class:'who', onchange:e=>{ App.attempt.actions[0].by = +e.target.value; } });
@@ -2260,6 +2315,20 @@ function actionTagger(){
   const box = el('div');
   box.appendChild(wrap);
   box.appendChild(actionHelpLine(a0.type));
+  return box;
+}
+/* Every action and what it means, on the page while you build. A dropdown you
+   have to open one item at a time is no way to learn a vocabulary. */
+function actionReference(){
+  const box = el('details', { class:'aref' });
+  box.appendChild(el('summary', { text:'What do these actions mean?' }));
+  const grid = el('div', { class:'gloss', style:'margin-top:8px' });
+  for (const a of ACTION_TYPES){
+    if (a.id === 'none') continue;
+    grid.appendChild(el('b', { text:a.label }));
+    grid.appendChild(el('span', { text:a.help }));
+  }
+  box.appendChild(grid);
   return box;
 }
 /* What the selected action actually means, plus a way into the full glossary. */
@@ -2515,7 +2584,7 @@ function callSheet(){
     row.appendChild(whoSel(d.who, v=>d.who=v));
     const tSel = el('select', { onchange:e=>{ d.type = e.target.value; renderRail(); } });
     for (const t of ACTION_TYPES) if (ACTION_NEEDS_FOR.has(t.id) && t.id !== 'pass')
-      tSel.appendChild(el('option', { value:t.id, text:t.label, selected:d.type===t.id }));
+      tSel.appendChild(el('option', { value:t.id, text:t.label + ' — ' + t.short, selected:d.type===t.id }));
     row.appendChild(tSel);
     row.appendChild(el('span', { class:'hint', text:'for' }));
     row.appendChild(whoSel(d.for, v=>d.for=v, SLOTS));
@@ -2779,7 +2848,8 @@ function renderDesignRail(r){
     'A short name for THIS beat only, like "Ball screen right".'));
   sc.appendChild(el('div', { class:'hint', style:'margin-bottom:5px', text:'Actions on this beat' }));
   if (!b.actions.length) sc.appendChild(el('div', { class:'defn',
-    text:'What actually happens here — a screen, a cut, a pass. Leave it empty if this beat is only players getting to their spots.' }));
+    text:'What actually happens here — a screen, a cut, a clear out. Leave it empty if this beat is only players getting to their spots.' }));
+  sc.appendChild(actionReference());
   const acts = el('div', { class:'calls' });
   b.actions.forEach((a,i) => acts.appendChild(designAction(a,i)));
   acts.appendChild(el('button', { class:'btn sm wide', text:'+ Add action', onclick:()=>{
@@ -2836,7 +2906,7 @@ function designAction(a, i){
   }});
   for (const at of ACTION_TYPES){
     if (at.id === 'none') continue;
-    t.appendChild(el('option', { value:at.id, text:at.label, selected:a.type === at.id }));
+    t.appendChild(el('option', { value:at.id, text:at.label + ' — ' + at.short, selected:a.type === at.id }));
   }
   wrap.appendChild(t);
   const by = el('select', { class:'who', onchange:e=>{ a.by = +e.target.value; d.dirty = true; } });
@@ -3215,8 +3285,54 @@ function syncModeButtons(){
 }
 
 /* ==================================================================== BOOT */
+/* Both grips share one implementation; only the sign of the delta differs. */
+function initGrips(){
+  const wire = (sel, side) => {
+    const g = $(sel);
+    if (!g) return;
+    const key = side === 'l' ? 'railL' : 'railR';
+    const railSel = side === 'l' ? '.rail-l' : '.rail-r';
+    let active = false, startX = 0, startW = 0;
+    const setW = px => {
+      const cap = Math.max(RAIL_MIN, Math.min(RAIL_MAX, innerWidth * .34));
+      const v = Math.round(Math.max(RAIL_MIN, Math.min(cap, px)));
+      App.settings[key] = v;
+      document.documentElement.style.setProperty(side === 'l' ? '--rail-l' : '--rail-r', v + 'px');
+    };
+    g.addEventListener('pointerdown', e => {
+      active = true; startX = e.clientX;
+      startW = document.querySelector(railSel).getBoundingClientRect().width;
+      g.classList.add('dragging');
+      try{ g.setPointerCapture(e.pointerId); }catch(err){}
+      e.preventDefault();
+    });
+    g.addEventListener('pointermove', e => {
+      if (!active) return;
+      const d = e.clientX - startX;
+      setW(side === 'l' ? startW + d : startW - d);
+    });
+    const stop = e => {
+      if (!active) return;
+      active = false;
+      g.classList.remove('dragging');
+      try{ g.releasePointerCapture(e.pointerId); }catch(err){}
+      Store.saveSettings(App.settings);
+    };
+    g.addEventListener('pointerup', stop);
+    g.addEventListener('pointercancel', stop);
+    g.addEventListener('dblclick', () => {
+      setW(RAIL_DEFAULT[side]);
+      Store.saveSettings(App.settings);
+    });
+    g.title = 'Drag to resize · double-click to reset';
+  };
+  wire('#gripL', 'l');
+  wire('#gripR', 'r');
+  addEventListener('resize', applyRailWidths);
+}
 function boot(){
   applySettings();
+  initGrips();
 
   $('#modes').addEventListener('click', e => {
     const b = e.target.closest('button[data-tab]');
@@ -3303,7 +3419,8 @@ window.HOOPS = {
   defenceFor, defenceContext, triggerMistake, displaySpots, MISTAKE_LABEL,
   shotQuality, shotZone, isThree, contestMult, contestLabel, shotVerdict, ZONE, takeShot,
   exportPlaybook, openPlaybookMenu, openGlossary, ACTION_HELP, SPOT_HELP, TERM_HELP,
-  ACTION_TYPES, ACTION_LABEL, SPOT_KEYS, SLOT_NAME, SIDED, stripTags,
+  applyRailWidths, RAIL_DEFAULT, RAIL_MIN, RAIL_MAX,
+  ACTION_TYPES, ACTION_LABEL, ACTION_SHORT, SPOT_KEYS, SLOT_NAME, SIDED, stripTags,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   cornerX, breakY, Store, App, cloneSpots, exemptPairs
 };
