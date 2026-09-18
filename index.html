@@ -209,7 +209,7 @@
         <ul class="facts">
           <li><b>Platform</b><span>Wazuh manager with co-located OpenSearch, on a Proxmox host, tuned at the systemd level to stay stable under sustained ingest.</span></li>
           <li><b>Collection</b><span>Firewall, switching, wireless, Windows endpoint, Active Directory and Zeek logs, normalised through custom ingest pipelines that resolve field-mapping conflicts between them.</span></li>
-          <li><b>Sensor</b><span>The core switch mirrors the firewall uplink through a Python decapsulation stage into a multi-node Zeek cluster, adding the DNS, TLS and HTTP detail the firewall logs lack.</span></li>
+          <li><b>Sensor</b><span>SPAN feeds from the core and access switches into a multi-node Zeek cluster through a Python decapsulation stage, so the sensor sees the network instead of a slice of it.</span></li>
           <li><b>Detection</b><span>Custom decoders and correlation rules written for the hardware in use, built on native Windows event logs rather than Sysmon, which I had no authority to push fleet-wide.</span></li>
           <li><b>Reliability</b><span>Retention policies after archive logging filled the disk and silently flipped every index read-only; SQLite recovery across dozens of corrupt agent databases; NIC-level fixes for link flapping and transmit-engine hangs.</span></li>
         </ul>
@@ -308,8 +308,9 @@
           <h3>The consoles I built for the SOC</h3>
           <p>
           I built the tools I worked in: three single-file consoles served from the SOC host
-          &mdash; a global traffic map, an endpoint alert console and a 3D traffic visualizer. All
-          three are published below as de-identified templates.
+          &mdash; a global traffic map, an endpoint alert console and a 3D traffic visualizer.
+          Writing the tools I used every day changed how I think about what an operator needs on
+          screen. All three are published below as de-identified templates.
         </p>
         </div>
         <div>
@@ -507,7 +508,7 @@
     <article data-key="1" class="item rv" data-cat="collection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
-      <p>A Zeek sensor on a mirror of the firewall uplink, adding the DNS, TLS and HTTP detail the firewall logs lack.</p>
+      <p>A Zeek sensor fed by SPAN from the core and access switches, so it sees the network instead of a slice of it.</p>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
@@ -892,7 +893,8 @@
     <div class="prose">
       <p class="big">
         I am a final-year Cybersecurity student at Asia Pacific University. From May to August 2026
-        I ran security operations for Palmgold Management, a licensed gaming operator in Malaysia.
+        I ran security operations for Palmgold Management, a licensed gaming operator in Malaysia
+        &mdash; the steepest learning curve I have had so far.
       </p>      <p>
         <strong>Malware development for purple-team testing is the part I care most about.</strong>
         Ransomware behaviour in Rust, a credential stealer in Python, a C2 client in C++, macro abuse
@@ -900,9 +902,10 @@
         one became Wazuh rules, Zeek scripts and OpenSearch queries.
       </p>
       <p>
-        Running both sides of a purple-team exercise changed how I write detections. The most
-        useful result was not the catch. It was finding a part of the network the sensor could not
-        see at all.
+        Running both sides of a purple-team exercise changed how I write detections. Being the
+        attacker taught me more about detection than any rule template ever did. The most useful
+        result was not the catch. It was finding a part of the network the sensor could not see at
+        all.
       </p>
       <p>
         Next I want to take the SOC from detection into response: automated blocking and host
