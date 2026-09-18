@@ -132,9 +132,9 @@
           <div><dt>SIEM</dt><dd>Wazuh, OpenSearch, custom decoders &amp; rules</dd></div>
           <div><dt>Network</dt><dd>Zeek, FortiGate, Aruba, Wireshark</dd></div>
           <div><dt>Code</dt><dd>Python, JavaScript, Bash, Rust, C++, Java</dd></div>
-          <div><dt>Study</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
+          <div><dt>Study</dt><dd>BSc (Hons) Computer Science (Cyber Security), APU — final year</dd></div>
           <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
-          <div><dt>Status</dt><dd>Open to graduate &amp; junior analyst roles</dd></div>
+          <div><dt>Certificate</dt><dd>ELITE TecForte SOC Programme, 2026</dd></div>
         </dl>
       </div>
     </aside>
@@ -143,7 +143,7 @@
       <li><span class="stat-v amber">Solo</span><span class="stat-l">Only person on security</span></li>
       <li><span class="stat-v">80+</span><span class="stat-l">Endpoints monitored</span></li>
       <li><span class="stat-v">3</span><span class="stat-l">Open-source tools published</span></li>
-      <li><span class="stat-v">Final year</span><span class="stat-l">BSc Cybersecurity, APU</span></li>
+      <li><span class="stat-v">Final year</span><span class="stat-l">Computer Science (Cyber Security), APU</span></li>
     </ul>
   </div>
 </section>
@@ -166,11 +166,11 @@
           <span class="badge live"><span class="dot" aria-hidden="true"></span>In production</span>
           <span class="badge">Flagship</span>
         </div>
-          <h3>Enterprise SOC build-out</h3>
+          <h3>The SOC build-out</h3>
           <p>
           It started as a proof of concept on a spare desktop and ended up as the stack that runs
-          the company&rsquo;s monitoring. I was the only person on security, so the architecture,
-          the detection content, the incident response and the reporting were all mine.
+          the company&rsquo;s monitoring. The architecture, the detection content, the incident
+          response and the reporting were all mine.
         </p>
         </div>
         <div>
@@ -208,9 +208,9 @@
         <summary>What it involved <i>5</i></summary>
         <ul class="facts">
           <li><b>Platform</b><span>Wazuh manager with co-located OpenSearch, on a Proxmox host, tuned at the systemd level to stay stable under sustained ingest.</span></li>
-          <li><b>Collection</b><span>Six sources normalised through custom ingest pipelines that resolve field-mapping conflicts between them.</span></li>
-          <li><b>Sensor</b><span>Port mirroring from the core and access switches into a multi-node Zeek cluster through a Python decapsulation stage.</span></li>
-          <li><b>Detection</b><span>Custom decoders and correlation rules written for the hardware actually in use, deliberately without an endpoint-agent dependency I have no authority to deploy.</span></li>
+          <li><b>Collection</b><span>Firewall, switching, wireless, Windows endpoint, Active Directory and Zeek logs, normalised through custom ingest pipelines that resolve field-mapping conflicts between them.</span></li>
+          <li><b>Sensor</b><span>The core switch mirrors the firewall uplink through a Python decapsulation stage into a multi-node Zeek cluster, adding the DNS, TLS and HTTP detail the firewall logs lack.</span></li>
+          <li><b>Detection</b><span>Custom decoders and correlation rules written for the hardware in use, built on native Windows event logs rather than Sysmon, which I had no authority to push fleet-wide.</span></li>
           <li><b>Reliability</b><span>Retention policies after archive logging filled the disk and silently flipped every index read-only; SQLite recovery across dozens of corrupt agent databases; NIC-level fixes for link flapping and transmit-engine hangs.</span></li>
         </ul>
       </details>
@@ -292,7 +292,7 @@
         <li><b>Why it was hard</b><span>A tunnel hides where traffic really goes. The firewall, the tunnel and the server all showed a shared address, so none of them could say which machine was infected.</span></li>
         <li><b>What found it</b><span>The DNS lookups. Those records were the only thing that named the infected machines.</span></li>
         <li><b>The bigger finding</b><span>Part of the network was not being monitored at all. No rule can help with traffic you never collect &mdash; that gap mattered more than the catch.</span></li>
-        <li><b>Tested honestly</b><span>A plain attack straight to an ordinary server was <strong>missed</strong>. The tunnel was itself the giveaway; without one there is no signature to match.</span></li>
+        <li><b>What it missed</b><span>A plain implant talking straight to an ordinary cloud server was <strong>missed</strong>. The tunnel was the giveaway; without one there is no signature to match.</span></li>
       </ul>
       </details>
     </article>
@@ -305,12 +305,11 @@
           <span class="badge live"><span class="dot" aria-hidden="true"></span>Live demo</span>
           <span class="badge">Open source</span>
         </div>
-          <h3>The console I use every day</h3>
+          <h3>The consoles I built for the SOC</h3>
           <p>
-          I built the tools I work in. Single-file consoles served from the SOC host: a global
-          traffic map, an endpoint alert console, and a 3D traffic visualizer. Writing them changed
-          how I think about what an operator actually needs on screen &mdash; and all three are now
-          published as de-identified templates.
+          I built the tools I worked in: three single-file consoles served from the SOC host
+          &mdash; a global traffic map, an endpoint alert console and a 3D traffic visualizer. All
+          three are published below as de-identified templates.
         </p>
         </div>
         <div>
@@ -492,14 +491,13 @@
     <article data-key="1" class="item rv" data-cat="detection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 11 2 2 4-4"/></svg></span><span class="item-n">01 / DETECTION</span></div>
       <h3>Malicious code analysis for detection validation</h3>
-      <p>My favourite part of the job. In isolated lab VMs I built and analysed samples purely to test signatures.</p>
+      <p>In isolated lab VMs I built and analysed samples purely to test signatures.</p>
 <details class="more">
-        <summary>Details <i>5</i></summary>
+        <summary>Details <i>4</i></summary>
         <ul>
         <li>Ransomware behaviour in Rust, a browser credential stealer in Python, a C2 client in C++</li>
         <li>Word macro abuse, DLL injection, and phishing kits analysed for exfiltration patterns</li>
         <li>Encryption testing stayed hard-guarded to a canary folder — benign by construction</li>
-        <li>Writing the payload and detonating it tells you exactly what your rules see and what they miss</li>
         <li>Every one became Wazuh rules, Zeek scripts and OpenSearch queries</li>
       </ul>
       </details>
@@ -509,14 +507,14 @@
     <article data-key="1" class="item rv" data-cat="collection">
       <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.7"/><circle cx="16" cy="12" r="1.7"/><circle cx="10" cy="18" r="1.7"/></svg></span><span class="item-n">02 / COLLECTION</span></div>
       <h3>Zeek network monitoring pipeline</h3>
-      <p>A Zeek sensor fed by a core-switch traffic mirror, seeing internal traffic the firewall never does.</p>
+      <p>A Zeek sensor on a mirror of the firewall uplink, adding the DNS, TLS and HTTP detail the firewall logs lack.</p>
 <details class="more">
         <summary>Details <i>4</i></summary>
         <ul>
         <li>A Python stage strips encapsulation headers and replays traffic onto a virtual interface</li>
         <li>Decoders classify each log stream by fields unique to it, not by guessing from field presence</li>
         <li>Detections for domain-generation bursts, DNS tunnelling, exfiltration and inbound scans</li>
-        <li>Re-characterised an alarming reported capture loss as an MTU artefact of the mirror tunnel, not real loss — which decides which detections you may trust</li>
+        <li>Showed that an alarming reported capture loss was an MTU artefact of the mirror tunnel, not missing traffic, so connection and DNS logs could still be trusted</li>
       </ul>
       </details>
       <div class="chips"><span class="chip">Zeek</span><span class="chip">Python</span><span class="chip">NSM</span></div>
@@ -530,7 +528,7 @@
         <summary>Details <i>3</i></summary>
         <ul>
         <li>Domain controller channels forwarded and ranked by volume, so an unusual lockout spike surfaces before anyone reports it</li>
-        <li>Written against native process-creation events rather than an agent I have no authority to push fleet-wide</li>
+        <li>Written against native Windows process-creation events rather than Sysmon, which I had no authority to push fleet-wide</li>
         <li>Saved searches for authentication failure, log clearing and account enumeration</li>
       </ul>
       </details>
@@ -577,9 +575,9 @@
         <summary>Details <i>4</i></summary>
         <ul>
         <li>OpenVAS for the full scan, plus Nmap, Nikto and command-line work to verify by hand what the scanner claimed</li>
-        <li>Findings included unauthenticated printer administration, exposed print services and a reverse-proxy bypass on an office device</li>
+        <li>Scope was the office network, including printers and copiers; the specific findings stay with the company</li>
         <li>Delivered as three reports: technical, non-technical, and plain language</li>
-        <li>Re-scanned and honestly downgraded one finding to &ldquo;unconfirmed&rdquo; when it could not be reproduced</li>
+        <li>Re-scanned and downgraded one finding to &ldquo;unconfirmed&rdquo; when it could not be reproduced</li>
       </ul>
       </details>
       <div class="chips"><span class="chip">OpenVAS</span><span class="chip">Nmap</span><span class="chip">Nikto</span><span class="chip">Reporting</span></div>
@@ -595,7 +593,7 @@
         <li>Built and debugged much of the tooling here with Claude Code, and used Claude Cowork for longer multi-step work</li>
         <li>Put an assistant in the analyst seat during a purple-team exercise, watching the SIEM alongside me</li>
         <li>Ran local models through Ollama to learn what genuinely needs a hosted one</li>
-        <li>The judgement is the point: what to delegate, what to verify, and never trusting a &ldquo;done&rdquo; message over the artefact</li>
+        <li>Learned what to delegate, what to verify, and not to trust a &ldquo;done&rdquo; message over the actual output</li>
       </ul>
       </details>
       <div class="chips"><span class="chip">Claude Code</span><span class="chip">Ollama</span><span class="chip">Automation</span></div>
@@ -755,7 +753,7 @@
   <header class="sec-head rv">
     <p class="tag">04 — Capability</p>
     <h2>Skills &amp; tooling</h2>
-    <p>What I work with day to day, grouped by how I actually use it.</p>
+    <p>What I work with day to day, grouped by how I use it.</p>
   </header>
 
   <div class="skills rv">
@@ -796,7 +794,7 @@
         <li>Bash &amp; Windows batch scripting</li>
         <li>JavaScript, D3.js, Three.js</li>
         <li>Rust, C++, Java</li>
-        <li>Active Directory &amp; Group Policy at scale</li>
+        <li>Active Directory &amp; Group Policy deployment</li>
         <li>AI-assisted development, OCR pipelines, Git</li>
       </ul>
     </div>
@@ -822,20 +820,20 @@
   <header class="sec-head rv">
     <p class="tag">05 — Track record</p>
     <h2>Experience</h2>
-    <p>Where the work above actually happened.</p>
+    <p>Where the work above happened.</p>
   </header>
 
   <ol class="tl rv">
     <li class="tl-row">
-      <div class="tl-when"><b>May 2026 — Aug 2026</b>Palmgold Management Sdn Bhd<br />Kuala Lumpur</div>
+      <div class="tl-when"><b>May 2026 — Aug 2026</b>Palmgold Management Sdn Bhd<br />Petaling Jaya</div>
       <div class="tl-body">
         <h3>Network &amp; Security Administrator (Intern)</h3>
         <p class="tl-org">Sole owner of security operations</p>
         <ul>
           <li>Joined nine months after a ransomware incident that still had no monitoring behind it, and built the company&rsquo;s Security Operations Centre as the <b>only person on security</b></li>
           <li>Deployed a Wazuh SIEM integrating firewall, switching, wireless, Windows endpoint, Active Directory and Zeek sensor telemetry, on a Proxmox host I set up in the office</li>
-          <li>Rolled out monitoring agents to <b>80+ Windows machines</b> via Group Policy with an idempotent, re-runnable installer</li>
-          <li>Wrote custom decoders, correlation rules and dashboards for the hardware actually in use</li>
+          <li>Rolled out Wazuh agents across <b>80+ domain-joined Windows machines</b> via Group Policy with an idempotent, re-runnable installer</li>
+          <li>Wrote custom decoders, correlation rules and dashboards for the hardware in use</li>
           <li>Ran authorized purple-team exercises — red from Kali Purple, blue in the SIEM — and turned each into detection content</li>
           <li>Built and analysed malware samples in isolated lab VMs purely to validate signatures</li>
           <li>Ran an authorized internal vulnerability assessment and delivered three audience-tailored reports</li>
@@ -863,13 +861,21 @@
     <li class="tl-row">
       <div class="tl-when"><b>Final year</b>Asia Pacific University<br />Kuala Lumpur</div>
       <div class="tl-body">
-        <h3>BSc (Hons) Cybersecurity</h3>
+        <h3>BSc (Hons) Computer Science (Cyber Security)</h3>
         <p class="tl-org">Asia Pacific University, Malaysia</p>
         <ul>
           <li>Coursework across network security, forensics and secure development</li>
           <li>Lab work in Kali, Ubuntu, Wireshark and Cisco Packet Tracer</li>
           <li>Industrial internship completed at Palmgold Management, with the SOC build-out as the primary project</li>
         </ul>
+      </div>
+    </li>
+
+    <li class="tl-row">
+      <div class="tl-when"><b>Mar 2026</b>TecForte</div>
+      <div class="tl-body">
+        <h3>ELITE TecForte SOC Programme</h3>
+        <p class="tl-org">Certificate of completion</p>
       </div>
     </li>
   </ol>
@@ -885,21 +891,18 @@
   <div class="about rv">
     <div class="prose">
       <p class="big">
-        I am a final-year Cybersecurity student at Asia Pacific University. I ran security
-        operations for Palmgold Management, a licensed gaming operator in Malaysia — the steepest
-        learning curve I have had so far.
+        I am a final-year Cybersecurity student at Asia Pacific University. From May to August 2026
+        I ran security operations for Palmgold Management, a licensed gaming operator in Malaysia.
       </p>      <p>
         <strong>Malware development for purple-team testing is the part I care most about.</strong>
         Ransomware behaviour in Rust, a credential stealer in Python, a C2 client in C++, macro abuse
-        and DLL injection &mdash; all built and detonated in isolated lab VMs to see what my rules
-        catch and what they miss. Most of my detection content came out of that loop rather than out
-        of a template.
+        and DLL injection &mdash; all built in isolated lab VMs purely to test signatures, and every
+        one became Wazuh rules, Zeek scripts and OpenSearch queries.
       </p>
       <p>
-        Running both sides of a purple-team exercise changed how I write detections. Being the
-        attacker taught me more about what a rule needs to catch than any template did, and the most
-        useful thing to come out of it was not the catch &mdash; it was discovering a segment whose
-        egress the sensor could not see at all.
+        Running both sides of a purple-team exercise changed how I write detections. The most
+        useful result was not the catch. It was finding a part of the network the sensor could not
+        see at all.
       </p>
       <p>
         Next I want to take the SOC from detection into response: automated blocking and host
@@ -913,11 +916,11 @@
       <div class="card">
         <h3>Details</h3>
         <dl class="spec">
-          <div><dt>Education</dt><dd>BSc (Hons) Cybersecurity, APU — final year</dd></div>
+          <div><dt>Education</dt><dd>BSc (Hons) Computer Science (Cyber Security), APU — final year</dd></div>
+          <div><dt>Certificate</dt><dd>ELITE TecForte SOC Programme (Mar 2026)</dd></div>
           <div><dt>Last role</dt><dd>Network &amp; Security Administrator, Palmgold Management Sdn Bhd (May &ndash; Aug 2026)</dd></div>
           <div><dt>Focus</dt><dd>Detection engineering, purple teaming, SOC automation</dd></div>
           <div><dt>Languages</dt><dd>English, Mandarin, Malay, Cantonese</dd></div>
-          <div><dt>Status</dt><dd>Open to graduate &amp; junior analyst roles</dd></div>
         </dl>
       </div>
     </div>

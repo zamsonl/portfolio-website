@@ -14,6 +14,14 @@
   var yr = $('#yr');
   if (yr) yr.textContent = new Date().getFullYear();
 
+  /* ---- 1b. Disclosure counts ------------------------------------------- */
+  // "Details 4" must match the list it opens. Derive it, so an edited list
+  // can never leave a stale number on the button.
+  $$('details.more > summary > i').forEach(function (i) {
+    var list = i.parentNode.parentNode.querySelector(':scope > ul');
+    if (list) i.textContent = list.querySelectorAll(':scope > li').length;
+  });
+
   /* ---- 2. Theme -------------------------------------------------------- */
   (function theme() {
     var btn = $('#theme');
