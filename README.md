@@ -10,15 +10,15 @@ The company had been hit by ransomware in August 2025, before I joined. There wa
 
 - **Featured work** - three long-form case studies: the SOC build-out, the purple-team exercise, and the consoles
 - **Projects** - a searchable, filterable index of everything else, plus coursework
-- **SOC console templates** - two of the consoles, de-identified and published
+- **SOC console templates** - three tools from the SOC, de-identified and published
 - **Skills** - SIEM, network, automation, offensive and forensics
-- **Experience** - current role, CTF participation, and education
+- **Experience** - the Palmgold internship, CTF participation, and education
 - **About** - background and current focus
 - **Contact** - email, LinkedIn, and GitHub
 
 ## SOC console templates
 
-Two of the consoles I run in production, de-identified and published here so anyone with a Wazuh or OpenSearch backend can use them. Both open in demo mode with a synthetic feed, so the links below work with no backend at all.
+Two of the consoles I built for the SOC, de-identified and published here so anyone with a Wazuh or OpenSearch backend can use them. The third tool, Packet Highway (`soc-packet-highway.html`, [live demo](https://zamsonl.github.io/portfolio-website/soc-packet-highway.html)), is published alongside them and generates its own traffic with no backend. Both consoles open in demo mode with a synthetic feed, so the links below work with no backend at all.
 
 | Template | Live demo | What it is |
 | --- | --- | --- |
@@ -59,7 +59,7 @@ The demo feeds are synthetic. The alert console uses RFC 5737 documentation addr
 | Packet-Highway - 3D Traffic Visualizer | Three.js, instanced meshes, object pooling |
 | Building with AI Tooling | Claude Code, Ollama, and the verification habit that goes with them |
 | Physical Floor-Plan Agent Map *(in progress)* | Python, OCR pipeline, asset-to-location mapping |
-| DFIR Memory Analysis *(in progress)* | Volatility, Windows forensics |
+| Malicious File Analysis with Autopsy *(coursework)* | Autopsy, digital forensics |
 
 ## Coursework projects
 
@@ -71,7 +71,7 @@ The demo feeds are synthetic. The alert console uses RFC 5737 documentation addr
 
 ## A note on what is not here
 
-Configuration, detection content, and infrastructure details from the production SOC are deliberately kept out of this repository. Everything published describes architecture and approach only - no addresses, hostnames, or rule internals from a live environment. The two templates above are the only code from that environment published here, and they were de-identified before publication.
+Configuration, detection content, and infrastructure details from the production SOC are deliberately kept out of this repository. Everything published describes architecture and approach only - no addresses, hostnames, or rule internals from a live environment. The two consoles and Packet Highway above are the only code from that environment published here, and all three were de-identified before publication.
 
 ## Contact
 

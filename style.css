@@ -700,6 +700,7 @@ h1.hero-h em {
    width blows the labels up. Cap it and centre it instead. */
 .shot.pad { padding: clamp(1rem, 2.5vw, 2rem); }
 .shot.pad svg { display: block; width: 100%; max-width: 780px; margin-inline: auto; }
+.shot.pad svg.flow-narrow { display: none; }
 .shot-cap {
   padding: 12px 14px;
   border-top: 1px solid var(--line-solid);
@@ -1333,7 +1334,7 @@ mark {
   color: var(--ink-4);
   margin-bottom: 5px;
 }
-.link span {
+.link span:not(.link-ic) {
   display: block;
   font-size: .875rem;
   color: var(--ink);
@@ -1446,7 +1447,7 @@ mark {
 
 @media (max-width: 620px) {
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .stats li { border-left: 0; padding-inline: 0; }
+  .stats li { border-left: 0; padding-inline: 0 14px; }
   .stats li:nth-child(2n) { padding-left: 18px; border-left: 1px solid var(--line-solid); }
   .stats li:nth-child(n + 3) { border-top: 1px solid var(--line-solid); }
   .facts li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
@@ -1494,6 +1495,8 @@ mark {
   .sec { padding-block: 3rem; }   /* shorthand here would cancel the shell gutter too */
   .shot-cap { padding: 14px 16px; }
   .shot.pad { padding: 14px 12px; }
+  .shot.pad svg.flow-narrow { display: block; }
+  .shot.pad svg.flow-wide { display: none; }
 
   /* The full pill and location wrap to two ragged lines beside a 68px
      portrait; drop the least load-bearing words instead. */
