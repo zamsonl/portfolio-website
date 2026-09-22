@@ -498,17 +498,17 @@
   </div>
 
   <div class="filters rv" role="group" aria-label="Filter projects by discipline" id="filters">
-    <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>15</i></button>
+    <button class="filter" type="button" data-f="all" aria-pressed="true">All <i>16</i></button>
     <button class="filter" type="button" data-f="detection" aria-pressed="false">Detection <i>2</i></button>
     <button class="filter" type="button" data-f="collection" aria-pressed="false">Collection <i>3</i></button>
     <button class="filter" type="button" data-f="offensive" aria-pressed="false">Offensive &amp; forensics <i>1</i></button>
     <button class="filter" type="button" data-f="tooling" aria-pressed="false">Tooling <i>2</i></button>
-    <button class="filter" type="button" data-f="opensource" aria-pressed="false">Open source <i>3</i></button>
+    <button class="filter" type="button" data-f="opensource" aria-pressed="false">Open source <i>4</i></button>
     <button class="filter" type="button" data-f="coursework" aria-pressed="false">Coursework <i>4</i></button>
   </div>
 
   <div class="index-bar rv">
-    <p class="tag" id="fcount" aria-live="polite">Showing all 15</p>
+    <p class="tag" id="fcount" aria-live="polite">Showing all 16</p>
     <div class="index-actions">
       <button class="toggle-all" id="showAll" type="button" aria-expanded="false">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
@@ -779,6 +779,26 @@
         Repository
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
       </a>
+    </article>
+
+    <article data-key="1" class="item rv" data-cat="opensource">
+      <div class="item-top"><span class="item-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 2.5v19"/><path d="M2.5 12h19"/><path d="M5.2 5.2c3.6 3.1 3.6 10.5 0 13.6"/><path d="M18.8 5.2c-3.6 3.1-3.6 10.5 0 13.6"/></svg></span><span class="item-n">16 / OPEN SOURCE</span><span class="badge live"><span class="dot" aria-hidden="true"></span>Live</span></div>
+      <h3>Set Play Trainer &mdash; basketball tactics, graded</h3>
+      <p>Drag the five players to where a set play says they belong and get scored on it. Built because coach whiteboards only draw plays &mdash; none of them tell you whether you ran it right.</p>
+      <details class="more">
+        <summary>Details <i>4</i></summary>
+        <ul>
+        <li>Grades position, ball, action and spacing per step in real court feet &mdash; the engine never sees a pixel, so the score is identical on any screen</li>
+        <li>Floor General mode: play the point guard, call a team-mate across the floor, and the rest of the play resolves around the call you made</li>
+        <li>Plays publish to a Cloudflare Worker with D1, so a share link opens the play on any device; the offline link carries the whole play inside the URL instead</li>
+        <li>One HTML file, no build step and no dependencies, with the API the only off-origin request it makes</li>
+      </ul>
+      </details>
+      <div class="chips"><span class="chip">SVG</span><span class="chip">Cloudflare Workers</span><span class="chip">D1</span><span class="chip">Single file</span></div>
+      <div class="links-row">
+        <a class="alink" href="./set-play-trainer.html" target="_blank" rel="noreferrer">Open the trainer <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+        <a class="alink mute-link" href="https://github.com/zamsonl/portfolio-website/blob/main/set-play-trainer.html" target="_blank" rel="noreferrer">Source <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+      </div>
     </article>
 
   </div>

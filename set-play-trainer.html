@@ -360,6 +360,22 @@ textarea.input{resize:vertical;min-height:74px;line-height:1.5}
 .sw input::-webkit-color-swatch-wrapper{padding:0}
 .sw input::-webkit-color-swatch{border:0;border-radius:5px}
 .codebox{width:100%;font-family:var(--mono);font-size:12px;line-height:1.5;min-height:90px;word-break:break-all}
+/* A share link you can actually click, not a string you have to select. */
+.linkbox{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--accent-line);
+  background:var(--accent-soft);border-radius:10px}
+.linkbox a{flex:1;min-width:0;color:var(--accent);font-family:var(--mono);font-size:12.5px;
+  text-decoration:none;word-break:break-all}
+.linkbox a:hover{text-decoration:underline}
+.shareopt{border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:12px;background:var(--surface-2)}
+.shareopt.on{border-color:var(--accent-line)}
+.shareopt h3{margin:0 0 4px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.shareopt h3 .tagm{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:99px;padding:2px 8px}
+.shareopt p{margin:0 0 11px;font-size:13px;color:var(--ink-2);line-height:1.5}
+.cloudrow{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.cloudrow:last-child{border-bottom:0}
+.cloudrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.cloudrow .mt{font-size:12px;color:var(--ink-3);white-space:nowrap}
 .choices{display:grid;gap:9px}
 .choice{text-align:left;cursor:pointer;color:inherit;background:var(--surface-2);border:1.5px solid var(--line);
   border-radius:var(--r);padding:13px 15px;font-weight:650;font-size:15px}
@@ -1483,7 +1499,7 @@ const Store = {
 
   settings(){
     const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard',
-                defence:false, side:SIDE_DEFAULT, colors:Object.assign({}, DEFAULT_COLORS) };
+                defence:false, side:SIDE_DEFAULT, author:'', colors:Object.assign({}, DEFAULT_COLORS) };
     const v = this._get(K_SET, {});
     const out = Object.assign(d, (v && typeof v === 'object') ? v : {});
     /* v1 stored defence as 'off' | 'on' | 'mistakes' */
@@ -2030,6 +2046,7 @@ function go(path){ if (location.hash !== '#' + path) location.hash = path; else 
 function parseRoute(){
   const h = location.hash || '';
   if (h.startsWith('#p=')) return { name:'shared', code:h.slice(3).split('&')[0] };
+  if (h.startsWith('#s=')) return { name:'cloud',  id:h.slice(3).split('&')[0] };
   const parts = h.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
   if (!parts.length) return { name:'home' };
   const [name, id, sub] = parts;
@@ -2050,6 +2067,7 @@ function renderScreen(){
   const r = parseRoute();
   const root = clear(document.getElementById('app'));
   if (r.name === 'shared') return openShared(r.code);
+  if (r.name === 'cloud')  return openCloud(r.id);
   if (r.name !== 'home' && r.name !== 'quiz'){
     const play = findPlay(r.id);
     if (!play){ toast('That play no longer exists.'); return go('/'); }
@@ -2214,6 +2232,20 @@ function screenHome(root){
   s2.appendChild(g2);
   main.appendChild(s2);
 
+  /* Published plays, filled in after the page is already usable. A server that
+     is slow, down or blocked must never stand between you and your own
+     playbook, so this section loads itself and explains itself if it can't. */
+  const sc = el('section', { class:'section' });
+  const hc = el('div', { class:'section-h' });
+  hc.appendChild(el('h2', { text:'Shared by everyone' }));
+  const hcount = el('span', { class:'count', text:'Loading…' });
+  hc.appendChild(hcount);
+  sc.appendChild(hc);
+  const clist = el('div');
+  clist.appendChild(el('p', { class:'help', text:'Looking for plays other people have published…' }));
+  sc.appendChild(clist);
+  main.appendChild(sc);
+
   const s3 = el('section', { class:'section' });
   const q = el('div', { class:'quiz-card' });
   const qi = el('div', { class:'qi' }); qi.appendChild(icon('question'));
@@ -2233,7 +2265,37 @@ function screenHome(root){
   main.appendChild(foot);
 
   root.appendChild(main);
-  return { destroy(){} };
+
+  /* If you navigate away before the server answers, the reply is dropped
+     rather than written into a screen that no longer exists. */
+  let live = true;
+  (async () => {
+    try{
+      const rows = await cloudList(8);
+      if (!live) return;
+      clear(clist);
+      if (!rows.length){
+        hcount.textContent = '';
+        clist.appendChild(el('p', { class:'help', text:'Nothing published yet. Open any play, choose Share, and publish it — it shows up here, and the link works on any device.' }));
+        return;
+      }
+      hcount.textContent = String(rows.length);
+      for (const r of rows){
+        const row = el('div', { class:'cloudrow' });
+        row.appendChild(el('span', { class:'nm', text:r.name || 'Untitled play' }));
+        row.appendChild(el('span', { class:'mt',
+          text:(r.beats || 0) + ' step' + (r.beats === 1 ? '' : 's') + (r.author ? ' · ' + r.author : '') }));
+        row.appendChild(btn('Open', { cls:'sm', onclick:()=>go('s=' + r.id) }));
+        clist.appendChild(row);
+      }
+    }catch(e){
+      if (!live) return;
+      hcount.textContent = '';
+      clear(clist).appendChild(el('p', { class:'help', text:'Couldn’t load shared plays — ' + e.message + ' Everything else here still works.' }));
+    }
+  })();
+
+  return { destroy(){ live = false; } };
 }
 function playCard(p, own){
   const c = el('div', { class:'pcard', role:'button', tabindex:'0', 'aria-label':'Open ' + p.name });
@@ -3589,23 +3651,125 @@ function screenQuiz(root){
   return { destroy(){ if (anim && anim.raf) cancelAnimationFrame(anim.raf); anim = null; W.destroy(); }, redraw:draw };
 }
 
+/* ==================================================================== CLOUD
+   Publishing sends a play to a small Cloudflare Worker and gets back a short
+   code, so a link opens on any device without carrying the play inside the
+   URL. Every call here is optional and every failure is survivable: if the
+   service is unreachable the app behaves exactly as it did before, and the
+   self-contained "#p=" link is still there as the offline route.
+   ======================================================================== */
+const CLOUD = { base:'https://hoops-plays.ezforge-booth.workers.dev', timeout:12000 };
+
+async function cloudCall(path, opts){
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), CLOUD.timeout);
+  try{
+    const res = await fetch(CLOUD.base + path, Object.assign({ signal:ctl.signal, mode:'cors' }, opts || {}));
+    let data = null;
+    try{ data = await res.json(); }catch(e){}
+    if (!res.ok || !data || data.ok !== true){
+      throw new Error((data && data.error) || ('The server answered ' + res.status + '.'));
+    }
+    return data;
+  }catch(e){
+    /* Three failures read very differently to a person, so they are named. */
+    if (e && e.name === 'AbortError') throw new Error('The server took too long to answer. Try again.');
+    if (e instanceof TypeError) throw new Error('Could not reach the server — check your connection.');
+    throw e;
+  }finally{ clearTimeout(timer); }
+}
+function cloudLink(id){ return location.origin + location.pathname + '#s=' + id; }
+async function cloudPublish(play, author){
+  const clean = validatePlay(play);
+  return cloudCall('/v1/plays', {
+    method:'POST', headers:{ 'content-type':'application/json' },
+    body: JSON.stringify({ play:clean, author:String(author || '').slice(0,40) })
+  });
+}
+/* Anything coming back off the wire is untrusted, exactly like an import. */
+async function cloudGet(id){
+  const d = await cloudCall('/v1/plays/' + encodeURIComponent(id));
+  return { play:validatePlay(d.play), author:d.author || '', created:d.created || 0 };
+}
+async function cloudList(limit){
+  const d = await cloudCall('/v1/plays?limit=' + (limit || 12));
+  return Array.isArray(d.plays) ? d.plays : [];
+}
+
 /* ============================================================ SHARE / FILES */
 async function shareSheet(play){
   let clean;
   try{ clean = validatePlay(play); }catch(e){ return toast('This play can’t be shared: ' + e.message); }
-  const url = location.origin + location.pathname + '#p=' + await encodePlay(clean);
-  const s = sheet({ title:'Share “' + clean.name + '”', sub:'Anyone who opens this link gets the play. Nothing is uploaded — the whole play travels inside the link.' });
-  const ta = el('textarea', { class:'input codebox', readonly:true, 'aria-label':'Share link' });
-  ta.value = url;
-  s.body.appendChild(ta);
-  s.body.appendChild(el('p', { class:'help', style:'margin-top:8px',
-    text: url.length > 1800 ? 'This link is long — some chat apps cut long links. Exporting a file is safer.' : url.length + ' characters.' }));
-  s.foot.appendChild(btn('Close', { onclick:()=>s.close() }));
-  s.foot.appendChild(btn('Copy link', { cls:'pri', icon:'copy', onclick:async ()=>{
-    try{ await navigator.clipboard.writeText(url); toast('Link copied.'); }
-    catch(e){ ta.focus(); ta.select(); toast('Press Ctrl+C to copy the selected link.'); }
-  } }));
-  setTimeout(() => { try{ ta.focus(); ta.select(); }catch(e){} }, 30);
+
+  const s = sheet({ title:'Share “' + clean.name + '”',
+    sub:'Publish it once and the link works on any phone or laptop — yours or anyone else’s.' });
+
+  /* ---- the published link, the one most people want ---- */
+  const box = el('div', { class:'shareopt on' });
+  const h = el('h3', { text:'Link anyone can open' });
+  h.appendChild(el('span', { class:'tagm', text:'recommended' }));
+  box.appendChild(h);
+  box.appendChild(el('p', { text:'Puts the play online and gives you a short link. Open it on your phone, send it to a team-mate — the play is there. It also shows up under “Shared by everyone” on the home screen.' }));
+
+  const nameIn = el('input', { class:'input', type:'text', maxlength:'40', placeholder:'Your name (optional)',
+    value: App.settings.author || '', 'aria-label':'Your name, shown with the published play' });
+  box.appendChild(nameIn);
+
+  const out = el('div', { style:'margin-top:11px' });
+  box.appendChild(out);
+
+  const pubBtn = btn('Publish and get a link', { cls:'pri', icon:'share', onclick:async ()=>{
+    pubBtn.disabled = true;
+    clear(out).appendChild(el('p', { class:'help', text:'Publishing…' }));
+    try{
+      const author = nameIn.value.trim();
+      App.settings.author = author; saveSettings();
+      const res = await cloudPublish(clean, author);
+      const url = cloudLink(res.id);
+      clear(out);
+      const lb = el('div', { class:'linkbox' });
+      lb.appendChild(el('a', { href:url, target:'_blank', rel:'noreferrer', text:url }));
+      lb.appendChild(btn('Copy', { cls:'sm', icon:'copy', onclick:()=>copyText(url) }));
+      out.appendChild(lb);
+      out.appendChild(el('p', { class:'help', style:'margin-top:8px',
+        text:'Published. The code is ' + res.id + ' — that link now opens this play anywhere.' }));
+      pubBtn.remove();
+    }catch(e){
+      clear(out).appendChild(el('p', { class:'help', style:'color:var(--bad)', text:e.message }));
+      out.appendChild(el('p', { class:'help', style:'margin-top:6px',
+        text:'The offline link below still works — it needs no server at all.' }));
+      pubBtn.disabled = false;
+    }
+  } });
+  box.appendChild(pubBtn);
+  s.body.appendChild(box);
+
+  /* ---- the offline link, unchanged: no server, whole play inside the URL ---- */
+  const url2 = location.origin + location.pathname + '#p=' + await encodePlay(clean);
+  const box2 = el('div', { class:'shareopt' });
+  box2.appendChild(el('h3', { text:'Offline link' }));
+  box2.appendChild(el('p', { text: 'Nothing is uploaded — the whole play travels inside the link itself. Works forever, even if the server is gone, but the link is long (' + url2.length + ' characters)' + (url2.length > 1800 ? ' and some chat apps will cut it.' : '.') }));
+  const lb2 = el('div', { class:'linkbox' });
+  lb2.appendChild(el('a', { href:url2, target:'_blank', rel:'noreferrer',
+    text: url2.length > 96 ? url2.slice(0, 96) + '…' : url2, title:url2 }));
+  lb2.appendChild(btn('Copy', { cls:'sm', icon:'copy', onclick:()=>copyText(url2) }));
+  box2.appendChild(lb2);
+  s.body.appendChild(box2);
+
+  s.foot.appendChild(btn('Export a file instead', { icon:'download', onclick:()=>{ s.close(); exportPlay(clean); } }));
+  s.foot.appendChild(btn('Done', { cls:'pri', onclick:()=>s.close() }));
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); toast('Link copied.'); }
+  catch(e){
+    /* Clipboard access is refused often enough that a dead button is not ok. */
+    const ta = el('textarea', { style:'position:fixed;left:-9999px;top:0' });
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    let done = false;
+    try{ done = document.execCommand('copy'); }catch(err){}
+    ta.remove();
+    toast(done ? 'Link copied.' : 'Couldn’t copy — long-press the link to copy it.');
+  }
 }
 function download(name, obj){
   const blob = new Blob([JSON.stringify(obj, null, 2)], { type:'application/json' });
@@ -3661,15 +3825,18 @@ function importFile(){
   document.body.appendChild(inp);
   inp.click();
 }
-async function openShared(code){
-  let p;
-  try{ p = await decodePlay(code); }
-  catch(e){ toast('That share link couldn’t be read: ' + e.message); history.replaceState(null, '', location.pathname); return route(); }
-  history.replaceState(null, '', location.pathname);
-  const root = clear(document.getElementById('app'));
-  App.ctl = screenHome(root);
-  const s = sheet({ title:'Someone shared a play with you', sub:'“' + p.name + '” — ' + p.beats.length + ' steps.' });
+/* One presenter for an arriving play, whichever route brought it in: an
+   offline link, a published code, or a row in the shared list. Two code paths
+   drawing the same sheet is exactly how they drift apart. */
+function offerPlay(p, opts){
+  opts = opts || {};
+  const n = p.beats.length;
+  const s = sheet({
+    title: opts.title || 'Someone shared a play with you',
+    sub: '“' + p.name + '” — ' + n + ' step' + (n === 1 ? '' : 's') + (opts.by ? ' · by ' + opts.by : '')
+  });
   s.body.appendChild(el('div', { class:'thumb', style:'border-radius:12px;overflow:hidden;background:var(--c-floor);aspect-ratio:50/40' }, [playThumb(p)]));
+  if (p.blurb) s.body.appendChild(el('p', { class:'help', style:'margin-top:11px', text:p.blurb }));
   s.foot.appendChild(btn('Not now', { onclick:()=>s.close() }));
   s.foot.appendChild(btn('Add to my plays', { cls:'pri', icon:'plus', onclick:()=>{
     const saved = importPlays([p]);
@@ -3677,6 +3844,35 @@ async function openShared(code){
     if (saved.length){ toast('Added “' + saved[0].name + '” to your plays.'); go('/play/' + encodeURIComponent(saved[0].id)); }
     else storageFailed();
   } }));
+  return s;
+}
+async function openShared(code){
+  let p;
+  try{ p = await decodePlay(code); }
+  catch(e){ toast('That share link couldn’t be read: ' + e.message); history.replaceState(null, '', location.pathname); return route(); }
+  history.replaceState(null, '', location.pathname);
+  const root = clear(document.getElementById('app'));
+  App.ctl = screenHome(root);
+  offerPlay(p);
+}
+/* A published code has to travel to the server and back, so this one can fail
+   for reasons that are nobody's fault. Name the reason, leave the app usable. */
+async function openCloud(id){
+  const root = clear(document.getElementById('app'));
+  App.ctl = screenHome(root);
+  const wait = sheet({ title:'Opening a shared play', sub:'Code ' + id });
+  wait.body.appendChild(el('p', { class:'help', text:'Fetching it from the server…' }));
+  let got;
+  try{ got = await cloudGet(id); }
+  catch(e){
+    history.replaceState(null, '', location.pathname);
+    clear(wait.body).appendChild(el('p', { class:'help', style:'color:var(--bad)', text:e.message }));
+    wait.foot.appendChild(btn('Close', { cls:'pri', onclick:()=>wait.close() }));
+    return;
+  }
+  history.replaceState(null, '', location.pathname);
+  wait.close();
+  offerPlay(got.play, { title:'A published play', by:got.author || '' });
 }
 
 /* ================================================================ SETTINGS */
@@ -3763,7 +3959,8 @@ window.HOOPS = {
   encodePlay, decodePlay, validatePlay, stripTags, cornerX, breakY, cloneSpots,
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   Store, App, findPlay, allPlays, isBuiltin, importPlays, moveSentence, callSentence, stepMarks,
-  go, route, parseRoute, createPlay, copyPlay, SIDE_DEFAULT, SIDE_MIN, SIDE_MAX, MAX_STEPS, MAX_MOVES
+  go, route, parseRoute, createPlay, copyPlay, SIDE_DEFAULT, SIDE_MIN, SIDE_MAX, MAX_STEPS, MAX_MOVES,
+  CLOUD, cloudPublish, cloudGet, cloudList, cloudLink, offerPlay, shareSheet
 };
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
