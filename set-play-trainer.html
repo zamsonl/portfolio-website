@@ -1499,12 +1499,16 @@ const Store = {
 
   settings(){
     const d = { appearance:'dark', court:'hardwood', render:'flat', spec:'nba', hints:'standard',
-                defence:false, side:SIDE_DEFAULT, author:'', colors:Object.assign({}, DEFAULT_COLORS) };
+                defence:false, side:SIDE_DEFAULT, author:'', published:{}, colors:Object.assign({}, DEFAULT_COLORS) };
     const v = this._get(K_SET, {});
     const out = Object.assign(d, (v && typeof v === 'object') ? v : {});
     /* v1 stored defence as 'off' | 'on' | 'mistakes' */
     out.defence = out.defence === true || out.defence === 'on' || out.defence === 'mistakes';
     out.colors = Object.assign({}, DEFAULT_COLORS, (out.colors && typeof out.colors === 'object') ? out.colors : {});
+    /* playId -> published code. Anything not a plain object is discarded rather
+       than trusted: this is read straight back out of localStorage. */
+    out.published = (out.published && typeof out.published === 'object' && !Array.isArray(out.published))
+      ? out.published : {};
     if (!['guided','standard','blind'].includes(out.hints)) out.hints = 'standard';
     if (!COURTS[out.spec]) out.spec = 'nba';
     return out;
@@ -2198,6 +2202,10 @@ function screenHome(root){
   h1.appendChild(el('h2', { text:'My plays' }));
   h1.appendChild(el('span', { class:'count', text: mine.length ? String(mine.length) : '' }));
   s1.appendChild(h1);
+  /* Plays are per-browser. Nothing said so, so the first time someone opened
+     the trainer on their phone their playbook looked empty for no reason. */
+  if (mine.length) s1.appendChild(el('p', { class:'help', style:'margin:-4px 0 14px',
+    text:'These live only in this browser. Publish one to open it on your phone.' }));
   if (!mine.length){
     /* one wide invitation, not a lone card stranded in an empty row */
     const empty = el('button', { class:'emptyhero', type:'button', onclick:createPlay });
@@ -2335,6 +2343,8 @@ function playMenuItems(p){
   const items = [];
   if (own) items.push({ label:'Edit', icon:'edit', run:()=>go('/edit/' + encodeURIComponent(p.id)) });
   items.push({ label: own ? 'Duplicate' : 'Make my own copy', icon:'copy', run:()=>copyPlay(p) });
+  items.push({ label: publishedCode(p.id) ? 'Open on my phone' : 'Publish online',
+               icon:'share', run:()=>publishSheet(p) });
   items.push({ label:'Share link', icon:'share', run:()=>shareSheet(p) });
   items.push({ label:'Export file', icon:'download', run:()=>exportPlay(p) });
   if (own){ items.push('-'); items.push({ label:'Delete', icon:'trash', danger:true, run:()=>deletePlay(p) }); }
@@ -3696,6 +3706,89 @@ async function cloudList(limit){
   return Array.isArray(d.plays) ? d.plays : [];
 }
 
+/* Which plays this browser has published, so the menu can offer the link back
+   instead of making you publish the same play twice to find it again. */
+function publishedCode(playId){
+  const m = App.settings && App.settings.published;
+  return (m && typeof m === 'object' && typeof m[playId] === 'string') ? m[playId] : '';
+}
+function rememberPublished(playId, code){
+  if (!App.settings.published || typeof App.settings.published !== 'object') App.settings.published = {};
+  const m = App.settings.published;
+  m[playId] = code;
+  /* Bounded: this rides along in the settings blob and must not grow forever. */
+  const keys = Object.keys(m);
+  if (keys.length > 60) delete m[keys[0]];
+  saveSettings();
+}
+
+/* The one-tap route to "I want this on my phone". shareSheet still offers both
+   kinds of link; this one does the single thing people actually came for. */
+async function publishSheet(play){
+  let clean;
+  try{ clean = validatePlay(play); }catch(e){ return toast('This play can’t be published: ' + e.message); }
+
+  const had = publishedCode(play.id);
+  const s = sheet({ title:'Publish “' + clean.name + '”',
+    sub:'Puts the play online so a link opens it on your phone — or anyone else’s device.' });
+
+  const nameIn = el('input', { class:'input', type:'text', maxlength:'40', placeholder:'Your name (optional)',
+    value: App.settings.author || '', 'aria-label':'Your name, shown with the published play' });
+  s.body.appendChild(nameIn);
+
+  const out = el('div', { style:'margin-top:12px' });
+  s.body.appendChild(out);
+
+  function showLink(code, note){
+    clear(out);
+    const url = cloudLink(code);
+    const lb = el('div', { class:'linkbox' });
+    lb.appendChild(el('a', { href:url, target:'_blank', rel:'noreferrer', text:url }));
+    lb.appendChild(btn('Copy', { cls:'sm', icon:'copy', onclick:()=>copyText(url) }));
+    out.appendChild(lb);
+    out.appendChild(el('p', { class:'help', style:'margin-top:8px', text:note }));
+  }
+
+  if (had){
+    /* A published link is a snapshot. Editing the play afterwards does not
+       change what that link serves, and silently stale is the worse failure. */
+    showLink(had, 'Already published. This link serves the play exactly as it was when you published it — if you have edited it since, publish again below for an up-to-date link.');
+  } else {
+    out.appendChild(el('p', { class:'help',
+      text:'Not published yet. Publishing uploads this play so the link works on any device, and lists it under “Shared by everyone”.' }));
+  }
+
+  const pubBtn = btn(had ? 'Publish the current version' : 'Publish', { cls:'pri', icon:'share', onclick:async ()=>{
+    pubBtn.disabled = true;
+    clear(out).appendChild(el('p', { class:'help', text:'Publishing…' }));
+    try{
+      const author = nameIn.value.trim();
+      App.settings.author = author; saveSettings();
+      const res = await cloudPublish(clean, author);
+      rememberPublished(play.id, res.id);
+      showLink(res.id, 'Published. Open this on your phone, or just reload the trainer there — it appears under “Shared by everyone”.');
+      pubBtn.remove();
+    }catch(e){
+      clear(out).appendChild(el('p', { class:'help', style:'color:var(--bad)', text:e.message }));
+      if (had) showLinkAfterError();
+      out.appendChild(el('p', { class:'help', style:'margin-top:6px',
+        text:'Nothing was lost — the play is still saved in this browser. You can also use ⋯ → Export file to move it by hand.' }));
+      pubBtn.disabled = false;
+    }
+    function showLinkAfterError(){
+      const url = cloudLink(had);
+      const lb = el('div', { class:'linkbox', style:'margin-top:10px' });
+      lb.appendChild(el('a', { href:url, target:'_blank', rel:'noreferrer', text:url }));
+      lb.appendChild(btn('Copy', { cls:'sm', icon:'copy', onclick:()=>copyText(url) }));
+      out.appendChild(lb);
+      out.appendChild(el('p', { class:'help', style:'margin-top:6px', text:'Your earlier link still works.' }));
+    }
+  } });
+
+  s.foot.appendChild(btn('Close', { onclick:()=>s.close() }));
+  s.foot.appendChild(pubBtn);
+}
+
 /* ============================================================ SHARE / FILES */
 async function shareSheet(play){
   let clean;
@@ -3960,7 +4053,8 @@ window.HOOPS = {
   slotColors, readableInk, DEFAULT_COLORS, COLOR_PRESETS,
   Store, App, findPlay, allPlays, isBuiltin, importPlays, moveSentence, callSentence, stepMarks,
   go, route, parseRoute, createPlay, copyPlay, SIDE_DEFAULT, SIDE_MIN, SIDE_MAX, MAX_STEPS, MAX_MOVES,
-  CLOUD, cloudPublish, cloudGet, cloudList, cloudLink, offerPlay, shareSheet
+  CLOUD, cloudPublish, cloudGet, cloudList, cloudLink, offerPlay, shareSheet,
+  publishSheet, publishedCode, rememberPublished, playMenuItems
 };
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
