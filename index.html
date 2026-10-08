@@ -6,17 +6,17 @@
 <title>Zamson Lim — purple team and detection engineering</title>
 <meta name="description" content="I build my own C2 and malware samples, detonate them in isolated VMs, and turn what the sensors miss into detection rules. Final-year Computer Science (Cyber Security) student at Asia Pacific University. Built and ran a SOC at Palmgold Management." />
 <meta name="author" content="Zamson Lim" />
-<meta name="theme-color" content="#0a0912" />
+<meta name="theme-color" content="#0b0c12" />
 <meta property="og:type" content="profile" />
 <meta property="og:title" content="Zamson Lim — purple team and detection engineering" />
 <meta property="og:description" content="I build my own C2 and malware samples, detonate them in isolated VMs, and turn what the sensors miss into detection rules." />
 <meta property="og:image" content="https://zamsonl.github.io/portfolio-website/img/portrait.jpg" />
 <meta property="og:url" content="https://zamsonl.github.io/portfolio-website/" />
 <meta name="twitter:card" content="summary" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2048%2048%27%3E%3Crect%20width%3D%2748%27%20height%3D%2748%27%20rx%3D%2711%27%20fill%3D%27%230a0912%27%2F%3E%3Cg%20fill%3D%27none%27%20stroke-width%3D%274.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M16%2016H32%27%20stroke%3D%27%23ff5f73%27%2F%3E%3Cpath%20d%3D%27M32%2016%2016%2032%27%20stroke%3D%27%234fa8ff%27%2F%3E%3Cpath%20d%3D%27M16%2032H32%27%20stroke%3D%27%239f72ff%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2048%2048%27%3E%3Crect%20width%3D%2748%27%20height%3D%2748%27%20rx%3D%2711%27%20fill%3D%27%230b0c12%27%2F%3E%3Cg%20fill%3D%27none%27%20stroke-width%3D%274.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M16%2016H32%27%20stroke%3D%27%23ff5d6a%27%2F%3E%3Cpath%20d%3D%27M32%2016%2016%2032%27%20stroke%3D%27%2352a8ff%27%2F%3E%3Cpath%20d%3D%27M16%2032H32%27%20stroke%3D%27%23a07cff%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 <script>
   (function () {
@@ -24,7 +24,6 @@
       var t = localStorage.getItem('zl.theme');
       if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', t);
-      if (localStorage.getItem('zl.rail') === 'off') document.documentElement.classList.add('rail-off');
     } catch (e) {}
   })();
 </script>
@@ -32,47 +31,12 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<button class="rail-reopen" id="railReopen" type="button" aria-label="Show menu" title="Show menu">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-</button>
-
-<aside class="rail" aria-label="Zamson Lim">
-  <button class="rail-hide" id="railHide" type="button" aria-label="Hide menu" title="Hide menu">
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
-  </button>
-  <a class="rail-id" href="#main">
-    <svg class="zmark zmark-lg" width="38" height="38" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14H34" stroke="var(--red)"/><path d="M34 14 14 34" stroke="var(--blue)"/><path d="M14 34H34" stroke="var(--purple)"/></g></svg>
-    <span class="rail-name">Zamson Lim</span>
-    <span class="rail-role">Purple team and detection engineering</span>
-  </a>
-  <nav class="rail-nav" aria-label="Sections">
-    <a href="#purple"><i class="rr rr-red" aria-hidden="true"></i>Purple team</a>
-    <a href="#samples"><i class="rr rr-red" aria-hidden="true"></i>Samples</a>
-    <a href="#soc"><i class="rr rr-blue" aria-hidden="true"></i>Experience</a>
-    <a href="#skills"><i class="rr rr-purple" aria-hidden="true"></i>Skills</a>
-    <a href="#projects"><i class="rr rr-purple" aria-hidden="true"></i>Projects</a>
-    <a href="#about"><i class="rr rr-purple" aria-hidden="true"></i>About</a>
-  </nav>
-  <div class="rail-foot">
-    <p class="rail-status"><span class="dot" aria-hidden="true"></span>Open to graduate roles</p>
-    <div class="rail-act">
-      <a class="btn btn-fill btn-sm" href="mailto:zamsonlim@gmail.com">Email me</a>
-      <a class="btn btn-line btn-sm" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
-    </div>
-    <div class="rail-links">
-      <a href="https://github.com/zamsonl" target="_blank" rel="noreferrer">GitHub</a>
-      <a href="https://www.linkedin.com/in/zamson-lim-b16617374" target="_blank" rel="noreferrer">LinkedIn</a>
-      <button class="icon theme-toggle" id="theme2" type="button" aria-label="Switch colour theme" title="Switch theme">
-        <svg class="i-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        <svg class="i-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2 12h2.4M19.6 12H22M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
-      </button>
-    </div>
-  </div>
-</aside>
-
 <header class="top" id="top">
   <div class="wrap top-in">
-    <a class="logo" href="#main"><svg class="zmark" width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14H34" stroke="var(--red)"/><path d="M34 14 14 34" stroke="var(--blue)"/><path d="M14 34H34" stroke="var(--purple)"/></g></svg>Zamson&nbsp;Lim</a>
+    <a class="logo" href="#main" aria-label="Zamson Lim, back to top">
+      <svg class="zmark" width="26" height="26" viewBox="0 0 48 48" aria-hidden="true"><g fill="none" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14H34" stroke="var(--red)"/><path d="M34 14 14 34" stroke="var(--blue)"/><path d="M14 34H34" stroke="var(--violet)"/></g></svg>
+      <span>Zamson Lim</span>
+    </a>
     <nav class="nav" id="nav" aria-label="Sections">
       <a href="#purple">Purple team</a>
       <a href="#samples">Samples</a>
@@ -80,13 +44,14 @@
       <a href="#skills">Skills</a>
       <a href="#projects">Projects</a>
       <a href="#about">About</a>
+      <a class="nav-cv" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
     </nav>
     <div class="top-act">
-      <button class="icon theme-toggle" id="theme" type="button" aria-label="Switch colour theme" title="Switch theme">
+      <button class="icon theme-toggle" type="button" aria-label="Switch colour theme" title="Switch theme">
         <svg class="i-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="i-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2 12h2.4M19.6 12H22M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
       </button>
-      <a class="btn btn-line btn-sm" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
+      <a class="btn btn-line btn-sm top-cv" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Résumé</a>
       <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
     </div>
   </div>
@@ -111,7 +76,7 @@
           C2 framework and malware samples &mdash; detonate it in an isolated lab, watch what the
           sensors pick up and what they miss, and turn the gap into a detection rule.
         </p>
-        <p class="lede">
+        <p class="lede-2">
           I spent my internship at Palmgold Management building and running their SOC, which gave me
           somewhere real to test all of this. I&rsquo;m in my final year of a Computer Science
           (Cyber Security) degree at Asia Pacific University.
@@ -124,20 +89,20 @@
         <p class="avail"><span class="dot" aria-hidden="true"></span>Open to graduate roles in purple team, detection engineering or a SOC</p>
       </div>
 
-      <aside class="log" aria-labelledby="log-h">
-        <div class="log-head">
-          <h2 id="log-h">What I built in the lab</h2>
+      <aside class="ledger" aria-labelledby="ledger-h">
+        <div class="ledger-head">
+          <h2 id="ledger-h">What I built in the lab</h2>
           <p>Written by me, to test detections. Isolated VMs, written authorization, never a live sample.</p>
         </div>
-        <ul class="log-list">
-          <li><span class="lang">Python</span><span class="what">A C2 framework and operator console</span></li>
-          <li><span class="lang">Rust</span><span class="what">Ransomware behaviour</span></li>
-          <li><span class="lang">Python</span><span class="what">Browser credential stealer</span></li>
-          <li><span class="lang">C++</span><span class="what">C2 client</span></li>
-          <li><span class="lang">VBA</span><span class="what">Word macro abuse</span></li>
-          <li><span class="lang">C/C++</span><span class="what">DLL injection</span></li>
+        <ul class="ledger-list">
+          <li><a href="#purple"><span class="lang">Python</span><span class="what">A C2 framework and operator console</span></a></li>
+          <li><a href="#case-ransomware"><span class="lang">Rust</span><span class="what">Ransomware behaviour</span></a></li>
+          <li><a href="#case-creds"><span class="lang">Python</span><span class="what">Browser credential stealer</span></a></li>
+          <li><a href="#case-c2client"><span class="lang">C++</span><span class="what">C2 client</span></a></li>
+          <li><a href="#case-creds"><span class="lang">VBA</span><span class="what">Word macro abuse</span></a></li>
+          <li><a href="#case-creds"><span class="lang">C/C++</span><span class="what">DLL injection</span></a></li>
         </ul>
-        <p class="log-foot">Every one of these ended up as Wazuh rules, Zeek scripts and OpenSearch queries.</p>
+        <p class="ledger-foot">Every one of these ended up as Wazuh rules, Zeek scripts and OpenSearch queries.</p>
       </aside>
     </div>
   </section>
@@ -145,12 +110,13 @@
   <!-- PURPLE TEAM -->
   <section class="sec" id="purple">
     <div class="wrap">
-      <h2>Purple team</h2>
-      <p class="sub">I run both sides: write the attack, then go and catch it. Writing the tooling myself is the only way I trust what a rule is really matching on.</p>
+      <header class="sec-head">
+        <h2>Purple team</h2>
+        <p class="sub">I run both sides: write the attack, then go and catch it. Writing the tooling myself is the only way I trust what a rule is really matching on.</p>
+      </header>
 
-      <!-- custom C2 -->
-      <div class="feature">
-        <div class="feature-text">
+      <div class="pt-row pt-c2">
+        <div class="prose">
           <h3>A C2 framework I wrote</h3>
           <p>
             I built my own command-and-control framework in Python rather than picking one off the
@@ -166,30 +132,65 @@
         </div>
         <button class="shot" type="button" data-full="img/c2-console-full.png" data-w="1720" data-h="1487"
                 data-caption="The operator console of the C2 framework I wrote, in an isolated Kali VM. The help menu lists the commands it supports.">
-          <img src="img/c2-console-thumb.jpg" width="960" height="830" loading="lazy" decoding="async"
+          <img src="img/c2-console-thumb.jpg" width="960" height="829" loading="lazy" decoding="async"
                alt="A terminal showing a custom C2 operator help menu with commands like list, shell, exfil and recon." />
-          <span class="shot-tag">The C2 operator console</span>
+          <span class="shot-cap"><span>The C2 operator console</span><span class="shot-open">View full size</span></span>
         </button>
       </div>
 
-      <!-- the rule it produced -->
-      <div class="rulewrap">
-        <div class="rule-intro">
-          <h3>The rule it produced</h3>
-          <p>
-            Watching that beacon arrive in Wazuh is how I wrote the detection for it. One rule notices
-            a single outbound connection to the tunnel edge. A second says that six of them in a
-            minute from the same machine is a pattern, not a coincidence.
-          </p>
-          <p>I mapped it to the ATT&amp;CK techniques for a command-and-control channel over a web
-            protocol, so it lines up with the rest of the coverage.</p>
-          <p class="rule-aside">The first rule alone is noise. The frequency rule is the one that means something.</p>
-        </div>
-        <div class="lab-rule">
-          <div class="code-head">
-            <span class="code-name">c2_beacon.xml</span>
-            <span class="code-note">Wazuh rules I wrote for the C2 exercise</span>
+      <div class="pt-row pt-rule" id="purple-rule">
+        <div class="rule-left">
+          <div class="prose">
+            <h3>The rule it produced</h3>
+            <p>
+              Watching that beacon arrive in Wazuh is how I wrote the detection for it. One rule notices
+              a single outbound connection to the tunnel edge. A second says that six of them in a
+              minute from the same machine is a pattern, not a coincidence.
+            </p>
+            <p>I mapped it to the ATT&amp;CK techniques for a command-and-control channel over a web
+              protocol, so it lines up with the rest of the coverage.</p>
+            <p class="aside">The first rule alone is noise. The frequency rule is the one that means something.</p>
           </div>
+
+          <figure class="strip" id="strip">
+            <div class="strip-top">
+              <figcaption>Six connections from one source address inside 60 seconds</figcaption>
+              <button class="strip-play" id="stripPlay" type="button">
+                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.8v8.4L10 6z" fill="currentColor"/></svg>
+                Step through it
+              </button>
+            </div>
+            <div class="strip-plot" role="img" aria-label="Rule 100001 fires at level 3 on each of six outbound SSL connections from the same source within 60 seconds. On the sixth, rule 100002 fires at level 12: potential beacon.">
+              <span class="lane-name"><code>100001</code><span>level 3</span></span>
+              <div class="lane-track lane-3">
+                <i class="m" style="--x:6.7%"></i><i class="m" style="--x:20%"></i><i class="m" style="--x:33.3%"></i>
+                <i class="m" style="--x:46.7%"></i><i class="m" style="--x:60%"></i><i class="m" style="--x:73.3%"></i>
+              </div>
+              <span class="lane-name"><code>100002</code><span>level 12</span></span>
+              <div class="lane-track lane-12">
+                <i class="d" style="--x:73.3%"></i>
+              </div>
+              <span class="axis-pad" aria-hidden="true"></span>
+              <div class="axis" aria-hidden="true"><span>0 s</span><span>30 s</span><span>60 s</span></div>
+            </div>
+            <div class="strip-key">
+              <p><i class="k-m" aria-hidden="true"></i><span>Each connection:</span> <code>Outbound SSL to a tunnel edge</code></p>
+              <p><i class="k-d" aria-hidden="true"></i><span>Sixth in the window:</span> <code>Potential beacon: repeated outbound SSL</code></p>
+            </div>
+            <p class="strip-count" id="stripCount" aria-live="polite"></p>
+          </figure>
+        </div>
+
+        <div class="sheet">
+          <div class="sheet-head">
+            <span class="sheet-name">c2_beacon.xml</span>
+            <span class="sheet-note">Wazuh rules I wrote for the C2 exercise</span>
+          </div>
+          <dl class="sheet-meta">
+            <div><dt>Rule 100001</dt><dd>level 3</dd></div>
+            <div><dt>Rule 100002</dt><dd>level 12, 6 matches in 60 s from one source</dd></div>
+            <div><dt>ATT&amp;CK</dt><dd class="v">T1071.001, T1572</dd></div>
+          </dl>
 <pre class="code"><code><span class="c">&lt;!-- one connection to a tunnel edge --&gt;</span>
 <span class="t">&lt;rule</span> <span class="a">id</span>=<span class="s">"100001"</span> <span class="a">level</span>=<span class="s">"3"</span><span class="t">&gt;</span>
   <span class="t">&lt;if_sid&gt;</span>81633<span class="t">&lt;/if_sid&gt;</span>
@@ -217,67 +218,74 @@
   <!-- SAMPLES -->
   <section class="sec sec-alt" id="samples">
     <div class="wrap">
-      <h2>Samples, and what they showed</h2>
-      <p class="sub">Each one follows the same path: I run it as the attacker, watch what the sensors see, and turn the gap into a rule. Red is what I did, blue is what the defence recorded, purple is what came out of it.</p>
+      <header class="sec-head">
+        <h2>Samples, and what they showed</h2>
+        <p class="sub">Each one follows the same path: I run it as the attacker, watch what the sensors see, and turn the gap into a rule. Red is what I did, blue is what the defence recorded, purple is what came out of it.</p>
+        <ul class="key" aria-label="Colour key">
+          <li class="k-red">I ran</li>
+          <li class="k-blue">The SIEM saw</li>
+          <li class="k-violet">I wrote</li>
+        </ul>
+      </header>
 
-      <article class="case">
-        <div class="case-top">
-          <h3>Ransomware behaviour, in Rust</h3>
-          <p class="tags"><span class="tag red">Attacker</span><span class="tag purple">MITRE T1486</span></p>
-        </div>
-        <div class="case-body">
-          <button class="case-shot" type="button" data-full="img/lab-defender-full.png" data-w="1157" data-h="436"
+      <article class="case" id="case-ransomware">
+        <div class="case-side">
+          <div class="case-top">
+            <h3>Ransomware behaviour, in Rust</h3>
+            <p class="tags"><span class="tag red">Attacker</span><span class="tag violet">MITRE T1486</span></p>
+          </div>
+          <button class="shot" type="button" data-full="img/lab-defender-full.png" data-w="1157" data-h="436"
                   data-caption="My own Rust ransomware sample, run in an isolated VirtualBox VM, triggers Windows Defender's ransomware detection.">
             <img src="img/lab-defender-thumb.jpg" width="760" height="286" loading="lazy" decoding="async"
                  alt="A Windows Security notification reading Ransomware found, Microsoft Defender has detected threats." />
-            <span class="shot-tag">My sample trips Defender</span>
+            <span class="shot-cap"><span>My sample trips Defender</span><span class="shot-open">View full size</span></span>
           </button>
-          <div class="beats">
-            <div class="beat beat-red"><h4>I ran</h4><p>A Rust sample that behaves like ransomware, hard-guarded so it could only ever write inside one canary folder. Benign by construction, never a live sample on the network.</p></div>
-            <div class="beat beat-blue"><h4>The SIEM saw</h4><p>File integrity monitoring caught the burst of changes inside the canary folder, which is what I wanted to confirm before relying on it.</p></div>
-            <div class="beat beat-purple"><h4>I wrote</h4><p>File integrity rules on that folder, mapped to T1486. My first version fired on every agent&rsquo;s overnight scan, a domain controller included, until I scoped it to one path.</p></div>
-          </div>
         </div>
+        <ol class="trace">
+          <li class="beat b-red"><h4>I ran</h4><p>A Rust sample that behaves like ransomware, hard-guarded so it could only ever write inside one canary folder. Benign by construction, never a live sample on the network.</p></li>
+          <li class="beat b-blue"><h4>The SIEM saw</h4><p>File integrity monitoring caught the burst of changes inside the canary folder, which is what I wanted to confirm before relying on it.</p></li>
+          <li class="beat b-violet"><h4>I wrote</h4><p>File integrity rules on that folder, mapped to T1486. My first version fired on every agent&rsquo;s overnight scan, a domain controller included, until I scoped it to one path.</p></li>
+        </ol>
       </article>
 
-      <article class="case case-rev">
-        <div class="case-top">
-          <h3>A C2 client, in C++</h3>
-          <p class="tags"><span class="tag red">Attacker</span><span class="tag blue">Network</span></p>
-        </div>
-        <div class="case-body">
-          <button class="case-shot" type="button" data-full="img/c2-recon-full.png" data-w="1840" data-h="1223"
+      <article class="case" id="case-c2client">
+        <div class="case-side">
+          <div class="case-top">
+            <h3>A C2 client, in C++</h3>
+            <p class="tags"><span class="tag red">Attacker</span><span class="tag blue">Network</span></p>
+          </div>
+          <button class="shot" type="button" data-full="img/c2-recon-full.png" data-w="1840" data-h="1223"
                   data-caption="The recon command in my C2 framework walking a target's file system in the lab, listing the files it found.">
             <img src="img/c2-recon-thumb.jpg" width="760" height="505" loading="lazy" decoding="async"
                  alt="A terminal listing configuration file paths found by a recon command." />
-            <span class="shot-tag">The recon command, running</span>
+            <span class="shot-cap"><span>The recon command, running</span><span class="shot-open">View full size</span></span>
           </button>
-          <div class="beats">
-            <div class="beat beat-red"><h4>I ran</h4><p>A C2 client that checks in on a fixed interval, talking back to the listener in my own framework, reached through a tunnelling service so the traffic looked ordinary from outside.</p></div>
-            <div class="beat beat-blue"><h4>The SIEM saw</h4><p>Only DNS named the affected hosts. The firewall and the tunnel both reported a single shared address, which tells you nothing about which machine to check.</p></div>
-            <div class="beat beat-purple"><h4>I wrote</h4><p>The two beacon rules above, built on the DNS side rather than the firewall side, because that was the side with the answer.</p></div>
-          </div>
         </div>
+        <ol class="trace">
+          <li class="beat b-red"><h4>I ran</h4><p>A C2 client that checks in on a fixed interval, talking back to the listener in my own framework, reached through a tunnelling service so the traffic looked ordinary from outside.</p></li>
+          <li class="beat b-blue"><h4>The SIEM saw</h4><p>Only DNS named the affected hosts. The firewall and the tunnel both reported a single shared address, which tells you nothing about which machine to check.</p></li>
+          <li class="beat b-violet"><h4>I wrote</h4><p>The two beacon rules above, built on the DNS side rather than the firewall side, because that was the side with the answer.</p></li>
+        </ol>
       </article>
 
-      <article class="case">
-        <div class="case-top">
-          <h3>Credential theft, macros and DLL injection</h3>
-          <p class="tags"><span class="tag red">Attacker</span><span class="tag purple">Rules</span></p>
-        </div>
-        <div class="case-body">
-          <button class="case-shot" type="button" data-full="img/phish-capture-full.png" data-w="1330" data-h="560"
+      <article class="case" id="case-creds">
+        <div class="case-side">
+          <div class="case-top">
+            <h3>Credential theft, macros and DLL injection</h3>
+            <p class="tags"><span class="tag red">Attacker</span><span class="tag violet">Rules</span></p>
+          </div>
+          <button class="shot" type="button" data-full="img/phish-capture-full.png" data-w="1330" data-h="560"
                   data-caption="A phishing kit running in the lab, printing each field and value as a form is submitted. The values here are test credentials.">
             <img src="img/phish-capture-thumb.jpg" width="760" height="320" loading="lazy" decoding="async"
                  alt="A terminal printing captured form fields: email and pass values, with test passwords." />
-            <span class="shot-tag">A phishing kit, capturing fields</span>
+            <span class="shot-cap"><span>A phishing kit, capturing fields</span><span class="shot-open">View full size</span></span>
           </button>
-          <div class="beats">
-            <div class="beat beat-red"><h4>I ran</h4><p>A browser credential stealer in Python, plus Word macro abuse and DLL injection. Separately I ran phishing kits in the lab to watch exactly what they capture and where they try to send it.</p></div>
-            <div class="beat beat-blue"><h4>The SIEM saw</h4><p>These run and stay on the host, so the endpoint agent is where they show up, not the network sensors. That is the difference between a host rule and a network rule.</p></div>
-            <div class="beat beat-purple"><h4>I wrote</h4><p>Host rules for the behaviour that held up across samples, not the details that only matched one of them.</p></div>
-          </div>
         </div>
+        <ol class="trace">
+          <li class="beat b-red"><h4>I ran</h4><p>A browser credential stealer in Python, plus Word macro abuse and DLL injection. Separately I ran phishing kits in the lab to watch exactly what they capture and where they try to send it.</p></li>
+          <li class="beat b-blue"><h4>The SIEM saw</h4><p>These run and stay on the host, so the endpoint agent is where they show up, not the network sensors. That is the difference between a host rule and a network rule.</p></li>
+          <li class="beat b-violet"><h4>I wrote</h4><p>Host rules for the behaviour that held up across samples, not the details that only matched one of them.</p></li>
+        </ol>
       </article>
     </div>
   </section>
@@ -285,46 +293,92 @@
   <!-- SOC -->
   <section class="sec" id="soc">
     <div class="wrap">
-      <h2>Built and ran a SOC</h2>
-      <p class="sub">Network &amp; Security Administrator intern, Palmgold Management Sdn&nbsp;Bhd, May to August 2026. The company had been hit by ransomware in August 2025 and still had no monitoring nine months later, when I started. I proposed a SOC, the head of IT approved it, and I built it and ran it until the internship ended.</p>
+      <header class="sec-head">
+        <h2>Built and ran a SOC</h2>
+        <p class="sub">Network &amp; Security Administrator intern, Palmgold Management Sdn&nbsp;Bhd, May to August 2026. The company had been hit by ransomware in August 2025 and still had no monitoring nine months later, when I started. I proposed a SOC, the head of IT approved it, and I built it and ran it until the internship ended.</p>
+      </header>
 
-      <div class="soc-top">
-        <div class="soc-text">
-          <p>
-            It started as a proof of concept on a spare desktop and ended up as the system the
-            company used. I was the only person on security, so the design, the rules, the incident
-            response and the reporting were all mine. Most of the work was getting usable data in:
-            Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless
-            over syslog, agents on the Windows machines, and SPAN feeds from the core and access
-            switches so the sensor sees the network instead of a slice of it.
-          </p>
-          <ul class="bullets">
-            <li>Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.</li>
-            <li>Rewrote the Zeek decoders so each log type is identified by the fields only it has, and added detections for DGA bursts, DNS tunnelling, exfiltration and inbound scans.</li>
-            <li>Found that Zeek alerts were being written to disk and never indexed, because a field was hitting a keyword mapping while the bulk request still reported success. Fixed it with an ingest pipeline.</li>
-            <li>Recovered a full outage after archive logging filled the disk and every index went read-only, then set retention policies so it couldn&rsquo;t happen again.</li>
-          </ul>
+      <figure class="flow" id="flow">
+        <div class="flow-col flow-in">
+          <p class="flow-h">Data in</p>
+          <div class="flow-nodes">
+            <div class="node n-in"><b>Wazuh agents</b><span>80+ domain-joined Windows machines, through Group Policy</span></div>
+            <div class="node n-in"><b>Firewall and wireless</b><span>over syslog</span></div>
+            <div class="node n-in"><b>Network sensor (Zeek)</b><span>SPAN feeds from the core and access switches</span></div>
+          </div>
         </div>
-        <button class="thumb" type="button" data-full="img/soc-dashboard.png" data-w="1280" data-h="717"
+        <div class="flow-col flow-mid">
+          <p class="flow-h">Where it landed</p>
+          <div class="flow-nodes">
+          <div class="node n-host">
+            <b>Wazuh and OpenSearch</b>
+            <span>on a Proxmox host I set up in the office</span>
+            <ul>
+              <li>Zeek decoders and detections</li>
+              <li>An ingest pipeline</li>
+              <li>Retention policies</li>
+            </ul>
+          </div>
+          </div>
+        </div>
+        <div class="flow-col flow-out">
+          <p class="flow-h">What it fed</p>
+          <div class="flow-nodes">
+            <a class="node n-out" href="#soc-daily"><b>The dashboard I used every day</b><span>event counts, a severity timeline and a world map</span></a>
+            <a class="node n-out" href="#soc-hunting"><b>Threat hunting</b><span>alert levels and ATT&amp;CK coverage</span></a>
+            <a class="node n-out" href="#bot"><b>An alerting bot I wrote</b><span>level 13 and above, to a chat channel</span></a>
+          </div>
+        </div>
+        <svg class="flow-wires" aria-hidden="true"></svg>
+      </figure>
+
+      <div class="soc-text">
+        <p>
+          It started as a proof of concept on a spare desktop and ended up as the system the
+          company used. I was the only person on security, so the design, the rules, the incident
+          response and the reporting were all mine. Most of the work was getting usable data in:
+          Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless
+          over syslog, agents on the Windows machines, and SPAN feeds from the core and access
+          switches so the sensor sees the network instead of a slice of it.
+        </p>
+        <dl class="role-card">
+          <div><dt>Role</dt><dd>Network &amp; Security Administrator (intern)</dd></div>
+          <div><dt>Company</dt><dd>Palmgold Management Sdn Bhd</dd></div>
+          <div><dt>Where</dt><dd>Petaling Jaya, Selangor</dd></div>
+          <div><dt>When</dt><dd>May to Aug 2026</dd></div>
+          <div><dt>Team</dt><dd>The only person on security</dd></div>
+        </dl>
+        <ul class="bullets">
+          <li>Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.</li>
+          <li>Rewrote the Zeek decoders so each log type is identified by the fields only it has, and added detections for DGA bursts, DNS tunnelling, exfiltration and inbound scans.</li>
+          <li>Found that Zeek alerts were being written to disk and never indexed, because a field was hitting a keyword mapping while the bulk request still reported success. Fixed it with an ingest pipeline.</li>
+          <li>Recovered a full outage after archive logging filled the disk and every index went read-only, then set retention policies so it couldn&rsquo;t happen again.</li>
+        </ul>
+      </div>
+
+      <div class="soc-shots">
+        <button class="shot" id="soc-daily" type="button" data-full="img/soc-dashboard.png" data-w="1280" data-h="717"
                 data-caption="The SOC dashboard I watched every day, drawn from Wazuh and OpenSearch. The addresses shown are outside traffic arriving at the firewall. One row naming an internal machine is blurred.">
           <img src="img/soc-dashboard-thumb.jpg" width="720" height="403" loading="lazy" decoding="async"
                alt="Thumbnail of the SOC dashboard: event counts, a severity timeline, a world map and ranked lists." />
-          <span class="thumb-label"><span>The dashboard I used every day</span><span class="thumb-open">View full size</span></span>
+          <span class="shot-cap"><span>The dashboard I used every day</span><span class="shot-open">View full size</span></span>
+        </button>
+        <button class="shot" id="soc-hunting" type="button" data-full="img/wazuh-hunting-full.png" data-w="2092" data-h="570"
+                data-caption="A threat-hunting view in Wazuh: total events, level-12-and-above alerts, authentication failures and successes, how alert levels moved over 24 hours, and the top MITRE ATT&CK techniques seen across the estate.">
+          <img src="img/wazuh-hunting-thumb.jpg" width="1200" height="326" loading="lazy" decoding="async"
+               alt="A Wazuh threat-hunting dashboard: event totals, an alert-level-over-time chart, and a MITRE ATT&CK techniques donut." />
+          <span class="shot-cap"><span>Threat hunting: alert levels and ATT&amp;CK coverage</span><span class="shot-open">View full size</span></span>
         </button>
       </div>
 
-      <figure class="dash-wide">
-        <button class="thumb" type="button" data-full="img/wazuh-hunting-full.png" data-w="2092" data-h="570"
-                data-caption="A threat-hunting view in Wazuh: total events, level-12-and-above alerts, authentication failures and successes, how alert levels moved over 24 hours, and the top MITRE ATT&CK techniques seen across the estate.">
-          <img src="img/wazuh-hunting-thumb.jpg" width="1200" height="327" loading="lazy" decoding="async"
-               alt="A Wazuh threat-hunting dashboard: event totals, an alert-level-over-time chart, and a MITRE ATT&CK techniques donut." />
-          <span class="thumb-label"><span>Threat hunting: alert levels and ATT&amp;CK coverage</span><span class="thumb-open">View full size</span></span>
+      <div class="pt-row bot" id="bot">
+        <button class="shot" type="button" data-full="img/soc-bot-full.png" data-w="1274" data-h="1124"
+                data-caption="The alerting bot posting level 13 Wazuh alerts to a chat channel: a Chrome CVE on an endpoint, and a FortiGate IPS detection. Agent names and addresses are blurred.">
+          <img src="img/soc-bot-thumb.jpg" width="640" height="564" loading="lazy" decoding="async"
+               alt="A chat channel showing Wazuh level 13 alerts for a Chrome CVE and a FortiGate IPS detection." />
+          <span class="shot-cap"><span>Level 13 alerts, pushed to chat</span><span class="shot-open">View full size</span></span>
         </button>
-      </figure>
-
-      <!-- reporting bot -->
-      <div class="feature feature-rev">
-        <div class="feature-text">
+        <div class="prose">
           <h3>An alerting bot I wrote</h3>
           <p>
             Nobody was going to sit and watch a dashboard all day, so I wrote a bot that pushes every
@@ -337,42 +391,38 @@
             It de-duplicates so a noisy rule can&rsquo;t flood the channel, and it checks that each
             message was actually delivered rather than assuming it was.
           </p>
+          <ol class="bot-path" aria-label="How an alert reaches the channel">
+            <li>Wazuh alert, level 13 or above</li>
+            <li>Duplicate check</li>
+            <li>Posted to the channel</li>
+            <li>Delivery confirmed</li>
+          </ol>
         </div>
-        <button class="shot shot-tall" type="button" data-full="img/soc-bot-full.png" data-w="1274" data-h="1124"
-                data-caption="The alerting bot posting level 13 Wazuh alerts to a chat channel: a Chrome CVE on an endpoint, and a FortiGate IPS detection. Agent names and addresses are blurred.">
-          <img src="img/soc-bot-thumb.jpg" width="640" height="565" loading="lazy" decoding="async"
-               alt="A chat channel showing Wazuh level 13 alerts for a Chrome CVE and a FortiGate IPS detection." />
-          <span class="shot-tag">Level 13 alerts, pushed to chat</span>
-        </button>
       </div>
 
-      <h3 class="h-sm sub-head">Three dashboards, published</h3>
-      <p class="sub">I removed everything identifying the company and put these on GitHub. Each runs on made-up data, so you can open it and click around.</p>
-      <div class="tools">
-        <article class="tool">
-          <a class="tool-img" href="./soc-traffic-map.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-traffic-map.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
-          <div class="tool-body">
+      <div class="published">
+        <h3>Three dashboards, published</h3>
+        <p class="sub">I removed everything identifying the company and put these on GitHub. Each runs on made-up data, so you can open it and click around.</p>
+        <div class="frames">
+          <article class="frame">
+            <a class="frame-img" href="./soc-traffic-map.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-traffic-map.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
             <h4>SOC Traffic Map</h4>
             <p>Firewall traffic on a world map with live arcs, a threat score that settles when things go quiet, and a searchable event feed.</p>
-            <div class="tool-links"><a href="./soc-traffic-map.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-traffic-map.html" target="_blank" rel="noreferrer">Source</a></div>
-          </div>
-        </article>
-        <article class="tool">
-          <a class="tool-img" href="./soc-alert-console.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-alert-console.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
-          <div class="tool-body">
+            <div class="frame-links"><a href="./soc-traffic-map.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-traffic-map.html" target="_blank" rel="noreferrer">Source</a></div>
+          </article>
+          <article class="frame">
+            <a class="frame-img" href="./soc-alert-console.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-alert-console.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
             <h4>SOC Alert Console</h4>
             <p>Wazuh endpoint alerts with severity counts, a live feed, file integrity changes and an ATT&amp;CK coverage grid. The filters share one state so the numbers always agree.</p>
-            <div class="tool-links"><a href="./soc-alert-console.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-alert-console.html" target="_blank" rel="noreferrer">Source</a></div>
-          </div>
-        </article>
-        <article class="tool">
-          <a class="tool-img" href="./soc-packet-highway.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-packet-highway.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
-          <div class="tool-body">
+            <div class="frame-links"><a href="./soc-alert-console.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-alert-console.html" target="_blank" rel="noreferrer">Source</a></div>
+          </article>
+          <article class="frame">
+            <a class="frame-img" href="./soc-packet-highway.html" target="_blank" rel="noreferrer" tabindex="-1" aria-hidden="true"><img src="img/soc-packet-highway.jpg" width="960" height="540" loading="lazy" decoding="async" alt="" /></a>
             <h4>Packet Highway</h4>
             <p>Traffic as vehicles on a highway, for people who don&rsquo;t read logs. Size is bytes, colour is the protocol.</p>
-            <div class="tool-links"><a href="./soc-packet-highway.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-packet-highway.html" target="_blank" rel="noreferrer">Source</a></div>
-          </div>
-        </article>
+            <div class="frame-links"><a href="./soc-packet-highway.html" target="_blank" rel="noreferrer">Open demo</a><a class="quiet" href="https://github.com/zamsonl/portfolio-website/blob/main/soc-packet-highway.html" target="_blank" rel="noreferrer">Source</a></div>
+          </article>
+        </div>
       </div>
     </div>
   </section>
@@ -380,73 +430,119 @@
   <!-- SKILLS -->
   <section class="sec sec-alt" id="skills">
     <div class="wrap">
-      <h2>What I can do</h2>
-      <p class="sub">Tools and skills I have used on real systems, not just read about.</p>
+      <header class="sec-head">
+        <h2>What I can do</h2>
+        <p class="sub">Tools and skills I have used on real systems, not just read about. Skills with a dot open the part of this page where I used them.</p>
+      </header>
 
       <div class="caps">
-        <section class="cap cap-purple">
+        <section class="cap" style="--c:var(--violet)">
           <div class="cap-head">
             <h3>Purple team and offensive</h3>
             <p>Build the attack, then catch it. Writing my own samples and C2 is how I know a rule fires on behaviour, not on one artefact.</p>
           </div>
-          <ul class="cap-chips">
-            <li>Custom C2 development</li><li>Malware development for testing</li><li>Kali Purple</li><li>MITRE ATT&amp;CK</li>
-            <li>Sandboxed analysis</li><li>Vulnerability assessment</li><li>OpenVAS</li><li>Nmap</li><li>Nikto</li><li>Autopsy</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><button class="chip ev" type="button" data-to="#purple" data-q="I built my own command-and-control framework in Python rather than picking one off the shelf, so I know exactly what it does on the wire and on the host.">Custom C2 development</button></li>
+              <li><button class="chip ev" type="button" data-to="#samples" data-q="Written by me, to test detections. Isolated VMs, written authorization, never a live sample.">Malware development for testing</button></li>
+              <li><span class="chip">Kali Purple</span></li>
+              <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="I mapped it to the ATT&amp;CK techniques for a command-and-control channel over a web protocol, so it lines up with the rest of the coverage.">MITRE ATT&amp;CK</button></li>
+              <li><span class="chip">Sandboxed analysis</span></li>
+              <li><button class="chip ev" type="button" data-to="#about" data-q="Built and ran the SOC, wrote the detection rules, ran purple team exercises and an authorized vulnerability assessment, handled incident response and reporting.">Vulnerability assessment</button></li>
+              <li><span class="chip">OpenVAS</span></li><li><span class="chip">Nmap</span></li><li><span class="chip">Nikto</span></li>
+              <li><button class="chip ev" type="button" data-to="#about" data-q="Final year. Network security, digital forensics and secure development, including analysing a suspicious file in Autopsy.">Autopsy</button></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
 
-        <section class="cap cap-blue">
+        <section class="cap" style="--c:var(--blue)">
           <div class="cap-head">
             <h3>Detection and SIEM</h3>
             <p>Where most of my time went: getting the data in, then writing rules that fire on behaviour, not on one sample.</p>
           </div>
-          <ul class="cap-chips">
-            <li>Wazuh</li><li>OpenSearch</li><li>Zeek</li><li>Custom decoders and rules</li><li>File integrity monitoring</li>
-            <li>Ingest pipelines</li><li>Alert automation</li><li>Incident response</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><button class="chip ev" type="button" data-to="#flow" data-q="Most of the work was getting usable data in: Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless over syslog, agents on the Windows machines, and SPAN feeds from the core and access switches.">Wazuh</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Recovered a full outage after archive logging filled the disk and every index went read-only, then set retention policies so it couldn&rsquo;t happen again.">OpenSearch</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Rewrote the Zeek decoders so each log type is identified by the fields only it has, and added detections for DGA bursts, DNS tunnelling, exfiltration and inbound scans.">Zeek</button></li>
+              <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="One rule notices a single outbound connection to the tunnel edge. A second says that six of them in a minute from the same machine is a pattern, not a coincidence.">Custom decoders and rules</button></li>
+              <li><button class="chip ev" type="button" data-to="#case-ransomware" data-q="File integrity monitoring caught the burst of changes inside the canary folder, which is what I wanted to confirm before relying on it.">File integrity monitoring</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Found that Zeek alerts were being written to disk and never indexed, because a field was hitting a keyword mapping while the bulk request still reported success. Fixed it with an ingest pipeline.">Ingest pipelines</button></li>
+              <li><button class="chip ev" type="button" data-to="#bot" data-q="I wrote a bot that pushes every high-severity alert &mdash; level 13 and above on Wazuh &mdash; straight to a chat channel the moment it fires.">Alert automation</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="I was the only person on security, so the design, the rules, the incident response and the reporting were all mine.">Incident response</button></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
 
-        <section class="cap cap-green">
+        <section class="cap" style="--c:var(--green)">
           <div class="cap-head">
             <h3>Web development</h3>
             <p>I ship real applications, not just scripts. A live booth operations system for a client runs on this stack.</p>
           </div>
-          <ul class="cap-chips">
-            <li>JavaScript</li><li>HTML and CSS</li><li>Cloudflare Workers</li><li>D1</li><li>R2</li>
-            <li>REST APIs</li><li>SQL</li><li>D3.js</li><li>Three.js</li><li>Automated testing</li><li>Git</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><button class="chip ev" type="button" data-to="#projects" data-q="I wrote the front end as plain JavaScript compiled into a single page, with the pay engine, permissions and activity log enforced on the server.">JavaScript</button></li>
+              <li><span class="chip">HTML and CSS</span></li>
+              <li><button class="chip ev" type="button" data-to="#projects" data-q="It runs on Cloudflare Workers with a D1 database and R2 for files.">Cloudflare Workers</button></li>
+              <li><button class="chip ev" type="button" data-to="#projects" data-q="It runs on Cloudflare Workers with a D1 database and R2 for files.">D1</button></li>
+              <li><button class="chip ev" type="button" data-to="#projects" data-q="It runs on Cloudflare Workers with a D1 database and R2 for files.">R2</button></li>
+              <li><span class="chip">REST APIs</span></li><li><span class="chip">SQL</span></li><li><span class="chip">D3.js</span></li><li><span class="chip">Three.js</span></li>
+              <li><button class="chip ev" type="button" data-to="#projects" data-q="It is backed by a test suite so I can change her pay rules without breaking last month&rsquo;s payroll.">Automated testing</button></li>
+              <li><span class="chip">Git</span></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
 
-        <section class="cap cap-plain">
+        <section class="cap" style="--c:var(--line-3)">
           <div class="cap-head">
             <h3>Network and systems</h3>
             <p>The infrastructure the monitoring sits on, most of which I set up myself.</p>
           </div>
-          <ul class="cap-chips">
-            <li>FortiGate</li><li>Aruba switching and wireless</li><li>Traffic mirroring and SPAN</li><li>Proxmox</li>
-            <li>Linux</li><li>Windows Server</li><li>Active Directory</li><li>Group Policy</li><li>Nginx and TLS</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><span class="chip">FortiGate</span></li><li><span class="chip">Aruba switching and wireless</span></li>
+              <li><button class="chip ev" type="button" data-to="#flow" data-q="SPAN feeds from the core and access switches so the sensor sees the network instead of a slice of it.">Traffic mirroring and SPAN</button></li>
+              <li><button class="chip ev" type="button" data-to="#flow" data-q="Wazuh and OpenSearch on a Proxmox host I set up in the office.">Proxmox</button></li>
+              <li><span class="chip">Linux</span></li><li><span class="chip">Windows Server</span></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.">Active Directory</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.">Group Policy</button></li>
+              <li><span class="chip">Nginx and TLS</span></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
 
-        <section class="cap cap-plain">
+        <section class="cap" style="--c:var(--line-3)">
           <div class="cap-head">
             <h3>Programming</h3>
             <p>What I reach for depends on the job. Rust and C++ for samples, Python for tooling and automation.</p>
           </div>
-          <ul class="cap-chips">
-            <li>Python</li><li>Rust</li><li>C++</li><li>C#</li><li>Java</li><li>JavaScript</li><li>Bash</li><li>PowerShell</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><button class="chip ev" type="button" data-to="#purple" data-q="I built my own command-and-control framework in Python rather than picking one off the shelf, so I know exactly what it does on the wire and on the host.">Python</button></li>
+              <li><button class="chip ev" type="button" data-to="#case-ransomware" data-q="A Rust sample that behaves like ransomware, hard-guarded so it could only ever write inside one canary folder.">Rust</button></li>
+              <li><button class="chip ev" type="button" data-to="#case-c2client" data-q="A C2 client that checks in on a fixed interval, talking back to the listener in my own framework.">C++</button></li>
+              <li><span class="chip">C#</span></li><li><span class="chip">Java</span></li><li><span class="chip">JavaScript</span></li><li><span class="chip">Bash</span></li><li><span class="chip">PowerShell</span></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
 
-        <section class="cap cap-plain">
+        <section class="cap" style="--c:var(--line-3)">
           <div class="cap-head">
             <h3>Certifications</h3>
             <p>Both completed during the degree, both hands-on.</p>
           </div>
-          <ul class="cap-chips cap-certs">
-            <li><img src="img/badge-ethical-hacker.png" width="26" height="26" loading="lazy" decoding="async" alt="" /> Cisco Ethical Hacker</li>
-            <li>ELITE TecForte SOC Programme</li>
-          </ul>
+          <div class="cap-body">
+            <ul class="chips">
+              <li><button class="chip ev chip-cert" type="button" data-to="#cert" data-q="Cisco Ethical Hacker, Cisco Networking Academy, September 2026."><img src="img/badge-ethical-hacker.png" width="22" height="22" loading="lazy" decoding="async" alt="" />Cisco Ethical Hacker</button></li>
+              <li><button class="chip ev" type="button" data-to="#about" data-q="ELITE TecForte SOC Programme, certificate of completion, March 2026.">ELITE TecForte SOC Programme</button></li>
+            </ul>
+            <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
+          </div>
         </section>
       </div>
     </div>
@@ -455,38 +551,51 @@
   <!-- PROJECTS -->
   <section class="sec" id="projects">
     <div class="wrap">
-      <h2>Client work</h2>
+      <header class="sec-head">
+        <h2>Client work</h2>
+      </header>
 
       <article class="proj">
-        <div class="proj-head">
+        <div class="proj-text">
           <h3>Booth operations system for Ezforge</h3>
           <p class="proj-meta">Built for a client, live and in daily use</p>
+          <p>
+            Ezforge run retail booths at shopping centres. The owner was tracking sales, staff
+            rosters and pay by hand across several booths at once, so I built her a web application
+            that runs the whole operation in one place. It has been live since September 2026 and
+            she uses it to run the business.
+          </p>
+          <p>
+            It runs on Cloudflare Workers with a D1 database and R2 for files. I wrote the front end
+            as plain JavaScript compiled into a single page, with the pay engine, permissions and
+            activity log enforced on the server. It covers the roster calendar, daily sales per
+            booth, a payroll engine that follows the company&rsquo;s own pay rules, rental
+            agreements and invoices, importers for her real spreadsheets, and PDF payslips. It is
+            backed by a test suite so I can change her pay rules without breaking last month&rsquo;s
+            payroll.
+          </p>
+          <p class="proj-note">The system holds a client&rsquo;s staff and payroll data, so it isn&rsquo;t linked here. The screenshot is its demo mode, with no real data.</p>
         </div>
-        <div class="proj-body">
-          <div class="proj-text">
-            <p>
-              Ezforge run retail booths at shopping centres. The owner was tracking sales, staff
-              rosters and pay by hand across several booths at once, so I built her a web application
-              that runs the whole operation in one place. It has been live since September 2026 and
-              she uses it to run the business.
-            </p>
-            <p>
-              It runs on Cloudflare Workers with a D1 database and R2 for files. I wrote the front end
-              as plain JavaScript compiled into a single page, with the pay engine, permissions and
-              activity log enforced on the server. It covers the roster calendar, daily sales per
-              booth, a payroll engine that follows the company&rsquo;s own pay rules, rental
-              agreements and invoices, importers for her real spreadsheets, and PDF payslips. It is
-              backed by a test suite so I can change her pay rules without breaking last month&rsquo;s
-              payroll.
-            </p>
-            <p class="proj-note">The system holds a client&rsquo;s staff and payroll data, so it isn&rsquo;t linked here. The screenshot is its demo mode, with no real data.</p>
-          </div>
-          <button class="shot" type="button" data-full="img/ezforge-full.png" data-w="1600" data-h="868"
+        <div class="proj-side">
+          <button class="shot" type="button" data-full="img/ezforge-full.png" data-w="3827" data-h="2077"
                   data-caption="The Ezforge booth operations system in demo mode, showing the sales, gross profit and staff performance dashboard. No real client data.">
             <img src="img/ezforge-thumb.jpg" width="960" height="521" loading="lazy" decoding="async"
                  alt="A business dashboard with sales, gross profit and staff performance figures, all zero in demo mode." />
-            <span class="shot-tag">Ezforge dashboard, demo mode</span>
+            <span class="shot-cap"><span>Ezforge dashboard, demo mode</span><span class="shot-open">View full size</span></span>
           </button>
+          <div class="covers">
+            <p class="covers-h">What it covers</p>
+            <ul>
+              <li>Roster calendar</li>
+              <li>Daily sales per booth</li>
+              <li>Payroll engine</li>
+              <li>Rental agreements and invoices</li>
+              <li>Spreadsheet importers</li>
+              <li>PDF payslips</li>
+              <li>Server-side permissions</li>
+              <li>Activity log</li>
+            </ul>
+          </div>
         </div>
       </article>
     </div>
@@ -495,61 +604,75 @@
   <!-- ABOUT -->
   <section class="sec sec-alt" id="about">
     <div class="wrap">
-      <h2>About me</h2>
-      <div class="about-text">
-        <p>
-          I&rsquo;m in my final year of a BSc in Computer Science (Cyber Security) at Asia Pacific
-          University. The internship was the steepest learning curve I&rsquo;ve had so far, and it
-          settled what I want to do next.
-        </p>
-        <p>
-          I&rsquo;d like to join a team doing purple team work properly, where I can keep building
-          tooling and samples and finding out what the rules miss, and learn from people who have
-          done this at a bigger scale.
-        </p>
-      </div>
+      <header class="sec-head">
+        <h2>About me</h2>
+      </header>
+      <div class="about">
+        <div class="about-left">
+          <div class="about-text">
+            <p>
+              I&rsquo;m in my final year of a BSc in Computer Science (Cyber Security) at Asia Pacific
+              University. The internship was the steepest learning curve I&rsquo;ve had so far, and it
+              settled what I want to do next.
+            </p>
+            <p>
+              I&rsquo;d like to join a team doing purple team work properly, where I can keep
+              <strong>building tooling and samples and finding out what the rules miss</strong>, and learn
+              from people who have done this at a bigger scale.
+            </p>
+          </div>
+          <button class="shot shot-cert" id="cert" type="button" data-full="img/cert-ethical-hacker-full.png" data-w="2226" data-h="1492"
+                  data-caption="My Cisco Ethical Hacker certificate from the Cisco Networking Academy, completed 11 September 2026.">
+            <img src="img/cert-ethical-hacker-thumb.jpg" width="760" height="509" loading="lazy" decoding="async"
+                 alt="Cisco Networking Academy certificate of completion for Ethical Hacker, awarded to Zamson Lim." />
+            <span class="shot-cap"><span>Cisco Ethical Hacker certificate</span><span class="shot-open">View full size</span></span>
+          </button>
+        </div>
 
-      <ol class="timeline">
-        <li>
-          <p class="when">May to Aug 2026</p>
-          <h3>Network &amp; Security Administrator (intern)</h3>
-          <p class="where">Palmgold Management Sdn Bhd, Petaling Jaya</p>
-          <p>The only person on security. Built and ran the SOC, wrote the detection rules, ran purple team exercises and an authorized vulnerability assessment, handled incident response and reporting.</p>
-        </li>
-        <li>
-          <p class="when">2024 to 2027</p>
-          <h3>BSc (Hons) Computer Science (Cyber Security)</h3>
-          <p class="where">Asia Pacific University, Kuala Lumpur</p>
-          <p>Final year. Network security, digital forensics and secure development, including analysing a suspicious file in Autopsy.</p>
-        </li>
-        <li>
-          <p class="when">Sept 2026</p>
-          <h3>Cisco Ethical Hacker</h3>
-          <p class="where">Cisco Networking Academy</p>
-        </li>
-        <li>
-          <p class="when">March 2026</p>
-          <h3>ELITE TecForte SOC Programme</h3>
-          <p class="where">Certificate of completion</p>
-        </li>
-        <li>
-          <p class="when">2024 to now</p>
-          <h3>Capture the Flag</h3>
-          <p class="where">SekaiCTF, CYNX, BeSec</p>
-          <p>At SekaiCTF 2025 with team Digital Phantoms I solved a medium reverse engineering challenge on an Android APK using jadx-gui, keytool and Python.</p>
-        </li>
-      </ol>
+        <ol class="tl">
+          <li class="tl-main">
+            <p class="when">May to Aug 2026</p>
+            <h3>Network &amp; Security Administrator (intern)</h3>
+            <p class="where">Palmgold Management Sdn Bhd, Petaling Jaya</p>
+            <p>The only person on security. Built and ran the SOC, wrote the detection rules, ran purple team exercises and an authorized vulnerability assessment, handled incident response and reporting.</p>
+          </li>
+          <li>
+            <p class="when">2024 to 2027</p>
+            <h3>BSc (Hons) Computer Science (Cyber Security)</h3>
+            <p class="where">Asia Pacific University, Kuala Lumpur</p>
+            <p>Final year. Network security, digital forensics and secure development, including analysing a suspicious file in Autopsy.</p>
+          </li>
+          <li>
+            <p class="when">Sept 2026</p>
+            <h3><img class="tl-badge" src="img/badge-ethical-hacker.png" width="26" height="26" loading="lazy" decoding="async" alt="" />Cisco Ethical Hacker</h3>
+            <p class="where">Cisco Networking Academy</p>
+          </li>
+          <li>
+            <p class="when">March 2026</p>
+            <h3>ELITE TecForte SOC Programme</h3>
+            <p class="where">Certificate of completion</p>
+          </li>
+          <li>
+            <p class="when">2024 to now</p>
+            <h3>Capture the Flag</h3>
+            <p class="where">SekaiCTF, CYNX, BeSec</p>
+            <p>At SekaiCTF 2025 with team Digital Phantoms I solved a medium reverse engineering challenge on an Android APK using jadx-gui, keytool and Python.</p>
+          </li>
+        </ol>
+      </div>
     </div>
   </section>
 
   <!-- CONTACT -->
   <section class="contact" id="contact">
     <div class="wrap contact-in">
-      <h2>Get in touch</h2>
-      <p>If you&rsquo;re hiring for purple team, detection engineering or a SOC role, I&rsquo;d be glad to talk through any of this.</p>
-      <div class="cta cta-mid">
-        <a class="btn btn-fill" href="mailto:zamsonlim@gmail.com">Email me</a>
-        <a class="btn btn-line" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Download résumé</a>
+      <div class="contact-main">
+        <h2>Get in touch</h2>
+        <p>If you&rsquo;re hiring for purple team, detection engineering or a SOC role, I&rsquo;d be glad to talk through any of this.</p>
+        <div class="cta">
+          <a class="btn btn-fill" href="mailto:zamsonlim@gmail.com">Email me</a>
+          <a class="btn btn-line" href="./Resume%20(Zamson).pdf" target="_blank" rel="noreferrer">Download résumé</a>
+        </div>
       </div>
       <ul class="contact-list">
         <li><span>Email</span><a href="mailto:zamsonlim@gmail.com">zamsonlim@gmail.com</a></li>
@@ -566,11 +689,14 @@
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Full size image">
-  <button class="lb-close" type="button" aria-label="Close">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-  </button>
-  <img alt="" />
-  <p class="lb-cap"></p>
+  <div class="lb-bar">
+    <p class="lb-cap"></p>
+    <button class="lb-zoom" type="button" aria-pressed="false">Actual size</button>
+    <button class="lb-close" type="button" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="lb-stage"><img alt="" /></div>
 </dialog>
 
 <script src="script.js"></script>
