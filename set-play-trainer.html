@@ -376,6 +376,18 @@ textarea.input{resize:vertical;min-height:74px;line-height:1.5}
 .cloudrow:last-child{border-bottom:0}
 .cloudrow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .cloudrow .mt{font-size:12px;color:var(--ink-3);white-space:nowrap}
+/* sync status: one quiet chip, coloured only by what needs your attention */
+.syncchip{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:650;line-height:1.3;
+  padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface-2);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.syncchip::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:var(--good)}
+.syncchip.busy::before{background:var(--accent)}
+.syncchip.bad{color:var(--bad);border-color:var(--bad-soft)}
+.syncchip.bad::before{background:var(--bad)}
+.section-h .syncchip{margin-left:auto;min-width:0}
+.syncbox{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface-2)}
+.syncrow{display:flex;gap:10px;flex-wrap:wrap}
+.syncrow .input{flex:1 1 200px;min-width:0;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .choices{display:grid;gap:9px}
 .choice{text-align:left;cursor:pointer;color:inherit;background:var(--surface-2);border:1.5px solid var(--line);
   border-radius:var(--r);padding:13px 15px;font-weight:650;font-size:15px}
@@ -751,7 +763,9 @@ function validatePlay(raw){
         : [ (s-3)*8, 24 ];
     }
     const actions = (Array.isArray(b.actions) ? b.actions.slice(0,3) : []).map(a => {
-      if (!a || !ACTION_LABEL[a.type] || a.type === 'none') return null;
+      /* own keys only: ACTION_LABEL['toString'] is truthy through the prototype,
+         which let a move called toString through and broke parity with the server */
+      if (!a || !Object.prototype.hasOwnProperty.call(ACTION_LABEL, a.type) || a.type === 'none') return null;
       if (!SLOTS.includes(a.by)) return null;
       const out = { type:a.type, by:a.by };
       if (ACTION_NEEDS_FOR.has(a.type) && SLOTS.includes(a.for)) out.for = a.for;
@@ -1477,7 +1491,8 @@ const Store = {
       : [];
   },
   get(id){ return this.plays().find(p => p.id === id) || null; },
-  /** Validate and upsert. A built-in id is never written: it gets a new one. */
+  /** Validate and upsert. A built-in id is never written: it gets a new one.
+      This is the path for changes a PERSON made, so it tells sync. */
   put(play){
     const clean = validatePlay(play);
     clean.id = (typeof play.id === 'string' && play.id && !isBuiltin(play.id)) ? play.id.slice(0,64) : uid('play');
@@ -1485,9 +1500,29 @@ const Store = {
     const all = this.plays();
     const i = all.findIndex(p => p.id === clean.id);
     if (i >= 0) all[i] = clean; else all.push(clean);
+    if (!this._set(K_PLAYS, all)) return null;
+    syncOnPut(clean.id);
+    return clean;
+  },
+  remove(id){
+    const ok = this._set(K_PLAYS, this.plays().filter(p => p.id !== id));
+    if (ok) syncOnRemove(id);
+    return ok;
+  },
+  /** Sync's own writes. They keep the id and timestamp they arrived with and
+      never tell sync - otherwise every download would look like an edit and
+      go straight back up. */
+  putRaw(play){
+    if (!play || typeof play.id !== 'string' || !play.id || isBuiltin(play.id)) return null;
+    const clean = validatePlay(play);
+    clean.id = play.id.slice(0,64);
+    clean.updated = (typeof play.updated === 'number' && isFinite(play.updated)) ? play.updated : Date.now();
+    const all = this.plays();
+    const i = all.findIndex(p => p.id === clean.id);
+    if (i >= 0) all[i] = clean; else all.push(clean);
     return this._set(K_PLAYS, all) ? clean : null;
   },
-  remove(id){ return this._set(K_PLAYS, this.plays().filter(p => p.id !== id)); },
+  removeRaw(id){ return this._set(K_PLAYS, this.plays().filter(p => p.id !== id)); },
 
   history(){ const v = this._get(K_HIST, []); return Array.isArray(v) ? v : []; },
   addHistory(rec){ const all = this.history(); all.unshift(rec); return this._set(K_HIST, all.slice(0, HIST_CAP)); },
@@ -1544,10 +1579,18 @@ const Store = {
   }
 };
 
-function allPlays(){ return Store.plays().concat(BUILTIN); }
+/* Your plays, then the shared playbook (only the ones not already here), then
+   the built-ins. */
+function allPlays(){
+  const mine = Store.plays(), have = new Set(mine.map(p => p.id));
+  return mine.concat(Book.plays().filter(p => !have.has(p.id)), BUILTIN);
+}
 /* Your plays are looked up FIRST. Ids can no longer collide, but if one ever
    did, your own work must win over a built-in — never the other way round. */
-function findPlay(id){ return Store.get(id) || BUILTIN.find(p => p.id === id) || null; }
+function findPlay(id){ return Store.get(id) || Book.get(id) || BUILTIN.find(p => p.id === id) || null; }
+/* Editable means it lives in THIS browser's store. A built-in never does, and a
+   shared-playbook play only does on a device that has sync turned on. */
+function canEditPlay(p){ return !!(p && Store.get(p.id)); }
 
 /* ======================================================================= APP */
 const App = {
@@ -2074,8 +2117,18 @@ function renderScreen(){
   if (r.name === 'cloud')  return openCloud(r.id);
   if (r.name !== 'home' && r.name !== 'quiz'){
     const play = findPlay(r.id);
-    if (!play){ toast('That play no longer exists.'); return go('/'); }
-    if (r.name === 'edit' && isBuiltin(play.id)) return go('/play/' + encodeURIComponent(play.id));
+    if (!play){
+      /* A link to a shared-playbook play, opened on a device that has never
+         loaded the playbook. Fetch it once, then try again - never loop. */
+      if (!Book.tried){
+        root.appendChild(el('div', { class:'empty', style:'margin:48px auto', text:'Loading the playbook…' }));
+        const want = r.id;
+        syncNow().then(() => { const now = parseRoute(); if (now.id === want) renderScreen(); });
+        return;
+      }
+      toast('That play no longer exists.'); return go('/');
+    }
+    if (r.name === 'edit' && !canEditPlay(play)) return go('/play/' + encodeURIComponent(play.id));
     App.ctl = r.name === 'play' ? screenPlay(root, play)
             : r.name === 'practice' ? screenPractice(root, play, r.sub === 'pg' ? 'pg' : 'all')
             : screenEdit(root, play);
@@ -2195,17 +2248,41 @@ function screenHome(root){
   ht.appendChild(el('p', { text:'Pick a play to watch it step by step, practise it and get graded on where you stand, or draw your own.' }));
   hello.appendChild(ht);
   const mine = Store.plays().sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  const synced = syncOn();
   if (mine.length) hello.appendChild(btn('Create a play', { cls:'pri lg', icon:'plus', onclick:createPlay }));
   main.appendChild(hello);
+
+  /* The shared playbook, on a device that cannot change it. Shown first: on a
+     phone or a visitor's laptop it IS the playbook. On a synced device these
+     same plays are already under My plays, so it is not shown twice. */
+  const mineIds = new Set(mine.map(p => p.id));
+  const shared = synced ? [] : Book.plays().filter(p => !mineIds.has(p.id));
+  if (shared.length){
+    const sb = el('section', { class:'section' });
+    const hb = el('div', { class:'section-h' });
+    hb.appendChild(el('h2', { text:'Playbook' }));
+    hb.appendChild(el('span', { class:'count', text:String(shared.length) }));
+    sb.appendChild(hb);
+    sb.appendChild(el('p', { class:'help', style:'margin:-4px 0 14px',
+      text:'The same on every device. You can watch and practise these here; to change them, turn on sync in Settings.' }));
+    const gb = el('div', { class:'cards' });
+    for (const p of shared) gb.appendChild(playCard(p, false));
+    sb.appendChild(gb);
+    main.appendChild(sb);
+  }
+
   const s1 = el('section', { class:'section' });
   const h1 = el('div', { class:'section-h' });
   h1.appendChild(el('h2', { text:'My plays' }));
   h1.appendChild(el('span', { class:'count', text: mine.length ? String(mine.length) : '' }));
+  if (synced) h1.appendChild(syncChip());
   s1.appendChild(h1);
-  /* Plays are per-browser. Nothing said so, so the first time someone opened
+  /* Say where these live. Nothing used to, so the first time someone opened
      the trainer on their phone their playbook looked empty for no reason. */
   if (mine.length) s1.appendChild(el('p', { class:'help', style:'margin:-4px 0 14px',
-    text:'These live only in this browser. Publish one to open it on your phone.' }));
+    text: synced
+      ? 'Synced — the same on every device you have turned sync on for. Changes upload as you make them.'
+      : 'These live only in this browser. Publish one to open it on another device.' }));
   if (!mine.length){
     /* one wide invitation, not a lone card stranded in an empty row */
     const empty = el('button', { class:'emptyhero', type:'button', onclick:createPlay });
@@ -2339,12 +2416,20 @@ function screenMoreItems(p){
     { label:'Settings', icon:'sliders', run:openSettings }]);
 }
 function playMenuItems(p){
-  const own = !isBuiltin(p.id);
+  const own = canEditPlay(p);
   const items = [];
   if (own) items.push({ label:'Edit', icon:'edit', run:()=>go('/edit/' + encodeURIComponent(p.id)) });
   items.push({ label: own ? 'Duplicate' : 'Make my own copy', icon:'copy', run:()=>copyPlay(p) });
-  items.push({ label: publishedCode(p.id) ? 'Open on my phone' : 'Publish online',
-               icon:'share', run:()=>publishSheet(p) });
+  /* A synced play is already on every device, so its link is simply a link to
+     it - always current, never a snapshot. Only a play that lives in this
+     browser alone needs publishing to be seen anywhere else. */
+  if ((own && syncOn()) || (!own && Book.get(p.id))){
+    items.push({ label:'Copy link', icon:'share',
+                 run:()=>copyText(location.origin + location.pathname + '#/play/' + encodeURIComponent(p.id)) });
+  } else {
+    items.push({ label: publishedCode(p.id) ? 'Open on my phone' : 'Publish online',
+                 icon:'share', run:()=>publishSheet(p) });
+  }
   items.push({ label:'Share link', icon:'share', run:()=>shareSheet(p) });
   items.push({ label:'Export file', icon:'download', run:()=>exportPlay(p) });
   if (own){ items.push('-'); items.push({ label:'Delete', icon:'trash', danger:true, run:()=>deletePlay(p) }); }
@@ -2371,7 +2456,9 @@ function copyPlay(src){
   go('/edit/' + encodeURIComponent(saved.id));
 }
 function deletePlay(p){
-  confirmSheet('Delete “' + p.name + '”?', 'It will be removed from this browser. You can undo straight after.', 'Delete', () => {
+  confirmSheet('Delete “' + p.name + '”?',
+    (syncOn() ? 'It will be removed from every device you have turned sync on for.' : 'It will be removed from this browser.') +
+    ' You can undo straight after.', 'Delete', () => {
     const backup = JSON.parse(JSON.stringify(p));
     DELETED.add(p.id);
     Store.remove(p.id);
@@ -2385,7 +2472,7 @@ function storageFailed(){
 
 /* ================================================================ WATCH/PLAY */
 function screenPlay(root, play){
-  const own = !isBuiltin(play.id);
+  const own = canEditPlay(play);
   const moreBtn = btn('', { cls:'icon', icon:'more', aria:'More' });
   moreBtn.addEventListener('click', () => menu(moreBtn, screenMoreItems(play)));
   root.appendChild(topBar({
@@ -2654,6 +2741,9 @@ function playerPicker(value, onpick, exclude, only){
 
 /* ================================================================== EDITOR */
 function screenEdit(root, stored){
+  /* Sync never replaces a play while it is open here: the editor holds its own
+     copy and would write it straight back over whatever arrived. */
+  App.editingId = stored.id;
   /* The live play. Every change goes through commit(), which records undo,
      marks the play dirty and schedules a save. Nothing touches `play` except
      through commit(), so nothing can change without being saved. */
@@ -2971,6 +3061,7 @@ function screenEdit(root, stored){
   return {
     destroy(){
       flush();
+      if (App.editingId === stored.id) App.editingId = null;
       if (previewAnim && previewAnim.raf) cancelAnimationFrame(previewAnim.raf);
       document.removeEventListener('keydown', key);
       removeEventListener('pagehide', onHide);
@@ -2986,7 +3077,7 @@ function screenEdit(root, stored){
 
 /* ================================================================ PRACTICE */
 function screenPractice(root, play, mode){
-  const own = !isBuiltin(play.id);
+  const own = canEditPlay(play);
   const title = el('div', { class:'top-title', text:'Practise' });
   root.appendChild(topBar({ back:[play.name, '/play/' + encodeURIComponent(play.id)], titleNode:title, actions:globalActions() }));
   const W = workspace(root);
@@ -3674,7 +3765,7 @@ async function cloudCall(path, opts){
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), CLOUD.timeout);
   try{
-    const res = await fetch(CLOUD.base + path, Object.assign({ signal:ctl.signal, mode:'cors' }, opts || {}));
+    const res = await fetch(apiBase() + path, Object.assign({ signal:ctl.signal, mode:'cors' }, opts || {}));
     let data = null;
     try{ data = await res.json(); }catch(e){}
     if (!res.ok || !data || data.ok !== true){
@@ -3704,6 +3795,376 @@ async function cloudGet(id){
 async function cloudList(limit){
   const d = await cloudCall('/v1/plays?limit=' + (limit || 12));
   return Array.isArray(d.plays) ? d.plays : [];
+}
+
+/* ===================================================================== SYNC
+   One playbook, every device.
+
+   The server holds the playbook (/v1/book) and anyone can read it. A device
+   that has been given the sync key mirrors its own plays (this browser's
+   store) with it, both ways. A device without the key shows the playbook
+   read-only, beside whatever it has made itself.
+
+   The rule above every other: nothing is ever lost.
+   - Every play remembers the server version it is based on (known). A write
+     names that version and the server refuses it if it has moved on, so no
+     device can overwrite a change it has not seen.
+   - When two devices changed the same play, BOTH versions are kept: the one in
+     front of you keeps its place, the other arrives beside it as a copy.
+   - A delete never beats an edit made elsewhere.
+   - The play open in the editor is never swapped out from under you.
+   - State is re-read from storage after every network wait and changed in
+     one synchronous step, so an edit made while a request is in flight can
+     never be overwritten by the sync that started before it.
+   ======================================================================== */
+const K_SYNC = 'hoops.sync.v1', K_BOOK = 'hoops.book.v1';
+const SYNC_DEBOUNCE = 2000, SYNC_EVERY = 60000;
+
+/* The test harness can point a LOCAL page at a local server. On the live site
+   this is ignored outright, so nothing can ever send the sync key elsewhere.
+   It fails CLOSED: an override that is present but malformed goes nowhere,
+   rather than silently falling through to the real server - which is exactly
+   how a test once reached production while it believed it was offline. */
+const API_NOWHERE = 'http://127.0.0.1:0';
+function apiBase(){
+  try{
+    if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)){
+      const o = localStorage.getItem('hoops.api');
+      if (o !== null) return /^http:\/\/(localhost|127\.0\.0\.1):\d{1,5}$/.test(o) ? o : API_NOWHERE;
+    }
+  }catch(e){}
+  return CLOUD.base;
+}
+/* Keys are typed on phones: case, spaces and dashes don't matter. */
+function normSyncKey(k){ return String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+
+function syncState(){
+  let v = Store._get(K_SYNC, null);
+  if (!v || typeof v !== 'object' || Array.isArray(v)) v = {};
+  const obj = o => (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
+  return {
+    key:   typeof v.key === 'string' ? v.key : '',
+    rev:   typeof v.rev === 'number' ? v.rev : -1,
+    last:  typeof v.last === 'number' ? v.last : 0,
+    known: obj(v.known),   // id -> server version this copy is based on
+    dirty: obj(v.dirty),   // id -> true: changed here, not yet on the server
+    gone:  obj(v.gone)     // id -> version: deleted here, not yet on the server
+  };
+}
+function saveSync(s){ return Store._set(K_SYNC, s); }
+function syncOn(){ return !!syncState().key; }
+function syncWaiting(s){ s = s || syncState(); return Object.keys(s.dirty).length + Object.keys(s.gone).length; }
+
+/* Called by Store.put / Store.remove - only for changes a person made. */
+function syncOnPut(id){
+  const s = syncState();
+  if (!s.key) return;
+  /* an undo of a delete that never reached the server: back to where it was */
+  if (s.gone[id] !== undefined){ s.known[id] = s.gone[id]; delete s.gone[id]; }
+  s.dirty[id] = true;
+  saveSync(s);
+  scheduleSync();
+}
+function syncOnRemove(id){
+  const s = syncState();
+  if (!s.key) return;
+  if (s.known[id] !== undefined) s.gone[id] = s.known[id];
+  delete s.known[id]; delete s.dirty[id];
+  saveSync(s);
+  scheduleSync();
+}
+
+/* The shared playbook as this device last saw it - what a device without the
+   key shows, and what makes a link to a synced play open anywhere. */
+const Book = {
+  _c: null,
+  tried: false,   // a fetch has been attempted this session (success or not)
+  load(){
+    if (this._c) return this._c;
+    const v = Store._get(K_BOOK, null);
+    this._c = (v && Array.isArray(v.plays)) ? v : { rev:-1, plays:[], at:0 };
+    return this._c;
+  },
+  plays(){ return this.load().plays; },
+  get(id){ return this.plays().find(p => p.id === id) || null; },
+  set(rev, rows){
+    const plays = [];
+    for (const r of rows || []){
+      if (!r || r.deleted || !r.play || typeof r.id !== 'string' || isBuiltin(r.id)) continue;
+      try{
+        const p = validatePlay(r.play);
+        p.id = r.id;
+        p.updated = (typeof r.updated === 'number' && isFinite(r.updated)) ? r.updated : 0;
+        plays.push(p);
+      }catch(e){}
+    }
+    plays.sort((a, b) => (b.updated || 0) - (a.updated || 0));
+    this._c = { rev, plays, at: Date.now() };
+    Store._set(K_BOOK, this._c);
+  }
+};
+
+/* Never throws. { status, data } on an answer, { net:true } when there was none. */
+async function bookRequest(method, path, body, key){
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), CLOUD.timeout);
+  const headers = {};
+  if (body) headers['content-type'] = 'application/json';
+  if (key) headers['authorization'] = 'Bearer ' + key;
+  try{
+    const res = await fetch(apiBase() + path, { method, headers, signal:ctl.signal, mode:'cors', cache:'no-store',
+                                               body: body ? JSON.stringify(body) : undefined });
+    let data = null;
+    try{ data = await res.json(); }catch(e){}
+    return { status: res.status, data: (data && typeof data === 'object') ? data : {} };
+  }catch(e){
+    return { status:0, net:true, data:{ error: (e && e.name === 'AbortError')
+      ? 'The server took too long to answer.' : 'Could not reach the server.' } };
+  }finally{ clearTimeout(timer); }
+}
+async function fetchBook(rev){
+  const r = await bookRequest('GET', '/v1/book' + (rev >= 0 ? '?rev=' + rev : ''));
+  if (r.net) return { net:true, error:r.data.error };
+  if (r.status !== 200 || !r.data.ok) return { error: r.data.error || ('The server answered ' + r.status + '.') };
+  return r.data;
+}
+
+/* What a play IS, ignoring where and when it was saved. Two plays with the same
+   signature are the same play, so agreeing devices never raise a conflict. */
+function playSig(p){
+  try{ const v = validatePlay(p); delete v.id; delete v.updated; return JSON.stringify(v); }catch(e){ return ''; }
+}
+function rowPlay(row){
+  if (!row || row.deleted || !row.play) return null;
+  try{
+    const p = validatePlay(row.play);
+    p.id = row.id;
+    p.updated = (typeof row.updated === 'number' && isFinite(row.updated)) ? row.updated : 0;
+    return p;
+  }catch(e){ return null; }
+}
+/* Keep a version that lost its place, as a new play beside it. Nothing is
+   ever thrown away to resolve a conflict. */
+function keepCopy(P, label, s){
+  const c = JSON.parse(JSON.stringify(P));
+  c.id = uid('play');
+  c.name = (String(P.name || 'Untitled play') + ' (' + label + ')').slice(0, 80);
+  const saved = Store.putRaw(c);
+  if (saved) s.dirty[saved.id] = true;
+  return saved;
+}
+
+/* Apply what the server has to this device. Runs synchronously from one read
+   of the sync state to one write, so nothing can interleave with it. */
+function applyRows(rows, s, notes){
+  const editing = App.editingId || '';
+  const seen = new Set();
+  for (const r of rows || []){
+    if (!r || typeof r.id !== 'string' || !r.id || isBuiltin(r.id)) continue;
+    seen.add(r.id);
+    if (r.id === editing) continue;                 // never yank the open play
+    if (s.gone[r.id] !== undefined) continue;       // our delete is still on its way up
+    const L = Store.get(r.id), k = s.known[r.id];
+    if (r.deleted){
+      /* edited here after it was deleted there: the edit wins, the push revives it */
+      if (L && s.dirty[r.id]){ s.known[r.id] = r.version; continue; }
+      if (L){ Store.removeRaw(r.id); notes.removed++; notes.changed = true; }
+      delete s.known[r.id]; delete s.dirty[r.id];
+      continue;
+    }
+    const P = rowPlay(r);
+    if (!P) continue;
+    if (!L){
+      Store.putRaw(P); s.known[r.id] = r.version; delete s.dirty[r.id];
+      notes.added++; notes.changed = true;
+      continue;
+    }
+    const same = playSig(L) === playSig(P);
+    if (k === undefined){
+      /* first contact: both sides have it and this device has never synced it */
+      s.known[r.id] = r.version;
+      if (same){ delete s.dirty[r.id]; continue; }
+      if ((L.updated || 0) >= (P.updated || 0)){ s.dirty[r.id] = true; continue; }   // ours is newer: it goes up
+      keepCopy(L, 'older copy from this device', s);                                  // theirs is newer: it takes the place,
+      Store.putRaw(P); delete s.dirty[r.id];                                          // ours stays beside it
+      notes.copies++; notes.changed = true;
+      continue;
+    }
+    if (r.version > k){
+      s.known[r.id] = r.version;
+      if (same){ delete s.dirty[r.id]; continue; }
+      if (s.dirty[r.id]){ keepCopy(P, 'from another device', s); notes.copies++; notes.changed = true; continue; }
+      Store.putRaw(P); notes.updated++; notes.changed = true;
+    }
+  }
+  /* A play here that the server has never heard of goes up. */
+  for (const L of Store.plays()){
+    if (seen.has(L.id)) continue;
+    delete s.known[L.id];
+    s.dirty[L.id] = true;
+  }
+}
+
+/* Send this device's changes. After every wait the state is read afresh. */
+async function pushPending(notes){
+  let s = syncState();
+  const key = s.key;
+  for (const id of Object.keys(s.gone)){
+    const r = await bookRequest('DELETE', '/v1/book/' + encodeURIComponent(id) + '?base=' + (s.gone[id] || 0), null, key);
+    if (r.net) return 'offline';
+    if (r.status === 401) return 'badkey';
+    s = syncState();
+    if (s.gone[id] === undefined) continue;          // undone while we were waiting
+    if (r.status === 200 || r.status === 404){ delete s.gone[id]; delete s.known[id]; saveSync(s); continue; }
+    if (r.status === 409){
+      /* edited elsewhere after we last saw it: that edit survives our delete */
+      const cur = r.data && r.data.current;
+      delete s.gone[id];
+      const P = rowPlay(cur);
+      if (P && !Store.get(id)){ Store.putRaw(P); s.known[id] = cur.version; notes.kept++; notes.changed = true; }
+      else delete s.known[id];
+      saveSync(s);
+      continue;
+    }
+    notes.error = r.data.error || ('The server answered ' + r.status + '.');
+  }
+  for (const id of Object.keys(syncState().dirty)){
+    const L = Store.get(id);
+    if (!L){ s = syncState(); delete s.dirty[id]; saveSync(s); continue; }
+    const sent = playSig(L), base = syncState().known[id] || 0;
+    const r = await bookRequest('PUT', '/v1/book/' + encodeURIComponent(id),
+                                { play:L, base, updated:L.updated || Date.now() }, key);
+    if (r.net) return 'offline';
+    if (r.status === 401) return 'badkey';
+    s = syncState();
+    if (r.status === 200 && typeof r.data.version === 'number'){
+      s.known[id] = r.data.version;
+      /* edited again while it was uploading: stays dirty, goes up next round */
+      const now = Store.get(id);
+      if (!now || playSig(now) === sent) delete s.dirty[id];
+      saveSync(s); notes.sent++;
+      continue;
+    }
+    if (r.status === 409){
+      const cur = r.data && r.data.current;
+      if (!cur){ delete s.known[id]; saveSync(s); notes.again = true; continue; }
+      s.known[id] = cur.version;
+      if (!cur.deleted){
+        const P = rowPlay(cur);
+        if (P && playSig(P) === sent) delete s.dirty[id];
+        else if (P){ keepCopy(P, 'from another device', s); notes.copies++; notes.changed = true; }
+      }
+      /* ours is still dirty and now based on their version: it goes up next round */
+      saveSync(s); notes.again = true;
+      continue;
+    }
+    notes.error = r.data.error || ('The server answered ' + r.status + '.');
+  }
+  return 'ok';
+}
+
+async function syncOnce(full, notes){
+  const s0 = syncState();
+  try{
+    if (!s0.key){
+      /* a device without the key: just keep its view of the playbook current */
+      const b = await fetchBook(Book.load().rev);
+      if (b.net || b.error) return setSyncStatus(b.net ? 'offline' : 'error', b.error);
+      if (!b.unchanged){ Book.set(b.rev, b.rows); notes.changed = true; }
+      return setSyncStatus('ok');
+    }
+    setSyncStatus('syncing');
+    const b = await fetchBook(full ? -1 : s0.rev);
+    if (b.net) return setSyncStatus('offline', b.error);
+    if (b.error) return setSyncStatus('error', b.error);
+    if (!b.unchanged){
+      const s = syncState();
+      if (!s.key) return setSyncStatus('ok');        // turned off while we were waiting
+      applyRows(b.rows, s, notes);
+      s.rev = b.rev;
+      saveSync(s);
+      Book.set(b.rev, b.rows);
+    }
+    const res = await pushPending(notes);
+    if (res === 'offline') return setSyncStatus('offline');
+    if (res === 'badkey') return setSyncStatus('badkey');
+    const s2 = syncState(); s2.last = Date.now(); saveSync(s2);
+    setSyncStatus(notes.error ? 'error' : 'ok', notes.error);
+  }finally{
+    Book.tried = true;
+  }
+}
+
+let syncRunning = null, syncQueued = false, syncFull = false, syncTimer = 0;
+/* One sync at a time. A request made while one runs is folded into a follow-up
+   round instead of racing it. */
+function syncNow(full){
+  if (full) syncFull = true;
+  if (syncRunning){ syncQueued = true; return syncRunning; }
+  const notes = { added:0, updated:0, removed:0, copies:0, sent:0, kept:0, again:false, changed:false, error:'' };
+  syncRunning = (async () => {
+    let rounds = 0;
+    do{
+      syncQueued = false; notes.again = false;
+      const f = syncFull; syncFull = false;
+      await syncOnce(f, notes);
+      rounds++;
+    }while((syncQueued || notes.again) && rounds < 4);
+    return notes;
+  })().catch(e => { setSyncStatus('error', (e && e.message) || 'Sync failed.'); return notes; })
+     .finally(() => { syncRunning = null; afterSync(notes); });
+  return syncRunning;
+}
+function scheduleSync(){
+  clearTimeout(syncTimer);
+  setSyncStatus(App.sync ? App.sync.state : 'ok');   // repaint the waiting count straight away
+  syncTimer = setTimeout(() => syncNow(), SYNC_DEBOUNCE);
+}
+function afterSync(notes){
+  if (notes.copies){
+    toast(notes.copies === 1
+      ? 'A play was changed on two devices at once — both versions are kept.'
+      : notes.copies + ' plays were changed on two devices at once — both versions of each are kept.');
+  }
+  /* Refresh the playbook view only when it is what you are looking at, and not
+     while a sheet or menu is open over it. */
+  if (notes.changed && parseRoute().name === 'home' && !document.querySelector('.sheet, .menu')) renderScreen();
+}
+
+/* One status for the whole app; anything marked [data-sync] repaints. */
+function setSyncStatus(state, msg){
+  App.sync = { state, msg: msg || '', at: Date.now() };
+  for (const n of document.querySelectorAll('[data-sync]')) paintSyncChip(n);
+}
+function syncText(){
+  const st = App.sync || { state:'idle' }, n = syncWaiting();
+  const w = n === 1 ? '1 change' : n + ' changes';
+  if (st.state === 'badkey')  return ['bad', 'Sync key not accepted — check Settings'];
+  if (st.state === 'syncing') return ['busy', 'Syncing…'];
+  if (st.state === 'offline') return ['bad', n ? 'Offline — ' + w + ' will upload later' : 'Offline'];
+  if (st.state === 'error')   return ['bad', 'Sync problem — ' + (st.msg || 'try again')];
+  if (n) return ['busy', w + ' waiting to upload'];
+  return ['ok', 'Synced'];
+}
+function paintSyncChip(n){
+  const [kind, text] = syncText();
+  n.className = 'syncchip ' + kind;
+  n.textContent = text;
+  n.title = text;
+}
+function syncChip(){ const n = el('span', { 'data-sync':'', role:'status' }); paintSyncChip(n); return n; }
+
+function startSync(){
+  addEventListener('online', () => syncNow());
+  /* Coming back to the tab is when another device's changes are most likely
+     waiting; leaving it is the last good moment to send ours. */
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' || syncWaiting()) syncNow();
+  });
+  /* Only a device that edits polls. A viewer refreshes when it comes back to
+     the page, which keeps the account's shared daily request quota safe. */
+  setInterval(() => { if (document.visibilityState === 'visible' && syncOn()) syncNow(); }, SYNC_EVERY);
+  syncNow();
 }
 
 /* Which plays this browser has published, so the menu can offer the link back
@@ -3969,6 +4430,72 @@ async function openCloud(id){
 }
 
 /* ================================================================ SETTINGS */
+/* Turning sync on is the one moment a device's plays meet the server's, so it
+   says exactly what happened: how many went up, how many came down. */
+function syncPanel(repaint){
+  const box = el('div', { class:'syncbox' });
+  const s = syncState();
+  if (!s.key){
+    box.appendChild(el('p', { class:'help', style:'margin:0 0 10px',
+      text:'Your playbook is shared: every device can see it. To change it from this device, enter your sync key once. Without it this device can watch and practise the playbook, but not change it.' }));
+    const row = el('div', { class:'syncrow' });
+    const inp = el('input', { class:'input', type:'text', placeholder:'XXXX-XXXX-XXXX-XXXX', maxlength:'40',
+      autocomplete:'off', autocapitalize:'characters', spellcheck:'false', 'aria-label':'Sync key' });
+    const msg = el('p', { class:'help', style:'margin:8px 0 0', role:'status' });
+    const goBtn = btn('Turn on sync', { cls:'pri', onclick: async () => {
+      const key = normSyncKey(inp.value);
+      if (key.length < 12){ msg.textContent = 'That looks too short — the key is 16 letters and numbers.'; return; }
+      goBtn.disabled = true; inp.disabled = true;
+      msg.style.color = ''; msg.textContent = 'Checking the key…';
+      const r = await bookRequest('GET', '/v1/book/check', null, key);
+      if (r.net || r.status !== 200){
+        msg.style.color = 'var(--bad)';
+        msg.textContent = r.net ? 'Could not reach the server — check your connection and try again.'
+                                : (r.data.error || 'That sync key is not right.');
+        goBtn.disabled = false; inp.disabled = false;
+        return;
+      }
+      const ns = syncState();
+      ns.key = key; ns.rev = -1; ns.known = {}; ns.dirty = {}; ns.gone = {};
+      saveSync(ns);
+      msg.textContent = 'Syncing your plays…';
+      const notes = await syncNow(true);
+      const total = Store.plays().length;
+      const parts = [];
+      if (notes.sent) parts.push(notes.sent + ' uploaded');
+      if (notes.added) parts.push(notes.added + ' downloaded');
+      toast(App.sync && App.sync.state === 'ok'
+        ? 'Sync is on. ' + total + ' play' + (total === 1 ? '' : 's') + ' on every device' + (parts.length ? ' (' + parts.join(', ') + ').' : '.')
+        : 'Sync is on, but the first sync did not finish — it will keep trying.');
+      repaint();
+      renderScreen();
+    } });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); goBtn.click(); } });
+    row.appendChild(inp);
+    row.appendChild(goBtn);
+    box.appendChild(row);
+    box.appendChild(msg);
+    return box;
+  }
+  const line = el('div', { class:'syncrow', style:'align-items:center' });
+  line.appendChild(syncChip());
+  const last = s.last ? 'Last synced ' + new Date(s.last).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) + '.' : '';
+  line.appendChild(el('span', { class:'help', text:last }));
+  box.appendChild(line);
+  box.appendChild(el('p', { class:'help', style:'margin:8px 0 12px',
+    text:'This device can change the playbook. Your plays upload as you edit, and changes made on your other devices arrive here on their own.' }));
+  const acts = el('div', { class:'quick' });
+  acts.appendChild(btn('Sync now', { cls:'sm', onclick: async () => { await syncNow(true); repaint(); } }));
+  acts.appendChild(btn('Turn off on this device', { cls:'sm ghost', onclick:() => {
+    const n = syncWaiting();
+    confirmSheet('Turn off sync on this device?',
+      (n ? n + (n === 1 ? ' change has' : ' changes have') + ' not uploaded yet — they stay on this device but will not reach your others. ' : '') +
+      'Your plays stay in this browser. You can turn sync back on any time with the same key.',
+      'Turn off', () => { saveSync({}); setSyncStatus('ok'); repaint(); renderScreen(); toast('Sync is off on this device.'); });
+  } }));
+  box.appendChild(acts);
+  return box;
+}
 function openSettings(){
   const s = sheet({ title:'Settings', sub:'Changes apply straight away.' });
   /* Look-only changes are pure CSS. Anything that changes the court's geometry
@@ -3977,6 +4504,9 @@ function openSettings(){
   const redraw = () => { if (App.ctl && App.ctl.redraw) App.ctl.redraw(); else renderScreen(); };
   function paint(){
     clear(s.body);
+    s.body.appendChild(el('div', { class:'label', style:'margin-bottom:10px', text:'Sync across devices' }));
+    s.body.appendChild(syncPanel(paint));
+    s.body.appendChild(el('div', { class:'hr', style:'margin-block:18px' }));
     const g = el('div', { class:'setgrid' });
     const row = (k, control) => { g.appendChild(el('div', { class:'k', text:k })); g.appendChild(el('div', {}, [control])); };
     const cssOnly = (key, v) => { App.settings[key] = v; saveSettings(); applyTheme(); paint(); };
@@ -4035,6 +4565,8 @@ function boot(){
   addEventListener('hashchange', route);
   addEventListener('resize', applySideWidth);
   route();
+  /* after the first paint: the page is usable before the network is asked anything */
+  startSync();
   if (rescued.length){
     toast(rescued.length === 1
       ? `Recovered a play you made earlier: “${rescued[0]}”. It’s in My plays.`
@@ -4054,7 +4586,9 @@ window.HOOPS = {
   Store, App, findPlay, allPlays, isBuiltin, importPlays, moveSentence, callSentence, stepMarks,
   go, route, parseRoute, createPlay, copyPlay, SIDE_DEFAULT, SIDE_MIN, SIDE_MAX, MAX_STEPS, MAX_MOVES,
   CLOUD, cloudPublish, cloudGet, cloudList, cloudLink, offerPlay, shareSheet,
-  publishSheet, publishedCode, rememberPublished, playMenuItems
+  publishSheet, publishedCode, rememberPublished, playMenuItems,
+  Book, syncState, saveSync, syncOn, syncNow, syncWaiting, applyRows, playSig, normSyncKey, apiBase,
+  bookRequest, canEditPlay, syncPanel
 };
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
