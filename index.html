@@ -535,15 +535,12 @@
         <section class="cap" style="--c:var(--line-3)">
           <div class="cap-head">
             <h3>AI tooling</h3>
-            <p>What I build and debug with, and how I check its work.</p>
+            <p>The AI tools I work with.</p>
           </div>
           <div class="cap-body">
             <ul class="chips">
-              <li><button class="chip ev" type="button" data-to="#claude" data-q="I built and debugged a lot of my tooling with Claude Code, used Claude Cowork for longer multi-step tasks, and experimented with local models through Ollama.">Claude Code</button></li>
-              <li><button class="chip ev" type="button" data-to="#claude-skills" data-q="Each one is a folder of instructions and scripts that Claude Code loads when a job calls for it.">Writing Claude Code skills</button></li>
-              <li><button class="chip ev" type="button" data-to="#claude" data-q="For bigger jobs I run multi-agent workflows.">Multi-agent workflows</button></li>
-              <li><button class="chip ev" type="button" data-to="#claude" data-q="I built and debugged a lot of my tooling with Claude Code, used Claude Cowork for longer multi-step tasks, and experimented with local models through Ollama.">Claude Cowork</button></li>
-              <li><button class="chip ev" type="button" data-to="#claude" data-q="I built and debugged a lot of my tooling with Claude Code, used Claude Cowork for longer multi-step tasks, and experimented with local models through Ollama.">Ollama and local models</button></li>
+              <li><button class="chip ev chip-ico" type="button" data-to="#claude" data-q="At the SOC I put Claude in the analyst seat to watch the C2 activity in Wazuh with me, then wrote the detection rules for that signature."><img src="img/claude-code-logo.png" width="22" height="22" loading="lazy" decoding="async" alt="" />Claude Code</button></li>
+              <li><span class="chip chip-ico"><img src="img/ollama-logo.png" width="22" height="22" loading="lazy" decoding="async" alt="" />Ollama and local models</span></li>
             </ul>
             <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
           </div>
@@ -629,37 +626,14 @@
       </header>
 
       <div class="cc">
-        <div class="prose cc-text">
-          <p class="cc-lede">I built and debugged a lot of my tooling with Claude Code, used Claude Cowork for longer multi-step tasks, and experimented with local models through Ollama. Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship for me.</p>
+        <div class="cc-text">
+          <p class="cc-lede">AI is moving fast, and I&rsquo;ll keep up with it as it changes. Getting hands on with this now, while it is all still moving, has been one of the most valuable parts of the internship for me. I plan to keep trying each new tool on real work, to see where it helps and where it gets things wrong.</p>
           <p>At the SOC I put Claude in the analyst seat to watch the C2 activity in Wazuh with me, then wrote the detection rules for that signature.</p>
-          <p>I don&rsquo;t take its word that something worked. Most of what I&rsquo;ve written for it is checks: skills that make it test the real output, like the rendered page, the built PDF or the bytes GitHub Pages actually serves, before anything is called done.</p>
-          <p>For bigger jobs I run multi-agent workflows. For this site, four agents proposed designs independently, a fifth judged them, and another set reviewed the copy and the design before it went live.</p>
+          <p>I don&rsquo;t take its word that something worked. I have it check the real output before anything is called done.</p>
         </div>
-        <aside class="cc-uses" aria-labelledby="cc-uses-h">
-          <h3 id="cc-uses-h">Where I&rsquo;ve used it</h3>
-          <ul>
-            <li><a href="#purple"><b>Purple team</b><span>Claude watching the C2 activity in Wazuh with me</span></a></li>
-            <li><a href="#soc"><b>The SOC tooling</b><span>the dashboards and the alerting bot</span></a></li>
-            <li><a href="#projects"><b>Ezforge</b><span>the booth operations system and its test suite</span></a></li>
-            <li><a href="#main"><b>This website</b><span>design, build, checks and publishing</span></a></li>
-          </ul>
-        </aside>
-      </div>
-
-      <div class="cc-skills" id="claude-skills">
-        <h3>Skills I wrote for it</h3>
-        <p class="sub">Each one is a folder of instructions and scripts that Claude Code loads when a job calls for it.</p>
-        <ul class="skill-grid">
-          <li><code>page-verify</code><p>Loads a page in headless Chrome and checks for script errors, failed requests, overflow and dead space at each screen width, with screenshots.</p></li>
-          <li><code>public-release-check</code><p>Scans anything going public for internal addresses, hostnames, secrets and claims I&rsquo;ve corrected.</p></li>
-          <li><code>wazuh-detection</code><p>The Wazuh field names and scoping rules that quietly break a rule, plus a linter for custom rules.</p></li>
-          <li><code>soc-templates</code><p>Re-runs the regressions that each shipped twice in the published SOC dashboards, and checks they make no third-party requests.</p></li>
-          <li><code>ezforge-booth</code><p>Runs the booth system&rsquo;s whole test suite in a temporary copy, and checks the live site matches a fresh build.</p></li>
-          <li><code>portfolio-publish</code><p>Publishes this site: hash-checks each file, runs the release scan, and confirms what GitHub Pages actually serves.</p></li>
-          <li><code>cv-build</code><p>Rebuilds my CV as a PDF and checks the page count, fonts, links and how applicant-tracking systems read it.</p></li>
-          <li><code>career-facts</code><p>Every fact about my work with its source, so nothing on my CV or on this site is made up.</p></li>
-          <li><code>squarez-build</code><p>Builds my C++ game from a scratch copy, runs its self-test and takes real screenshots.</p></li>
-          <li><code>set-play-trainer</code><p>Checks the rules of my basketball set-play trainer through the page&rsquo;s own code.</p></li>
+        <ul class="cc-tools" aria-label="AI tools I use">
+          <li><img src="img/claude-code-logo.png" width="144" height="144" loading="lazy" decoding="async" alt="Claude Code logo" /><div><b>Claude Code</b><span>Anthropic&rsquo;s coding agent</span></div></li>
+          <li><img src="img/ollama-logo.png" width="144" height="144" loading="lazy" decoding="async" alt="Ollama logo" /><div><b>Ollama</b><span>Runs language models locally</span></div></li>
         </ul>
       </div>
     </div>
