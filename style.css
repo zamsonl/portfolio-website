@@ -90,7 +90,7 @@ button { font: inherit; color: inherit; }
 .top { position: sticky; top: 0; z-index: 100; background: transparent; border-bottom: 1px solid transparent; transition: background-color .15s, border-color .15s; }
 .top.stuck { background: color-mix(in srgb, var(--bg) 90%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom-color: var(--line); }
 .top-in { display: flex; align-items: center; height: 62px; gap: 1.5rem; }
-.logo { display: inline-flex; align-items: center; gap: .6rem; font-family: var(--display); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; color: var(--text); text-decoration: none; }
+.logo { display: inline-flex; align-items: center; min-height: 44px; gap: .6rem; font-family: var(--display); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; color: var(--text); text-decoration: none; }
 .zmark { flex: none; }
 .nav { display: flex; gap: 1.6rem; margin-left: auto; }
 .nav a { font-size: .93rem; font-weight: 500; color: var(--mute); text-decoration: none; padding: .35rem 0; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
@@ -372,7 +372,7 @@ button.chip[aria-expanded="true"] { border-color: var(--c); background: color-mi
 .tl li.tl-main::before { background: var(--violet); border-color: var(--violet); }
 .when { font-size: .86rem; font-weight: 600; color: var(--mute); font-variant-numeric: tabular-nums; }
 .tl h3 { margin-top: .2rem; font-size: 1.12rem; display: flex; align-items: center; gap: .55rem; }
-.tl-badge { width: 26px; height: 26px; border-radius: 5px; flex: none; }
+.tl-badge { width: 26px; height: 26px; border-radius: 5px; flex: none; align-self: flex-start; margin-top: .05em; background: #fff; }
 .where { margin-top: .15rem; font-size: .93rem; color: var(--violet); }
 .tl li > p:last-child:not(.where):not(.when):not(.tl-links), .tl .tl-body { margin-top: .5rem; font-size: .96rem; }
 .tl .tl-links { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin-top: .45rem; font-size: .9rem; }
@@ -384,9 +384,9 @@ button.chip[aria-expanded="true"] { border-color: var(--c); background: color-mi
 .contact-in { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: end; }
 .contact-main p { margin-top: .9rem; max-width: 52ch; font-size: 1.08rem; }
 .contact-list { list-style: none; border-top: 1px solid var(--line-2); }
-.contact-list li { display: grid; grid-template-columns: 6rem minmax(0, 1fr); align-items: baseline; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid var(--line-2); }
+.contact-list li { display: grid; grid-template-columns: 6rem minmax(0, 1fr); align-items: baseline; gap: 1rem; padding: .4rem 0; border-bottom: 1px solid var(--line-2); }
 .contact-list span { font-size: .88rem; color: var(--mute); }
-.contact-list a { color: var(--text); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.contact-list a { display: inline-block; padding-block: .45rem; color: var(--text); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
 .contact-list a:hover { color: var(--violet); }
 
 .foot { border-top: 1px solid var(--line); padding-block: 1.6rem; font-size: .88rem; color: var(--mute); }
