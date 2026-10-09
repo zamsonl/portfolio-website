@@ -432,7 +432,7 @@
     <div class="wrap">
       <header class="sec-head">
         <h2>What I can do</h2>
-        <p class="sub">Tools and skills I have used on real systems, not just read about. Skills with a dot open the part of this page where I used them.</p>
+        <p class="sub">Tools and skills I have used on real systems, not just read about. Skills with a dot show the line on this page where I used them, with a link to it.</p>
       </header>
 
       <div class="caps">
@@ -444,7 +444,7 @@
           <div class="cap-body">
             <ul class="chips">
               <li><button class="chip ev" type="button" data-to="#purple" data-q="I built my own command-and-control framework in Python rather than picking one off the shelf, so I know exactly what it does on the wire and on the host.">Custom C2 development</button></li>
-              <li><button class="chip ev" type="button" data-to="#samples" data-q="Written by me, to test detections. Isolated VMs, written authorization, never a live sample.">Malware development for testing</button></li>
+              <li><button class="chip ev" type="button" data-to="#samples" data-q="Each one follows the same path: I run it as the attacker, watch what the sensors see, and turn the gap into a rule.">Malware development for testing</button></li>
               <li><span class="chip">Kali Purple</span></li>
               <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="I mapped it to the ATT&amp;CK techniques for a command-and-control channel over a web protocol, so it lines up with the rest of the coverage.">MITRE ATT&amp;CK</button></li>
               <li><span class="chip">Sandboxed analysis</span></li>
@@ -463,7 +463,7 @@
           </div>
           <div class="cap-body">
             <ul class="chips">
-              <li><button class="chip ev" type="button" data-to="#flow" data-q="Most of the work was getting usable data in: Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless over syslog, agents on the Windows machines, and SPAN feeds from the core and access switches.">Wazuh</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Most of the work was getting usable data in: Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless over syslog, agents on the Windows machines, and SPAN feeds from the core and access switches so the sensor sees the network instead of a slice of it.">Wazuh</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Recovered a full outage after archive logging filled the disk and every index went read-only, then set retention policies so it couldn&rsquo;t happen again.">OpenSearch</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Rewrote the Zeek decoders so each log type is identified by the fields only it has, and added detections for DGA bursts, DNS tunnelling, exfiltration and inbound scans.">Zeek</button></li>
               <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="One rule notices a single outbound connection to the tunnel edge. A second says that six of them in a minute from the same machine is a pattern, not a coincidence.">Custom decoders and rules</button></li>
@@ -504,8 +504,8 @@
           <div class="cap-body">
             <ul class="chips">
               <li><span class="chip">FortiGate</span></li><li><span class="chip">Aruba switching and wireless</span></li>
-              <li><button class="chip ev" type="button" data-to="#flow" data-q="SPAN feeds from the core and access switches so the sensor sees the network instead of a slice of it.">Traffic mirroring and SPAN</button></li>
-              <li><button class="chip ev" type="button" data-to="#flow" data-q="Wazuh and OpenSearch on a Proxmox host I set up in the office.">Proxmox</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="SPAN feeds from the core and access switches so the sensor sees the network instead of a slice of it.">Traffic mirroring and SPAN</button></li>
+              <li><button class="chip ev" type="button" data-to="#soc" data-q="Wazuh and OpenSearch on a Proxmox host I set up in the office">Proxmox</button></li>
               <li><span class="chip">Linux</span></li><li><span class="chip">Windows Server</span></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.">Active Directory</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Wazuh agents to more than 80 domain-joined Windows machines through Group Policy, with an installer that was safe to run twice.">Group Policy</button></li>
@@ -524,7 +524,7 @@
             <ul class="chips">
               <li><button class="chip ev" type="button" data-to="#purple" data-q="I built my own command-and-control framework in Python rather than picking one off the shelf, so I know exactly what it does on the wire and on the host.">Python</button></li>
               <li><button class="chip ev" type="button" data-to="#case-ransomware" data-q="A Rust sample that behaves like ransomware, hard-guarded so it could only ever write inside one canary folder.">Rust</button></li>
-              <li><button class="chip ev" type="button" data-to="#case-c2client" data-q="A C2 client that checks in on a fixed interval, talking back to the listener in my own framework.">C++</button></li>
+              <li><button class="chip ev" type="button" data-to="#case-c2client" data-q="A C2 client that checks in on a fixed interval, talking back to the listener in my own framework, reached through a tunnelling service so the traffic looked ordinary from outside.">C++</button></li>
               <li><span class="chip">C#</span></li><li><span class="chip">Java</span></li><li><span class="chip">JavaScript</span></li><li><span class="chip">Bash</span></li><li><span class="chip">PowerShell</span></li>
             </ul>
             <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
@@ -533,13 +533,15 @@
 
         <section class="cap" style="--c:var(--line-3)">
           <div class="cap-head">
-            <h3>Certifications</h3>
-            <p>Both completed during the degree, both hands-on.</p>
+            <h3>Certificates</h3>
+            <p>All completed during the degree.</p>
           </div>
           <div class="cap-body">
             <ul class="chips">
-              <li><button class="chip ev chip-cert" type="button" data-to="#cert" data-q="Cisco Ethical Hacker, Cisco Networking Academy, September 2026."><img src="img/badge-ethical-hacker.png" width="22" height="22" loading="lazy" decoding="async" alt="" />Cisco Ethical Hacker</button></li>
-              <li><button class="chip ev" type="button" data-to="#about" data-q="ELITE TecForte SOC Programme, certificate of completion, March 2026.">ELITE TecForte SOC Programme</button></li>
+              <li><button class="chip ev chip-cert" type="button" data-to="#cert" data-q="My Cisco Ethical Hacker certificate from the Cisco Networking Academy, completed 11 September 2026."><img src="img/badge-ethical-hacker.png" width="22" height="22" loading="lazy" decoding="async" alt="" />Cisco Ethical Hacker</button></li>
+              <li><span class="chip">ELITE TecForte SOC Programme</span></li>
+              <li><button class="chip ev" type="button" data-to="#certs" data-q="Certificates of attendance for RH124 and RH134, 40 credit hours each.">Red Hat System Administration I (RH124)</button></li>
+              <li><button class="chip ev" type="button" data-to="#certs" data-q="Certificates of attendance for RH124 and RH134, 40 credit hours each.">Red Hat System Administration II (RH134)</button></li>
             </ul>
             <div class="ev-panel" hidden><p class="ev-q"></p><a class="ev-go" href="#">Show me where</a></div>
           </div>
@@ -621,12 +623,26 @@
               from people who have done this at a bigger scale.
             </p>
           </div>
-          <button class="shot shot-cert" id="cert" type="button" data-full="img/cert-ethical-hacker-full.png" data-w="2226" data-h="1492"
-                  data-caption="My Cisco Ethical Hacker certificate from the Cisco Networking Academy, completed 11 September 2026.">
-            <img src="img/cert-ethical-hacker-thumb.jpg" width="760" height="509" loading="lazy" decoding="async"
-                 alt="Cisco Networking Academy certificate of completion for Ethical Hacker, awarded to Zamson Lim." />
-            <span class="shot-cap"><span>Cisco Ethical Hacker certificate</span><span class="shot-open">View full size</span></span>
-          </button>
+          <div class="certs" id="certs">
+            <button class="shot shot-cert" id="cert" type="button" data-full="img/cert-ethical-hacker-full.png" data-w="2226" data-h="1492"
+                    data-caption="My Cisco Ethical Hacker certificate from the Cisco Networking Academy, completed 11 September 2026.">
+              <img src="img/cert-ethical-hacker-thumb.jpg" width="760" height="509" loading="lazy" decoding="async"
+                   alt="Cisco Networking Academy certificate of completion for Ethical Hacker, awarded to Zamson Lim Zhen Pin." />
+              <span class="shot-cap"><span>Cisco Ethical Hacker certificate</span><span class="shot-open">View full size</span></span>
+            </button>
+            <button class="shot" id="cert-rh124" type="button" data-full="img/redhat-rh124-full.png" data-w="1980" data-h="1530"
+                    data-caption="Red Hat certificate of attendance for Red Hat System Administration I (RH124), 29 December 2025, 40 credit hours.">
+              <img src="img/redhat-rh124-thumb.jpg" width="760" height="587" loading="lazy" decoding="async"
+                   alt="Red Hat certificate of attendance for Red Hat System Administration I (RH124), awarded to Zamson Lim." />
+              <span class="shot-cap"><span>Red Hat RH124</span><span class="shot-open">View full size</span></span>
+            </button>
+            <button class="shot" id="cert-rh134" type="button" data-full="img/redhat-rh134-full.png" data-w="1980" data-h="1530"
+                    data-caption="Red Hat certificate of attendance for Red Hat System Administration II (RH134), 29 December 2025, 40 credit hours.">
+              <img src="img/redhat-rh134-thumb.jpg" width="760" height="587" loading="lazy" decoding="async"
+                   alt="Red Hat certificate of attendance for Red Hat System Administration II (RH134), awarded to Zamson Lim." />
+              <span class="shot-cap"><span>Red Hat RH134</span><span class="shot-open">View full size</span></span>
+            </button>
+          </div>
         </div>
 
         <ol class="tl">
@@ -651,6 +667,13 @@
             <p class="when">March 2026</p>
             <h3>ELITE TecForte SOC Programme</h3>
             <p class="where">Certificate of completion</p>
+          </li>
+          <li>
+            <p class="when">December 2025</p>
+            <h3>Red Hat System Administration I and II</h3>
+            <p class="where">Red Hat</p>
+            <p class="tl-body">Certificates of attendance for RH124 and RH134, 40 credit hours each.</p>
+            <p class="tl-links"><a href="https://www.credly.com/badges/7cf5cf93-d526-4292-83e8-bc2370ca5267" target="_blank" rel="noreferrer">Verify RH124 on Credly</a><a href="https://www.credly.com/badges/de7ab529-d7da-4449-8a4f-2e252888b4da" target="_blank" rel="noreferrer">Verify RH134 on Credly</a></p>
           </li>
           <li>
             <p class="when">2024 to now</p>
