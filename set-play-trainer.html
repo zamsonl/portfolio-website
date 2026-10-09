@@ -334,6 +334,7 @@ textarea.input{resize:vertical;min-height:74px;line-height:1.5}
 .save .dot{width:8px;height:8px;border-radius:99px;background:var(--good)}
 .save.saving .dot{background:var(--warn)}
 .save.error{color:var(--bad)} .save.error .dot{background:var(--bad)}
+.save.local{color:var(--warn)} .save.local .dot{background:var(--warn)}
 
 /* ----------------------------------------------------------------- sheet -- */
 .scrim{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
@@ -388,6 +389,14 @@ textarea.input{resize:vertical;min-height:74px;line-height:1.5}
 .syncbox{border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface-2)}
 .syncrow{display:flex;gap:10px;flex-wrap:wrap}
 .syncrow .input{flex:1 1 200px;min-width:0;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase}
+/* sync is off on a device that holds shared plays: say it plainly, once, at the top */
+.syncwarn{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 22px;padding:14px 16px;
+  border:1px solid var(--warn);border-radius:var(--r);background:var(--warn-soft)}
+.syncwarn .tx{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:3px}
+.syncwarn .tx b{font-size:14.5px;color:var(--ink)}
+.syncwarn .tx span{font-size:13px;color:var(--ink-2);line-height:1.5}
+.syncwarn .btn{flex:none}
+@media (max-width:620px){ .syncwarn .btn{flex:1 1 100%;justify-content:center} }
 .choices{display:grid;gap:9px}
 .choice{text-align:left;cursor:pointer;color:inherit;background:var(--surface-2);border:1.5px solid var(--line);
   border-radius:var(--r);padding:13px 15px;font-weight:650;font-size:15px}
@@ -439,6 +448,8 @@ textarea.input{resize:vertical;min-height:74px;line-height:1.5}
   .title-input{width:38vw;font-size:15px}
   .back span{display:none}
   .save span:not(.dot){display:none}
+  /* the one status that must stay readable on a phone: it is a warning */
+  .save.local span:not(.dot){display:inline;white-space:normal;line-height:1.2;max-width:9.5em}
   .top-sub{display:none}
   .stagecol{padding:10px}
   .emptyhero{flex-direction:column;align-items:flex-start;padding:20px}
@@ -2251,6 +2262,8 @@ function screenHome(root){
   const synced = syncOn();
   if (mine.length) hello.appendChild(btn('Create a play', { cls:'pri lg', icon:'plus', onclick:createPlay }));
   main.appendChild(hello);
+  const unsynced = unsyncedShared();
+  if (unsynced) main.appendChild(syncWarning(unsynced));
 
   /* The shared playbook, on a device that cannot change it. Shown first: on a
      phone or a visitor's laptop it IS the playbook. On a synced device these
@@ -2282,7 +2295,9 @@ function screenHome(root){
   if (mine.length) s1.appendChild(el('p', { class:'help', style:'margin:-4px 0 14px',
     text: synced
       ? 'Synced — the same on every device you have turned sync on for. Changes upload as you make them.'
-      : 'These live only in this browser. Publish one to open it on another device.' }));
+      : unsynced
+        ? 'These live only in this browser until you turn on sync.'
+        : 'These live only in this browser. Publish one to open it on another device.' }));
   if (!mine.length){
     /* one wide invitation, not a lone card stranded in an empty row */
     const empty = el('button', { class:'emptyhero', type:'button', onclick:createPlay });
@@ -2783,9 +2798,14 @@ function screenEdit(root, stored){
 
   function setStatus(s){
     saveState = s;
-    status.className = 'save' + (s === 'saving' ? ' saving' : s === 'error' ? ' error' : '');
-    statusText.textContent = s === 'saving' ? 'Saving…' : s === 'error' ? 'Not saved — export it!' : 'Saved';
-    status.title = s === 'error' ? 'This browser refused to store the play. Use ⋯ → Export file to keep it.' : 'Saved to this browser automatically';
+    /* a play that is also in the shared playbook, edited where sync is off:
+       saved, but only here - say so right where the edit happens */
+    const onlyHere = s === 'saved' && !syncOn() && !!Book.get(play.id);
+    status.className = 'save' + (s === 'saving' ? ' saving' : s === 'error' ? ' error' : onlyHere ? ' local' : '');
+    statusText.textContent = s === 'saving' ? 'Saving…' : s === 'error' ? 'Not saved — export it!' : onlyHere ? 'Saved on this device only' : 'Saved';
+    status.title = s === 'error' ? 'This browser refused to store the play. Use ⋯ → Export file to keep it.'
+      : onlyHere ? 'Sync is off here, so this edit is not reaching your other devices. Turn it on in Settings.'
+      : 'Saved to this browser automatically';
   }
   function flush(){
     clearTimeout(saveTimer);
@@ -4154,6 +4174,41 @@ function paintSyncChip(n){
 }
 function syncChip(){ const n = el('span', { 'data-sync':'', role:'status' }); paintSyncChip(n); return n; }
 
+/* Sync is off here, yet this browser holds plays that are also in the shared
+   playbook - the owner's own device before sync was turned on. Edits made
+   here stay here, and nothing used to say so: the owner edited two plays and
+   reasonably expected them on the phone. Returns null when there is nothing
+   to warn about (sync on, or plays that are only this device's own). */
+function unsyncedShared(){
+  if (syncOn()) return null;
+  const book = Book.plays();
+  if (!book.length) return null;
+  const byId = new Map(book.map(p => [p.id, p]));
+  let shared = 0, differ = 0;
+  for (const p of Store.plays()){
+    const b = byId.get(p.id);
+    if (!b) continue;
+    shared++;
+    if (playSig(p) !== playSig(b)) differ++;
+  }
+  return shared ? { shared, differ } : null;
+}
+function openSyncSettings(){
+  openSettings();
+  setTimeout(() => { const i = document.querySelector('input[aria-label="Sync key"]'); if (i) i.focus(); }, 60);
+}
+function syncWarning(u){
+  const w = el('div', { class:'syncwarn', role:'status' });
+  const tx = el('div', { class:'tx' });
+  tx.appendChild(el('b', { text:'Your changes here aren’t reaching your other devices.' }));
+  tx.appendChild(el('span', { text:
+    (u.differ ? (u.differ === 1 ? '1 play is' : u.differ + ' plays are') + ' different here than in your shared playbook. ' : '') +
+    'Sync is off on this device, so anything you edit stays in this browser.' }));
+  w.appendChild(tx);
+  w.appendChild(btn('Turn on sync', { cls:'pri', icon:'share', onclick:openSyncSettings }));
+  return w;
+}
+
 function startSync(){
   addEventListener('online', () => syncNow());
   /* Coming back to the tab is when another device's changes are most likely
@@ -4588,7 +4643,7 @@ window.HOOPS = {
   CLOUD, cloudPublish, cloudGet, cloudList, cloudLink, offerPlay, shareSheet,
   publishSheet, publishedCode, rememberPublished, playMenuItems,
   Book, syncState, saveSync, syncOn, syncNow, syncWaiting, applyRows, playSig, normSyncKey, apiBase,
-  bookRequest, canEditPlay, syncPanel
+  bookRequest, canEditPlay, syncPanel, unsyncedShared
 };
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
