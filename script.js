@@ -55,7 +55,7 @@
     burger.addEventListener('click', function () { set(burger.getAttribute('aria-expanded') !== 'true'); });
     nav.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
-    window.addEventListener('resize', function () { if (window.innerWidth > 960) set(false); });
+    window.addEventListener('resize', function () { if (window.innerWidth > 1120) set(false); });
   })();
 
   /* lightbox: the original screenshot only loads when asked for */
