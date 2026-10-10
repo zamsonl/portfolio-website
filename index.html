@@ -109,7 +109,7 @@
           <li><a href="#case-creds"><span class="lang">VBA</span><span class="what">Word macro abuse</span></a></li>
           <li><a href="#case-creds"><span class="lang">C/C++</span><span class="what">DLL injection</span></a></li>
         </ul>
-        <p class="ledger-foot">Every one of these ended up as Wazuh rules, Zeek scripts and OpenSearch queries.</p>
+        <p class="ledger-foot">Each one was written to test a detection. The cases below show what each one led to.</p>
       </aside>
     </div>
   </section>
@@ -152,7 +152,7 @@
             <p>
               Watching that beacon arrive in Wazuh is how I wrote the detection for it. One rule notices
               a single outbound connection to the tunnel edge. A second says that six of them in a
-              minute from the same machine is a pattern, not a coincidence.
+              minute from the same source address is a pattern, not a coincidence.
             </p>
             <p>I mapped it to the ATT&amp;CK techniques for a command-and-control channel over a web
               protocol, so it lines up with the rest of the coverage.</p>
@@ -219,6 +219,16 @@
 <span class="t">&lt;/rule&gt;</span></code></pre>
         </div>
       </div>
+
+      <div class="limits">
+        <h3>What it doesn&rsquo;t catch</h3>
+        <ul>
+          <li><b>Normal use of the same tunnel service.</b> Anything on the network using that provider on port 443 matches too, so an alert means &ldquo;check this host&rdquo;, not confirmed C2.</li>
+          <li><b>Slow or jittered beacons.</b> My implant checked in on a fixed interval. A beacon that calls home less often, or at random gaps, stays under six in a minute.</li>
+          <li><b>A plain implant to a clean cloud server.</b> The rule keys on the tunnel provider&rsquo;s addresses, so a bare HTTPS beacon to an ordinary cloud IP was missed. The tunnel was the signature, not the beacon.</li>
+          <li><b>Which machine it is.</b> The firewall reported one shared address, and that is what the rule groups on. Naming the host took DNS.</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -271,7 +281,7 @@
         <ol class="trace">
           <li class="beat b-red"><h4>I ran</h4><p>A C2 client that checks in on a fixed interval, talking back to the listener in my own framework, reached through a tunnelling service so the traffic looked ordinary from outside.</p></li>
           <li class="beat b-blue"><h4>The SIEM saw</h4><p>Only DNS named the affected hosts. The firewall and the tunnel both reported a single shared address, which tells you nothing about which machine to check.</p></li>
-          <li class="beat b-violet"><h4>I wrote</h4><p>The two beacon rules above, built on the DNS side rather than the firewall side, because that was the side with the answer.</p></li>
+          <li class="beat b-violet"><h4>I wrote</h4><p>The two beacon rules above. They run on the firewall&rsquo;s logs, so they show that something is beaconing to the tunnel. DNS is what told me which machine.</p></li>
         </ol>
       </article>
 
@@ -302,7 +312,7 @@
     <div class="wrap">
       <header class="sec-head">
         <h2>Built and ran a SOC</h2>
-        <p class="sub">Network &amp; Security Administrator intern, Palmgold Management Sdn&nbsp;Bhd, May to August 2026. The company had been hit by ransomware in August 2025 and still had no monitoring nine months later, when I started. I proposed a SOC, the head of IT approved it, and I built it and ran it until the internship ended.</p>
+        <p class="sub">Network &amp; Security Administrator intern, Palmgold Management Sdn&nbsp;Bhd, May to August 2026. When I started, the company had no security monitoring. I proposed a SOC, the head of IT approved it, and I built it and ran it until the internship ended.</p>
       </header>
 
       <figure class="flow" id="flow">
@@ -473,7 +483,7 @@
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Most of the work was getting usable data in: Wazuh and OpenSearch on a Proxmox host I set up in the office, the firewall and wireless over syslog, agents on the Windows machines, and SPAN feeds from the core and access switches so the sensor sees the network instead of a slice of it.">Wazuh</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Recovered a full outage after archive logging filled the disk and every index went read-only, then set retention policies so it couldn&rsquo;t happen again.">OpenSearch</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Rewrote the Zeek decoders so each log type is identified by the fields only it has, and added detections for DGA bursts, DNS tunnelling, exfiltration and inbound scans.">Zeek</button></li>
-              <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="One rule notices a single outbound connection to the tunnel edge. A second says that six of them in a minute from the same machine is a pattern, not a coincidence.">Custom decoders and rules</button></li>
+              <li><button class="chip ev" type="button" data-to="#purple-rule" data-q="One rule notices a single outbound connection to the tunnel edge. A second says that six of them in a minute from the same source address is a pattern, not a coincidence.">Custom decoders and rules</button></li>
               <li><button class="chip ev" type="button" data-to="#case-ransomware" data-q="File integrity monitoring caught the burst of changes inside the canary folder, which is what I wanted to confirm before relying on it.">File integrity monitoring</button></li>
               <li><button class="chip ev" type="button" data-to="#soc" data-q="Found that Zeek alerts were being written to disk and never indexed, because a field was hitting a keyword mapping while the bulk request still reported success. Fixed it with an ingest pipeline.">Ingest pipelines</button></li>
               <li><button class="chip ev" type="button" data-to="#bot" data-q="I wrote a bot that pushes every high-severity alert &mdash; level 13 and above on Wazuh &mdash; straight to a chat channel the moment it fires.">Alert automation</button></li>
