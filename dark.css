@@ -125,5 +125,5 @@ html{scrollbar-gutter:stable}
 @media(max-width:40rem){.dashboard-brief{grid-template-columns:1fr;gap:1.25rem}.dashboard-brief li{gap:.5rem}.dashboard-brief li>div{gap:.75rem}}
 
 /* AI toolkit marks. */
-.ai-tools img[src$="codex-logo.png"]{filter:invert(1)}
-.ai-tools img[src$="qwen-logo.png"]{border-radius:.375rem}
+.ai-tools .ai-logo-codex{filter:brightness(0) invert(1);opacity:1}
+.ai-tools img[src$="qwen-logo-transparent.png"]{filter:none;border-radius:0;background:none}
