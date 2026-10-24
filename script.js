@@ -110,36 +110,6 @@
   window.addEventListener('popstate', syncHash);
   window.addEventListener('hashchange', syncHash);
 
-  const demos = {
-    map: { image: 'traffic-map.jpg', title: 'SOC Traffic Map', file: 'soc-traffic-map.html?demo=1', alt: 'SOC Traffic Map running on made-up data', description: 'Firewall traffic on a world map with live arcs, a threat score that settles when things go quiet, and a searchable event feed.' },
-    alerts: { image: 'alert-console.jpg', title: 'SOC Alert Console', file: 'soc-alert-console.html?demo=1', alt: 'SOC Alert Console running on made-up data', description: 'Wazuh endpoint alerts with severity counts, a live feed, file integrity changes and an ATT&CK coverage grid. The filters share one state so the numbers always agree.' },
-    highway: { image: 'packet-highway.jpg', title: 'Packet Highway', file: 'soc-packet-highway.html', alt: 'Packet Highway running on made-up data', description: 'Traffic as vehicles on a highway, for people who don’t read logs. Size is bytes, colour is the protocol.' }
-  };
-  const demoButtons = [...document.querySelectorAll('[data-demo]')];
-  function selectDemo(button) {
-    const demo = demos[button.dataset.demo];
-    demoButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-    const preview = document.querySelector('#demo-preview');
-    preview.src = `assets/${demo.image}`;
-    preview.alt = demo.alt;
-    document.querySelector('#preview-label').textContent = demo.title;
-    document.querySelector('#demo-link').href = `demos/${demo.file}`;
-    document.querySelector('#demo-description').textContent = demo.description;
-    document.querySelector('#demo-source').href = `https://github.com/zamsonl/portfolio-website/blob/main/${demo.file.split('?')[0]}`;
-    window.SOCPreview?.select(button.dataset.demo);
-  }
-  demoButtons.forEach((button, index) => {
-    button.addEventListener('click', () => selectDemo(button));
-    button.addEventListener('keydown', event => {
-      let next;
-      if (event.key === 'ArrowRight') next = (index + 1) % demoButtons.length;
-      else if (event.key === 'ArrowLeft') next = (index + demoButtons.length - 1) % demoButtons.length;
-      else if (event.key === 'Home') next = 0;
-      else if (event.key === 'End') next = demoButtons.length - 1;
-      else return;
-      event.preventDefault(); demoButtons[next].focus(); selectDemo(demoButtons[next]);
-    });
-  });
   function notify(message) {
     const toast = document.querySelector('.toast');
     toast.textContent = message;
