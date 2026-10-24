@@ -1,0 +1,81 @@
+/* Direct routes from a first impression to the work behind it. */
+.hero{padding-top:2.5rem}
+.hero-title-row{padding:1.5rem 0 1.75rem}
+.hero-title-row h1{font-size:clamp(4rem,7.5vw,6.75rem);letter-spacing:-.075em}
+.hero-avatar{width:4.75rem;height:4.75rem}
+.hero-main{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);grid-template-rows:min-content 1fr;grid-template-areas:"lead work" "intro work";gap:1.5rem 3.5rem;align-items:start}
+.hero-lead{grid-area:lead;min-width:0}
+.hero-lead h2{font-size:clamp(2rem,3.15vw,2.875rem);line-height:1.13;letter-spacing:-.045em;padding:0}
+.hero-focus-label{display:block;margin-bottom:.875rem;font-size:.625rem;color:#b8a6d0}
+.hero-context{font-size:.8125rem;line-height:1.6;color:#bdb2cc;margin-top:.875rem}
+.hero-focus-link{display:inline-block;font-size:.75rem;color:#d5b9f5;margin-top:.75rem;text-decoration:underline;text-underline-offset:.25rem;text-decoration-color:#d5b9f54d}
+.hero-focus-link:hover{text-decoration-color:currentColor}
+.contact-section>.contact-research-interest{font-size:.875rem;color:#cab7e0;margin-top:.75rem}
+.hero-intro{grid-area:intro;min-width:0}
+.hero-intro p{max-width:38rem}
+.hero-actions{gap:1.5rem;flex-wrap:wrap}
+.work-spotlight{grid-area:work;min-width:0;border:1px solid #c9b5ed30;border-radius:1.125rem;overflow:hidden;background:#17151e;box-shadow:0 1.25rem 3.75rem #0003}
+.spotlight-toolbar{display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.25rem .75rem;font:.625rem ui-monospace,Consolas,monospace;letter-spacing:.1em;color:#b9abc9}
+.spotlight-picker{display:flex;gap:.25rem;margin:0 1rem 1rem;padding:.25rem;border:1px solid #bba1e21a;background:#0e0d13;border-radius:.625rem;flex-wrap:wrap}
+.spotlight-picker button{flex:1 1 6rem;min-width:0;min-height:2.5rem;padding:.55rem .625rem;border:1px solid transparent;border-radius:.4375rem;background:transparent;color:#b6afc3;font-size:.75rem;line-height:1.5;transition:background 160ms ease,color 160ms ease,transform 100ms cubic-bezier(.23,1,.32,1)}
+.spotlight-picker button[aria-pressed=true]{background:#31283f;border-color:#c6a6f236;color:#f0e5ff}
+.spotlight-picker button:active{transform:scale(.97)}
+.spotlight-panel[hidden]{display:none!important}
+.spotlight-image{display:block;width:calc(100% - 2rem);margin:0 1rem;padding:0;border:1px solid #ffffff1c;background:#0c0c10;border-radius:.625rem;overflow:hidden;position:relative;text-align:left;aspect-ratio:2.8}
+.spotlight-image>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 45%;transition:transform 260ms cubic-bezier(.23,1,.32,1)}
+.spotlight-image>span{position:absolute;bottom:.625rem;right:.625rem;display:flex;align-items:center;gap:.5rem;background:#14121eeb;border:1px solid #f2e7ff26;border-radius:.375rem;padding:.45rem .65rem;color:#f1e7ff;font-size:.625rem}
+.spotlight-image .icon{width:.75rem;height:.75rem}
+.spotlight-copy{padding:1.125rem 1.25rem 1.25rem}
+.spotlight-meta{display:flex;justify-content:space-between;gap:.5rem 1rem;flex-wrap:wrap;font:.5625rem ui-monospace,Consolas,monospace;letter-spacing:.08em;color:#afa3c1}
+.spotlight-meta>span:last-child{color:#c9bae0}
+.spotlight-copy h3{font-size:clamp(1.25rem,2vw,1.625rem);font-weight:500;line-height:1.2;letter-spacing:-.035em;margin:.625rem 0 .75rem}
+.spotlight-copy p{color:#bfb6cb;font-size:.8125rem;line-height:1.7;min-height:4.15em}
+.spotlight-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem 1rem;margin-top:1rem}
+.spotlight-actions .text-link{font-size:.75rem;color:#efe2ff}
+.spotlight-actions>a{font-size:.6875rem;color:#c4b1df;line-height:1.6;text-decoration:underline;text-underline-offset:.25rem;text-decoration-color:#c4b1df4d}
+
+
+
+
+
+
+.hero-foot{margin-top:1.5rem;padding:1.25rem 0;border-top:1px solid var(--line)}
+.rule-controls{gap:.75rem;align-items:center}
+.rule-controls #step-rule{background:#ffffff08;color:#d7c7ec;border:1px solid #c8a8ef36}
+.rule-controls #play-rule[aria-pressed=true]{background:#c5addf;color:#1c1526}
+.rule-controls #reset-rule{margin-left:auto;font-size:.75rem}
+.rule-playback-note{font:.625rem/1.6 ui-monospace,Consolas,monospace;color:#ac9bbf;margin:.75rem 0}
+@media(hover:hover) and (pointer:fine){
+ .spotlight-picker button:hover{background:#292232;color:#f4ecff}
+ .spotlight-image:hover>img{transform:scale(1.025)}
+ 
+ .spotlight-actions>a:hover{text-decoration-color:currentColor;color:#f2e7ff}
+}
+@media(max-width:68.75rem){.hero-main{column-gap:2rem}.spotlight-copy p{min-height:5.8em}}
+@media(max-width:56.25rem){
+ .hero-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"lead work" "intro work";gap:1rem 1.5rem}
+ .hero-lead h2{font-size:2rem}.hero-intro p{font-size:.8125rem}
+ .spotlight-picker button{font-size:.6875rem;flex-basis:5.5rem}
+ .spotlight-image{aspect-ratio:1.65}.spotlight-copy{padding:1rem}
+ .spotlight-copy p{min-height:0}.spotlight-actions{flex-direction:column;align-items:start}
+ 
+}
+@media(max-width:43.75rem){
+ .hero{padding-top:1.875rem}.hero-title-row{padding:1.25rem 0 1.5rem}
+ .hero-title-row h1{font-size:clamp(2.5rem,12.8vw,5rem);flex:1 1 10rem}
+ .hero-avatar{width:3rem;height:3rem;min-width:3rem}
+ .hero-main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;grid-template-areas:"lead" "work" "intro";gap:1.5rem}
+ .hero-lead h2{font-size:2rem}.hero-intro p{font-size:.875rem}
+ .spotlight-toolbar{padding:1rem 1rem .75rem}
+ .spotlight-picker{margin-inline:.75rem}.spotlight-picker button{font-size:.6875rem}
+ .spotlight-image{width:calc(100% - 1.5rem);margin-inline:.75rem;aspect-ratio:2}
+ .spotlight-actions{flex-direction:row;align-items:center;gap:1rem}
+ .spotlight-copy p{min-height:0}.spotlight-meta{font-size:.5625rem}
+ 
+ 
+ 
+ 
+ .rule-controls{align-items:start}.rule-controls #reset-rule{margin-left:0}
+}
+@media(prefers-reduced-motion:reduce){.spotlight-picker button,.spotlight-image>img{transition:none}.spotlight-image:hover>img{transform:none}}
+@media(prefers-contrast:more){.work-spotlight,.spotlight-picker,.spotlight-image{border-color:#d4c4ec70}.spotlight-meta,.spotlight-toolbar{color:#dbceeb}}
